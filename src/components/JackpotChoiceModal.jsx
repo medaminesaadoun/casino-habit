@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X, Gift, Zap, Lock, CloudRain } from 'lucide-react';
 
@@ -34,6 +34,13 @@ const CHOICES = [
 ];
 
 export default function JackpotChoiceModal({ onSelect, onClose }) {
+  const [selected, setSelected] = useState(null);
+
+  const handleSelect = (key) => {
+    setSelected(key);
+    setTimeout(() => onSelect(key), 180);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -74,7 +81,7 @@ export default function JackpotChoiceModal({ onSelect, onClose }) {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="text-xl font-bold text-white mb-1"
+          className="text-xl font-heading text-white mb-1"
         >
           Choose Your Destiny
         </motion.h2>
@@ -83,7 +90,7 @@ export default function JackpotChoiceModal({ onSelect, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-xs text-casino-text-tertiary mb-6"
+          className="text-xs font-body text-casino-text-tertiary mb-6"
         >
           Select one reward for your Mega Spin Jackpot
         </motion.p>
@@ -95,21 +102,30 @@ export default function JackpotChoiceModal({ onSelect, onClose }) {
               <motion.button
                 key={choice.key}
                 initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 + idx * 0.08 }}
-                onClick={() => onSelect(choice.key)}
-                className="jackpot-choice-card relative flex flex-col items-center gap-2 p-4 rounded-2xl text-center transition-all duration-200"
+                animate={
+                  selected === choice.key
+                    ? { opacity: 1, y: 0, scale: [1, 1.05, 0.98, 1] }
+                    : { opacity: 1, y: 0, scale: 1 }
+                }
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ delay: selected ? 0 : 0.25 + idx * 0.08, type: 'spring', stiffness: 400, damping: 20 }}
+                onClick={() => handleSelect(choice.key)}
+                className="jackpot-choice-card relative flex flex-col items-center gap-2 p-4 rounded-2xl text-center"
                 style={{
                   background: 'linear-gradient(135deg, var(--color-casino-surface), var(--color-casino-bg))',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  border: `1px solid ${choice.color}30`,
+                  boxShadow: `0 4px 16px rgba(0,0,0,0.3), 0 0 0 1px ${choice.color}15`,
                 }}
               >
-                <div
+                <motion.div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
                   style={{ backgroundColor: choice.color + '18', color: choice.color }}
+                  whileHover={{ backgroundColor: choice.color + '30', scale: 1.1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 20 }}
                 >
                   <Icon size={20} />
-                </div>
+                </motion.div>
                 <div>
                   <p className="text-sm font-bold text-white mb-0.5">{choice.title}</p>
                   <p className="text-xs text-casino-text-secondary leading-snug">{choice.description}</p>

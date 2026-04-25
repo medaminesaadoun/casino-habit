@@ -9,12 +9,14 @@ function JarCard({ jar, onEdit, onDelete }) {
   return (
     <motion.div
       layout
-      className="glass p-4 relative overflow-hidden"
+      className="glass shape-card-alt p-4 relative overflow-hidden"
+      whileHover={{ y: -2, boxShadow: `0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px ${jar.color}30, 0 0 24px ${jar.color}15` }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       style={{ boxShadow: `0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px ${jar.color}15` }}
     >
       {/* Subtle colored glow */}
       <div className="absolute -top-10 -right-10 w-20 h-20 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ backgroundColor: jar.color }} />
-      
+
       <div className="flex items-center justify-between mb-3 relative">
         <div className="flex items-center gap-2.5">
           <div className="w-3 h-3 rounded-full" style={{ backgroundColor: jar.color, boxShadow: `0 0 8px ${jar.color}60` }} />
@@ -53,7 +55,17 @@ function JarCard({ jar, onEdit, onDelete }) {
           const achieved = jar.totalClips >= m.target;
           return (
             <div key={idx} className="flex items-center gap-2 text-xs">
-              <Gem size={10} className={achieved ? 'text-casino-accent' : 'text-casino-text-tertiary'} />
+              {achieved ? (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 500, delay: idx * 0.05 }}
+                >
+                  <Gem size={10} className="text-casino-accent" />
+                </motion.div>
+              ) : (
+                <Gem size={10} className="text-casino-text-tertiary" />
+              )}
               <span className={`tabular-nums font-medium ${achieved ? 'text-casino-accent' : 'text-casino-text-secondary'}`}>
                 {m.target.toLocaleString()}
               </span>
@@ -72,12 +84,14 @@ export default function Jars({ jars, onAddJar, onEditJar, onDeleteJar }) {
       {jars.map((jar) => (
         <JarCard key={jar.id} jar={jar} onEdit={onEditJar} onDelete={onDeleteJar} />
       ))}
-      <button
+      <motion.button
         onClick={onAddJar}
-        className="w-full py-3 border border-dashed border-white/10 rounded-2xl text-casino-text-tertiary hover:text-casino-accent hover:border-casino-accent/20 transition-colors text-xs font-semibold"
+        whileHover={{ borderColor: 'rgba(255,255,255,0.2)', color: 'var(--color-casino-accent)' }}
+        whileTap={{ scale: 0.98 }}
+        className="w-full py-3 border border-dashed border-white/10 rounded-2xl text-casino-text-tertiary transition-colors text-xs font-semibold"
       >
         + Create Jar
-      </button>
+      </motion.button>
     </div>
   );
 }

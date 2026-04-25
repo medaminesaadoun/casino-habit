@@ -5,8 +5,11 @@ import { Sparkles, Gift, X } from 'lucide-react';
 const TIER_COLORS = { 1: '#ef4444', 2: '#3b82f6', 3: '#a855f7', 4: '#e8b931' };
 const TIER_LABELS = { 1: 'Tier 1', 2: 'Tier 2', 3: 'Tier 3', 4: 'Jackpot' };
 
+const BURST_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
+
 export default function RewardWonModal({ reward, tier, onDismiss }) {
   const color = TIER_COLORS[tier];
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-backdrop" onClick={onDismiss}>
       <motion.div
@@ -17,31 +20,80 @@ export default function RewardWonModal({ reward, tier, onDismiss }) {
         className="modal-panel text-center relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Glow effect */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full blur-3xl opacity-20 pointer-events-none" style={{ backgroundColor: color }} />
-        
+        {/* Animated pulsing glow */}
+        <motion.div
+          className="absolute rounded-full pointer-events-none"
+          style={{ width: 200, height: 200, backgroundColor: color, filter: 'blur(60px)', top: -40, left: '50%', transform: 'translateX(-50%)' }}
+          animate={{ opacity: [0.15, 0.35, 0.15], scale: [1, 1.3, 1] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        />
+
         <button onClick={onDismiss} className="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center text-casino-text-tertiary hover:text-white hover:bg-white/5 transition-colors z-10">
           <X size={18} />
         </button>
 
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.1 }} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold mb-4" style={{ backgroundColor: color + '15', color, boxShadow: `0 0 16px ${color}20` }}>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold mb-4"
+          style={{ backgroundColor: color + '15', color, boxShadow: `0 0 16px ${color}20` }}
+        >
           <Sparkles size={12} />{TIER_LABELS[tier]}
         </motion.div>
 
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: 'spring' }} className="text-7xl mb-4">
-          {reward.icon}
-        </motion.div>
+        {/* Icon with bounce-wiggle + particle burst */}
+        <div className="relative inline-block mb-4">
+          {/* SVG particle burst */}
+          <motion.svg
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ width: 120, height: 120 }}
+            initial="hidden"
+            animate="visible"
+          >
+            {BURST_ANGLES.map((angle, i) => {
+              const rad = (angle * Math.PI) / 180;
+              return (
+                <motion.circle
+                  key={angle}
+                  cx={60 + Math.cos(rad) * 48}
+                  cy={60 + Math.sin(rad) * 48}
+                  r={3}
+                  fill={color}
+                  variants={{
+                    hidden: { opacity: 0, scale: 0 },
+                    visible: { opacity: [0, 1, 0], scale: [0, 1.5, 0] },
+                  }}
+                  transition={{ delay: 0.15 + i * 0.03, duration: 0.6 }}
+                />
+              );
+            })}
+          </motion.svg>
 
-        <motion.h2 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-xl font-bold text-white mb-1">
+          <motion.div
+            initial={{ scale: 0, rotate: -15 }}
+            animate={{ scale: [0, 1.3, 0.9, 1.1, 1], rotate: [-15, 8, -5, 3, 0] }}
+            transition={{ delay: 0.2, duration: 0.7, ease: 'easeOut' }}
+            className="text-7xl"
+          >
+            {reward.icon}
+          </motion.div>
+        </div>
+
+        <motion.h2 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-xl font-heading text-white mb-1">
           {reward.name}
         </motion.h2>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-xs text-casino-text-tertiary mb-6">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-xs font-body text-casino-text-tertiary mb-6">
           Added to your Reward Bank
         </motion.p>
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
-          <button onClick={onDismiss} className="btn-pill btn-gold w-full py-3" style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 20px ${color}40` }}>
+          <button
+            onClick={onDismiss}
+            className="btn-pill btn-gold w-full py-3"
+            style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 24px ${color}50, 0 0 48px ${color}20` }}
+          >
             <Gift size={16} />Collect
           </button>
         </motion.div>

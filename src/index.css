@@ -23,6 +23,10 @@
   --color-clip-purple: #a855f7;
   --color-clip-orange: #f97316;
   --color-clip-gold: #e8b931;
+  --color-tier-1: #ef4444;
+  --color-tier-2: #3b82f6;
+  --color-tier-3: #a855f7;
+  --color-tier-jackpot: #e8b931;
 }
 
 [data-theme="purple"] {
@@ -58,9 +62,30 @@
 body {
   background-color: var(--color-casino-bg);
   color: var(--color-casino-text);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Noise texture + ambient lighting */
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in srgb, var(--color-casino-accent) 6%, transparent), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, color-mix(in srgb, var(--color-casino-accent) 3%, transparent), transparent);
+}
+
+/* Typography */
+.font-display {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.font-heading {
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.font-body {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 500;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -74,25 +99,32 @@ body {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .glass:hover {
   background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
   border-color: rgba(255,255,255,0.1);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.25);
+  transform: translateY(-2px);
 }
-.glass:active { transform: scale(0.985); }
+.glass:active { transform: scale(0.985) translateY(0); }
 
 .glass-strong {
   background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 24px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.2);
 }
+
+/* ===== SHAPES ===== */
+.shape-card { border-radius: 16px 16px 16px 4px; }
+.shape-card-alt { border-radius: 4px 16px 16px 16px; }
+.shape-squircle { border-radius: 12px; }
+.shape-pill { border-radius: 9999px; }
 
 /* ===== AMBIENT GLOW ===== */
 .glow-gold {
@@ -108,9 +140,10 @@ body {
 /* ===== BUTTONS ===== */
 .btn-pill {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 10px 24px; border-radius: 9999px; font-weight: 600; font-size: 14px;
+  padding: 10px 24px; border-radius: 12px; font-weight: 600; font-size: 14px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border: none; outline: none;
   letter-spacing: -0.01em;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
 }
 .btn-pill:active { transform: scale(0.96); }
 .btn-gold {
@@ -206,13 +239,12 @@ body {
   transform: translateY(-1px);
 }
 
-/* ===== JACKPOT CHOICE ===== */
-.jackpot-choice-card:hover {
-  border-color: var(--color-casino-accent) !important;
-  box-shadow: 0 0 20px color-mix(in srgb, var(--color-casino-accent) 20%, transparent),
-              inset 0 1px 2px rgba(255,255,255,0.08);
-  transform: translateY(-2px);
+/* ===== EXPIRING REWARD ===== */
+@keyframes expiringPulse {
+  0%, 100% { box-shadow: 0 0 8px color-mix(in srgb, var(--color-casino-danger) 30%, transparent); }
+  50%       { box-shadow: 0 0 20px color-mix(in srgb, var(--color-casino-danger) 60%, transparent); }
 }
+.reward-expiring { animation: expiringPulse 1.2s ease-in-out infinite; }
 
 /* ===== RAINMAKER ===== */
 @keyframes rainmakerPulse {
@@ -309,11 +341,11 @@ body {
 .modal-panel {
   background: linear-gradient(135deg, rgba(30,30,35,0.95) 0%, rgba(18,18,20,0.98) 100%);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 24px;
+  border-radius: 20px;
   padding: 28px;
   max-width: 480px; width: 100%;
   max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 /* ===== UTILS ===== */

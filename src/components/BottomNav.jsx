@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Dices, ListTodo, Trophy, Clock, Gift } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -17,17 +18,33 @@ export default function BottomNav({ active, onChange }) {
           const isActive = active === item.id;
           const Icon = item.icon;
           return (
-            <button
+            <motion.button
               key={item.id}
               onClick={() => onChange(item.id)}
-              className={`flex flex-col items-center gap-0.5 px-4 py-2 rounded-xl transition-all ${
+              whileTap={{ scale: 0.9 }}
+              className={`relative flex flex-col items-center gap-0.5 px-4 py-2 rounded-xl transition-colors ${
                 isActive ? 'text-casino-accent' : 'text-casino-text-tertiary'
               }`}
-              style={isActive ? { background: 'rgba(255,255,255,0.06)' } : undefined}
             >
-              <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
-              <span className={`text-[10px] font-semibold ${isActive ? 'text-casino-accent' : ''}`}>{item.label}</span>
-            </button>
+              {isActive && (
+                <motion.span
+                  layoutId="botnav-pill"
+                  className="absolute inset-0 rounded-xl"
+                  style={{
+                    background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-casino-accent) 15%, transparent), color-mix(in srgb, var(--color-casino-accent) 5%, transparent))',
+                    boxShadow: '0 0 16px color-mix(in srgb, var(--color-casino-accent) 15%, transparent)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                />
+              )}
+              <motion.div
+                animate={{ scale: isActive ? [1, 1.2, 1] : 1 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+              >
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
+              </motion.div>
+              <span className={`text-[10px] font-semibold relative z-10 font-heading tracking-tight ${isActive ? 'text-casino-accent' : ''}`}>{item.label}</span>
+            </motion.button>
           );
         })}
       </div>

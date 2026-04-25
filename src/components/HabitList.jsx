@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Trash2, Pencil, Flame, Zap, Calendar } from 'lucide-react';
 
 function getStreak(dates) {
@@ -34,15 +34,28 @@ function getLastCompletedText(dates) {
 function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
   const streak = getStreak(habit.completedDates);
   const lastText = getLastCompletedText(habit.completedDates);
+  const hasStreak = streak >= 3;
 
   return (
     <motion.div
       layout
-      className="glass rounded-2xl overflow-hidden"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -20, scale: 0.95 }}
+      whileHover={{ y: -3, boxShadow: `0 16px 48px rgba(0,0,0,0.45), 0 0 0 1px ${habit.color}30` }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className="glass shape-card overflow-hidden"
     >
       <div className="flex">
         {/* Left accent bar */}
-        <div className="w-[3px] shrink-0 rounded-l-2xl" style={{ backgroundColor: habit.color }} />
+        <div
+          className="w-[3px] shrink-0 rounded-l-2xl"
+          style={{
+            backgroundColor: habit.color,
+            boxShadow: hasStreak ? `0 0 12px ${habit.color}80` : undefined,
+          }}
+        />
         <div className="flex-1 p-4">
           {/* Top row: color indicator + actions */}
           <div className="flex items-start justify-between mb-2">
@@ -54,10 +67,7 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
               {jar && (
                 <span
                   className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
-                  style={{
-                    backgroundColor: jar.color + '20',
-                    color: jar.color,
-                  }}
+                  style={{ backgroundColor: jar.color + '20', color: jar.color }}
                 >
                   {jar.name}
                 </span>
@@ -80,7 +90,7 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
           </div>
 
           {/* Name + desc */}
-          <h3 className="font-semibold text-white text-base leading-tight mb-1">{habit.name}</h3>
+          <h3 className="font-heading text-white text-base leading-tight mb-1">{habit.name}</h3>
           <p className="text-xs text-casino-text-tertiary mb-3 line-clamp-1">{habit.description}</p>
 
           {/* Stats row */}
@@ -90,10 +100,14 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
               <span className="tabular-nums">{habit.completedDates.length} total</span>
             </div>
             {streak > 1 && (
-              <div className="flex items-center gap-1 text-casino-warning">
+              <motion.div
+                className="flex items-center gap-1 text-casino-warning"
+                animate={hasStreak ? { opacity: [0.7, 1, 0.7] } : {}}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
                 <Flame size={12} />
                 <span className="font-bold tabular-nums">{streak} day streak</span>
-              </div>
+              </motion.div>
             )}
             <div className="flex items-center gap-1">
               <Calendar size={12} />
@@ -102,8 +116,9 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
           </div>
 
           {/* Complete button */}
-          <button
+          <motion.button
             onClick={() => onComplete(habit)}
+            whileTap={{ scale: 0.93 }}
             className="btn-pill w-full py-2.5 text-sm font-semibold"
             style={{
               background: `linear-gradient(135deg, ${habit.color}, ${habit.color}cc)`,
@@ -113,7 +128,7 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
           >
             <Check size={15} />
             Complete
-          </button>
+          </motion.button>
         </div>
       </div>
     </motion.div>
@@ -138,7 +153,7 @@ export default function HabitList({ habits, jars, onComplete, onEdit, onDelete, 
           </button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <AnimatePresence mode="popLayout">
           {habits.map((habit) => {
             const jar = jars.find((j) => j.id === habit.jarId);
             return (
@@ -152,7 +167,7 @@ export default function HabitList({ habits, jars, onComplete, onEdit, onDelete, 
               />
             );
           })}
-        </div>
+        </AnimatePresence>
       )}
     </div>
   );

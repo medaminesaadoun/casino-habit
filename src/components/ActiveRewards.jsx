@@ -3,7 +3,10 @@ import { motion } from 'framer-motion';
 import { Timer, SkipForward, CheckCircle2, XCircle } from 'lucide-react';
 
 const TIER_COLORS = {
-  1: '#ef4444', 2: '#3b82f6', 3: '#a855f7', 4: '#e8b931',
+  1: 'var(--color-tier-1)',
+  2: 'var(--color-tier-2)',
+  3: 'var(--color-tier-3)',
+  4: 'var(--color-tier-jackpot)',
 };
 
 function formatTime(ms) {
@@ -25,7 +28,7 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
-        <p className="text-sm font-semibold text-white">Active Rewards</p>
+        <p className="text-sm font-heading font-semibold text-white tracking-tight">Active Rewards</p>
         <span className="glass px-2 py-0.5 rounded-full text-xs font-semibold text-casino-accent tabular-nums">{rewards.length}</span>
       </div>
 
@@ -53,13 +56,17 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
           }
           if (status === 'expired') { timeLabel = 'Expired'; progress = 1; }
 
+          const isExpiringSoon = status === 'active' && timeLabel.includes(':') && parseInt(timeLabel) < 5;
+
           return (
             <motion.div
               key={reward.id}
               layout
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="glass min-w-[280px] max-w-[300px] lg:min-w-[320px] lg:max-w-[340px] shrink-0 overflow-hidden snap-start"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              className={`glass shape-card min-w-[280px] max-w-[300px] lg:min-w-[320px] lg:max-w-[340px] shrink-0 overflow-hidden snap-start ${isExpiringSoon ? 'reward-expiring' : ''}`}
               style={{ borderLeft: `3px solid ${tierColor}` }}
             >
               <div className="p-3">
@@ -73,8 +80,16 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
                   </div>
                 </div>
 
-                <div className="h-1.5 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                  <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${Math.min(progress * 100, 100)}%`, backgroundColor: tierColor, opacity: 0.8 }} />
+                {/* Thicker progress bar with gradient glow */}
+                <div className="h-2 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-1000"
+                    style={{
+                      width: `${Math.min(progress * 100, 100)}%`,
+                      background: `linear-gradient(90deg, ${tierColor}, color-mix(in srgb, ${tierColor} 70%, white))`,
+                      boxShadow: `0 0 8px color-mix(in srgb, ${tierColor} 50%, transparent)`,
+                    }}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -83,13 +98,19 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
                   </div>
                   {status === 'grace' && (
                     <div className="flex gap-1">
-                      <button onClick={() => onSkipGrace(reward)} className="p-1 rounded-lg hover:bg-white/5 text-blue-400 transition-colors"><SkipForward size={13} /></button>
-                      <button onClick={() => onCancelGrace(reward)} className="p-1 rounded-lg hover:bg-white/5 text-red-400 transition-colors"><XCircle size={13} /></button>
+                      <button onClick={() => onSkipGrace(reward)} className="p-1 rounded-lg hover:bg-white/5 text-casino-accent transition-colors"><SkipForward size={13} /></button>
+                      <button onClick={() => onCancelGrace(reward)} className="p-1 rounded-lg hover:bg-white/5 text-casino-danger transition-colors"><XCircle size={13} /></button>
                     </div>
                   )}
                   {status === 'active' && (
-                    <button onClick={() => { if (window.confirm(`Complete "${reward.rewardName}" early?`)) onCompleteEarly(reward); }}
-                      className="px-2 py-0.5 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 text-[10px] font-semibold transition-colors">
+                    <button
+                      onClick={() => { if (window.confirm(`Complete "${reward.rewardName}" early?`)) onCompleteEarly(reward); }}
+                      className="px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-colors"
+                      style={{
+                        backgroundColor: 'color-mix(in srgb, var(--color-casino-success) 12%, transparent)',
+                        color: 'var(--color-casino-success)',
+                      }}
+                    >
                       <CheckCircle2 size={10} className="inline mr-0.5" />Done
                     </button>
                   )}

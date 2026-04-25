@@ -75,6 +75,22 @@ function getAngleInSegment(segmentLabel, segments) {
   return seg.start + padding + Math.random() * (seg.end - seg.start - padding * 2);
 }
 
+// Keeps label text readable (never more than 90° from horizontal)
+function getTextRotation(midAngle) {
+  const a = ((midAngle % 360) + 360) % 360;
+  if (a > 90 && a <= 270) return a - 180;
+  return a;
+}
+
+// Brighter shade of a hex color for the highlight edge
+function lightenColor(hex, amount = 40) {
+  const num = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, (num >> 16) + amount);
+  const g = Math.min(255, ((num >> 8) & 0xff) + amount);
+  const b = Math.min(255, (num & 0xff) + amount);
+  return `rgb(${r},${g},${b})`;
+}
+
 export default function MainWheel({
   activeTier,
   spinTokens,
@@ -91,7 +107,6 @@ export default function MainWheel({
   const controls = useAnimation();
   const rotationRef = useRef(0);
 
-  // Auto-revert mega mode if tokens drop below 5
   useEffect(() => {
     if (megaMode && !canMegaSpin) setMegaMode(false);
   }, [canMegaSpin, megaMode]);
@@ -99,7 +114,6 @@ export default function MainWheel({
   const segments = megaMode ? MEGA_SEGMENTS : NORMAL_SEGMENTS;
   const isLocked = isFreeJackpotSpin ? false : spinTokens < (megaMode ? 5 : 1);
 
-  // Progress ring: max 5 tokens shown, each fills 1/5 of ring
   const ringMax = 5;
   const ringCircumference = 2 * Math.PI * 52;
   const ringDash = ringCircumference;
@@ -112,7 +126,6 @@ export default function MainWheel({
     setResult(null);
 
     if (isFreeJackpotSpin) {
-      // Free jackpot spin: no cost, force jackpot
       playSpinStart();
       resetTickTracking();
       const seg = segments.find((s) => s.label === 'Jackpot');
@@ -120,31 +133,19 @@ export default function MainWheel({
       const finalAngle = seg.start + padding + Math.random() * (seg.end - seg.start - padding * 2);
       const extraSpins = 5 + Math.floor(Math.random() * 3);
       const offset = 360 - finalAngle;
-      // Snap to clean multiple of 360 so visual pointer always matches result
       const snapped = Math.floor(rotationRef.current / 360) * 360;
       rotationRef.current = snapped + extraSpins * 360 + offset;
-
-      await controls.start({
-        rotate: rotationRef.current,
-        transition: { duration: 3.5, ease: [0.15, 0.85, 0.35, 1] },
-      });
-
+      await controls.start({ rotate: rotationRef.current, transition: { duration: 3.5, ease: [0.15, 0.85, 0.35, 1] } });
       setResult({ landed: 'Jackpot', effective: 'Jackpot', color: '#e8b931' });
       setShowResult(true);
       setIsSpinning(false);
       playSpinLand('Jackpot');
-      onSpinComplete(
-        { landed: 'Jackpot', effective: 'Jackpot', isBonus: false },
-        { isMegaSpin: false, isFreeJackpot: true }
-      );
+      onSpinComplete({ landed: 'Jackpot', effective: 'Jackpot', isBonus: false }, { isMegaSpin: false, isFreeJackpot: true });
       return;
     }
 
-    if (megaMode) {
-      onConsumeMegaToken();
-    } else {
-      onConsumeToken();
-    }
+    if (megaMode) onConsumeMegaToken();
+    else onConsumeToken();
     playSpinStart();
     resetTickTracking();
 
@@ -163,18 +164,13 @@ export default function MainWheel({
 
     const extraSpins = 5 + Math.floor(Math.random() * 3);
     const offset = 360 - finalAngle;
-    // Snap to clean multiple of 360 so visual pointer always matches result
     const snapped = Math.floor(rotationRef.current / 360) * 360;
     rotationRef.current = snapped + extraSpins * 360 + offset;
 
-    await controls.start({
-      rotate: rotationRef.current,
-      transition: { duration: 3.5, ease: [0.15, 0.85, 0.35, 1] },
-    });
+    await controls.start({ rotate: rotationRef.current, transition: { duration: 3.5, ease: [0.15, 0.85, 0.35, 1] } });
 
     const landed = getSegmentAtAngle(finalAngle, segments);
     let effectiveResult = landed.label;
-    // Mega spin ignores tier gating — you get what you land
     if (!megaMode) {
       if (effectiveResult === 'Tier 2' && activeTier < 2) effectiveResult = 'Tier 1';
       if (effectiveResult === 'Tier 3' && activeTier < 3) effectiveResult = activeTier >= 2 ? 'Tier 2' : 'Tier 1';
@@ -184,7 +180,6 @@ export default function MainWheel({
     setShowResult(true);
     setIsSpinning(false);
     playSpinLand(effectiveResult);
-
     onSpinComplete(
       { landed: landed.label, effective: effectiveResult, isBonus: effectiveResult === 'Bonus' },
       { isMegaSpin: megaMode, isFreeJackpot: false }
@@ -193,7 +188,6 @@ export default function MainWheel({
 
   return (
     <div className="flex flex-col items-center">
-      {/* Wheel container */}
       <div className={`relative mb-8 ${isSpinning ? 'wheel-spin-pulse' : ''} ${megaMode || isFreeJackpotSpin ? 'mega-mode-active' : ''}`}>
         {/* Outer ambient glow ring */}
         <div
@@ -213,54 +207,136 @@ export default function MainWheel({
           </div>
         )}
 
-        {/* SVG Pointer — sits above the wheel */}
-        <svg className="absolute -top-2 left-1/2 -translate-x-1/2 z-30" width="24" height="28" viewBox="0 0 24 28">
+        {/* Pointer — larger diamond-tipped indicator */}
+        <svg className="absolute -top-4 left-1/2 -translate-x-1/2 z-30" width="36" height="46" viewBox="0 0 36 46">
           <defs>
-            <filter id="ptrShadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.5" />
+            <linearGradient id="ptrHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+              <stop offset="40%" stopColor="rgba(255,255,255,0.45)" />
+              <stop offset="60%" stopColor="rgba(255,255,255,0.45)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+            </linearGradient>
+            <filter id="ptrShadow" x="-30%" y="-10%" width="160%" height="140%">
+              <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="rgba(0,0,0,0.7)" />
+            </filter>
+            <filter id="ptrGlow" x="-30%" y="-10%" width="160%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
+              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
             </filter>
           </defs>
-          <path
-            d="M12 26 L22 6 Q12 2 2 6 Z"
-            fill="var(--color-casino-accent)"
-            filter="url(#ptrShadow)"
-          />
-          <path d="M12 22 L18 8 Q12 6 6 8 Z" fill="rgba(255,255,255,0.2)" />
+          {/* Glow layer */}
+          <path d="M18 44 L32 10 Q18 3 4 10 Z" fill="var(--color-casino-accent)" opacity="0.4" filter="url(#ptrGlow)" />
+          {/* Main body */}
+          <path d="M18 44 L32 10 Q18 3 4 10 Z" fill="var(--color-casino-accent)" filter="url(#ptrShadow)" />
+          {/* Inner highlight */}
+          <path d="M18 38 L28 12 Q18 7 8 12 Z" fill="url(#ptrHighlight)" />
+          {/* Tip dot */}
+          <circle cx="18" cy="44" r="4.5" fill="var(--color-casino-accent)" filter="url(#ptrShadow)" />
+          <circle cx="18" cy="44" r="2.5" fill="rgba(255,255,255,0.7)" />
         </svg>
 
         {/* SVG Wheel */}
-        <div className="relative" style={{ width: 340, height: 340 }}>
+        <div
+          className="relative"
+          style={{
+            width: 340,
+            height: 340,
+            filter: isSpinning ? 'blur(2px)' : 'blur(0px)',
+            transition: 'filter 0.4s ease-out',
+          }}
+        >
           <motion.svg
             width="340"
             height="340"
-            viewBox={`0 0 340 340`}
+            viewBox="0 0 340 340"
             animate={controls}
             onUpdate={(latest) => {
-              if (typeof latest.rotate === 'number') {
-                playTickIfPassed(latest.rotate);
-              }
+              if (typeof latest.rotate === 'number') playTickIfPassed(latest.rotate);
             }}
             style={{ transformOrigin: '170px 170px' }}
           >
-            {/* Segments — solid colors, no gradients */}
-            {segments.map((seg) => (
+            <defs>
+              {/* Per-segment inner-edge highlight gradients */}
+              {segments.map((seg, idx) => (
+                <linearGradient
+                  key={`grad-${idx}`}
+                  id={`segGrad-${idx}`}
+                  gradientUnits="userSpaceOnUse"
+                  x1={CX} y1={CY}
+                  x2={polarToCartesian(CX, CY, OUTER_R, (seg.start + seg.end) / 2).x}
+                  y2={polarToCartesian(CX, CY, OUTER_R, (seg.start + seg.end) / 2).y}
+                >
+                  <stop offset="0%" stopColor={lightenColor(seg.color, 30)} stopOpacity="1" />
+                  <stop offset="45%" stopColor={seg.color} stopOpacity="1" />
+                  <stop offset="100%" stopColor={seg.color} stopOpacity="0.85" />
+                </linearGradient>
+              ))}
+              {/* Depth overlay gradient */}
+              <radialGradient id="wheelDepth" cx="50%" cy="35%" r="65%">
+                <stop offset="0%"   stopColor="rgba(255,255,255,0)" />
+                <stop offset="55%"  stopColor="rgba(0,0,0,0)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0.5)" />
+              </radialGradient>
+              {/* Outer edge vignette */}
+              <radialGradient id="wheelVignette" cx="50%" cy="50%" r="50%">
+                <stop offset="75%"  stopColor="rgba(0,0,0,0)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0.45)" />
+              </radialGradient>
+            </defs>
+
+            {/* Segments with gradient fill */}
+            {segments.map((seg, idx) => (
               <path
                 key={seg.label}
                 d={describeDonutSegment(CX, CY, INNER_R, OUTER_R, seg.start, seg.end)}
-                fill={seg.color}
-                fillOpacity={megaMode ? '0.95' : '0.9'}
-                stroke={megaMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.4)'}
-                strokeWidth={megaMode ? '2' : '1.5'}
+                fill={`url(#segGrad-${idx})`}
+                stroke="rgba(0,0,0,0.5)"
+                strokeWidth="1"
               />
             ))}
 
+            {/* Decorative divider spokes between segments */}
+            {segments.map((seg) => {
+              const p1 = polarToCartesian(CX, CY, INNER_R + 2, seg.start);
+              const p2 = polarToCartesian(CX, CY, OUTER_R - 2, seg.start);
+              return (
+                <line
+                  key={`spoke-${seg.label}`}
+                  x1={p1.x} y1={p1.y}
+                  x2={p2.x} y2={p2.y}
+                  stroke="rgba(255,255,255,0.35)"
+                  strokeWidth="1.5"
+                />
+              );
+            })}
 
+            {/* Outer rim ring */}
+            <circle cx={CX} cy={CY} r={OUTER_R - 1} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="3" />
+            {/* Inner rim ring */}
+            <circle cx={CX} cy={CY} r={INNER_R + 1} fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="2" />
 
-            {/* Upright labels */}
+            {/* Tick marks at segment boundaries on outer ring */}
+            {segments.map((seg) => {
+              const p = polarToCartesian(CX, CY, OUTER_R - 6, seg.start);
+              return (
+                <circle key={`tick-${seg.label}`} cx={p.x} cy={p.y} r={3} fill="rgba(255,255,255,0.55)" />
+              );
+            })}
+
+            {/* Depth overlay */}
+            <circle cx={CX} cy={CY} r={OUTER_R} fill="url(#wheelDepth)" style={{ mixBlendMode: 'multiply', pointerEvents: 'none' }} />
+            {/* Outer vignette */}
+            <circle cx={CX} cy={CY} r={OUTER_R} fill="url(#wheelVignette)" style={{ pointerEvents: 'none' }} />
+
+            {/* Rotated labels — follow segment angle, never upside-down */}
             {segments.map((seg) => {
               const midAngle = (seg.start + seg.end) / 2;
               const labelR = (INNER_R + OUTER_R) / 2;
               const pos = polarToCartesian(CX, CY, labelR, midAngle);
+              const rotAngle = getTextRotation(midAngle);
+              const segSpan = seg.end - seg.start;
+              const fontSize = segSpan < 15 ? 9 : segSpan < 30 ? 10 : 12;
+
               return (
                 <text
                   key={`label-${seg.label}`}
@@ -269,9 +345,10 @@ export default function MainWheel({
                   textAnchor="middle"
                   dominantBaseline="central"
                   fill="white"
-                  fontSize="12"
+                  fontSize={fontSize}
                   fontWeight="700"
-                  style={{ textShadow: '0 1px 4px rgba(0,0,0,0.7)', pointerEvents: 'none' }}
+                  transform={`rotate(${rotAngle}, ${pos.x}, ${pos.y})`}
+                  style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.9))', pointerEvents: 'none', letterSpacing: '0.02em' }}
                 >
                   {seg.label}
                 </text>
@@ -279,30 +356,18 @@ export default function MainWheel({
             })}
           </motion.svg>
 
-          {/* Center Hub — glassmorphic with progress ring */}
+          {/* Center Hub with progress ring */}
           <div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center"
             style={{ width: 120, height: 120 }}
           >
-            {/* Progress ring background */}
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 120 120">
-              {/* Background track */}
+              <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
               <circle
-                cx="60"
-                cy="60"
-                r="52"
-                fill="none"
-                stroke="rgba(255,255,255,0.06)"
-                strokeWidth="3"
-              />
-              {/* Active arc */}
-              <circle
-                cx="60"
-                cy="60"
-                r="52"
+                cx="60" cy="60" r="52"
                 fill="none"
                 stroke="var(--color-casino-accent)"
-                strokeWidth="3"
+                strokeWidth="4"
                 strokeLinecap="round"
                 strokeDasharray={ringDash}
                 strokeDashoffset={ringOffset}
@@ -315,30 +380,23 @@ export default function MainWheel({
               />
             </svg>
 
-            {/* Hub body */}
             <div
               className={`relative w-[84px] h-[84px] rounded-full flex items-center justify-center ${megaMode || isFreeJackpotSpin ? 'mega-hub-glow' : ''}`}
               style={{
                 background: 'linear-gradient(135deg, var(--color-casino-surface), var(--color-casino-bg))',
-                border: `2px solid ${megaMode || isFreeJackpotSpin ? 'var(--color-casino-accent)' : 'rgba(255,255,255,0.08)'}`,
+                border: `2px solid ${megaMode || isFreeJackpotSpin ? 'var(--color-casino-accent)' : 'rgba(255,255,255,0.1)'}`,
                 boxShadow: megaMode || isFreeJackpotSpin
-                  ? '0 0 30px color-mix(in srgb, var(--color-casino-accent) 40%, transparent), inset 0 2px 4px rgba(255,255,255,0.06)'
+                  ? '0 0 30px color-mix(in srgb, var(--color-casino-accent) 40%, transparent), inset 0 2px 4px rgba(255,255,255,0.08)'
                   : '0 0 20px color-mix(in srgb, var(--color-casino-accent) 20%, transparent), inset 0 2px 4px rgba(255,255,255,0.06)',
                 transition: 'all 0.4s ease',
               }}
             >
               {isSpinning ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: megaMode ? 1.2 : 2, repeat: Infinity, ease: 'linear' }}
-                >
+                <motion.div animate={{ rotate: 360 }} transition={{ duration: megaMode ? 1.2 : 2, repeat: Infinity, ease: 'linear' }}>
                   <Sparkles size={24} className="text-casino-accent" />
                 </motion.div>
               ) : isFreeJackpotSpin ? (
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                >
+                <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}>
                   <Zap size={24} className="text-casino-accent" />
                 </motion.div>
               ) : (
@@ -349,31 +407,33 @@ export default function MainWheel({
         </div>
       </div>
 
-      {/* Spin mode toggle */}
+      {/* Mode toggle */}
       <div className="flex items-center gap-2 mb-4">
         <button
           onClick={() => setMegaMode(false)}
           disabled={isSpinning}
-          className={`text-xs px-3 py-1.5 rounded-full transition-all border ${
+          className={`text-xs px-4 py-2 rounded-full font-semibold transition-all ${
             !megaMode
-              ? 'bg-casino-accent text-black font-bold border-casino-accent'
-              : 'text-casino-text-tertiary border-transparent hover:text-casino-text-secondary'
+              ? 'bg-casino-accent text-black shadow-lg'
+              : 'text-casino-text-tertiary hover:text-casino-text-secondary glass'
           }`}
+          style={!megaMode ? { boxShadow: '0 0 16px color-mix(in srgb, var(--color-casino-accent) 40%, transparent)' } : {}}
         >
-          Normal (1)
+          Normal · 1 token
         </button>
         <button
           onClick={() => canMegaSpin && setMegaMode(true)}
           disabled={isSpinning || !canMegaSpin}
-          className={`text-xs px-3 py-1.5 rounded-full transition-all border ${
+          className={`text-xs px-4 py-2 rounded-full font-semibold transition-all ${
             megaMode
-              ? 'bg-casino-accent text-black font-bold border-casino-accent'
+              ? 'bg-casino-accent text-black shadow-lg'
               : canMegaSpin
-              ? 'text-casino-text-tertiary border-transparent hover:text-casino-text-secondary'
-              : 'text-casino-text-tertiary/40 border-transparent cursor-not-allowed'
+              ? 'text-casino-text-tertiary hover:text-casino-text-secondary glass'
+              : 'text-casino-text-tertiary/30 glass cursor-not-allowed'
           }`}
+          style={megaMode ? { boxShadow: '0 0 16px color-mix(in srgb, var(--color-casino-accent) 40%, transparent)' } : {}}
         >
-          Mega (5)
+          Mega · 5 tokens
         </button>
       </div>
 
@@ -389,32 +449,22 @@ export default function MainWheel({
             : 'btn-gold'
         }`}
       >
-        {isSpinning ? (
-          'Spinning...'
-        ) : isLocked ? (
-          <>
-            <Lock size={18} />
-            {isFreeJackpotSpin ? 'Free Spin' : megaMode ? 'Need 5 Tokens' : 'Complete a Habit'}
-          </>
-        ) : isFreeJackpotSpin ? (
-          <>
-            <Zap size={18} />
-            FREE SPIN
-          </>
-        ) : megaMode ? (
-          'MEGA SPIN'
-        ) : (
-          'SPIN'
-        )}
+        {isSpinning ? 'Spinning...'
+          : isLocked ? <><Lock size={18} />{megaMode ? 'Need 5 Tokens' : 'Complete a Habit'}</>
+          : isFreeJackpotSpin ? <><Zap size={18} />FREE SPIN</>
+          : megaMode ? 'MEGA SPIN'
+          : 'SPIN'}
       </button>
 
-      {/* Result */}
+      {/* Result card */}
       {showResult && result && (
         <motion.div
           initial={{ opacity: 0, y: 12, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="mt-6 glass p-5 text-center max-w-xs w-full"
+          className="mt-6 glass p-5 text-center max-w-xs w-full relative overflow-hidden"
+          style={{ borderTop: `3px solid ${result.color}`, boxShadow: `0 8px 32px rgba(0,0,0,0.4), 0 0 24px ${result.color}20` }}
         >
+          <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${result.color}, transparent 70%)` }} />
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -425,32 +475,23 @@ export default function MainWheel({
             {result.landed}
           </motion.div>
           {result.landed !== result.effective && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-xs text-casino-text-tertiary mb-1"
-            >
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-xs text-casino-text-tertiary mb-1">
               Tier not active — awarded {result.effective}
             </motion.p>
           )}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-sm text-casino-text-secondary"
-          >
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-sm text-casino-text-secondary">
             You won a <span className="font-semibold" style={{ color: result.color }}>{result.effective}</span> reward
           </motion.p>
         </motion.div>
       )}
 
       {/* Legend */}
-      <div className="mt-5 flex gap-4 text-xs text-casino-text-tertiary">
+      <div className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-1.5 text-xs text-casino-text-tertiary max-w-xs">
         {segments.map((seg) => (
           <div key={seg.label} className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: seg.color, boxShadow: `0 0 6px ${seg.color}60` }} />
-            <span className="tabular-nums">{seg.weight}%</span>
+            <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: seg.color, boxShadow: `0 0 6px ${seg.color}60` }} />
+            <span className="font-medium" style={{ color: seg.color }}>{seg.label}</span>
+            <span className="tabular-nums opacity-60">{seg.weight}%</span>
           </div>
         ))}
       </div>

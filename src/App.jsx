@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Diamond, Plus, Trash2, Sparkles, Orbit, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain } from 'lucide-react';
+import { Diamond, Plus, Trash2, Sparkles, Orbit, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy } from 'lucide-react';
 import { playComplete, playClipDrop, playCashIn, playRewardWon, playClick, toggleMute, getMuteState } from './sounds';
 import { api } from './api';
 import Jars from './components/Jars';
@@ -654,49 +654,58 @@ function App() {
       <div className="max-w-6xl mx-auto px-4 md:px-6 pt-6 md:pt-8">
 
         {/* Header */}
-        <header className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center glass glow-subtle">
-              <Diamond size={20} className="text-casino-accent" />
+        <header className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center glass glow-subtle">
+              <Diamond size={22} className="text-casino-accent" />
             </div>
             <div>
-              <h1 className="text-lg md:text-xl font-bold tracking-tight text-white leading-none">
-                Casino<span className="text-casino-accent">Habit</span>
+              <h1 className="font-display text-2xl md:text-3xl text-white leading-none tracking-tight">
+                CASINO<span className="text-casino-accent">HABIT</span>
               </h1>
-              <p className="text-xs text-casino-text-tertiary mt-0.5">Track. Spin. Win.</p>
+              <p className="text-[10px] text-casino-text-tertiary uppercase tracking-[0.2em] mt-1 font-semibold">
+                Track · Spin · Win
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="glass px-3 py-1.5 rounded-full flex items-center gap-1.5 text-sm font-semibold text-casino-accent tabular-nums">
-              <Sparkles size={14} />
-              <span>{inventory.spinTokens || 0}</span>
-              <button
-                onClick={() => {
-                  setInventory((prev) => {
-                    const updated = { ...prev, spinTokens: (prev.spinTokens || 0) + 100 };
-                    if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
-                    return updated;
-                  });
-                }}
-                className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-casino-accent/20 text-casino-accent hover:bg-casino-accent/30 transition-colors"
-                title="Debug: +100 tokens"
-              >
-                +100
-              </button>
-            </div>
-            {(inventory.rainmakerRemaining || 0) > 0 && (
-              <div className="rainmaker-badge glass px-2.5 py-1 rounded-full flex items-center gap-1 text-[11px] font-bold text-casino-accent tabular-nums">
-                <CloudRain size={12} />
-                <span>{inventory.rainmakerRemaining}</span>
+            <div className="glass rounded-xl p-1 flex items-center gap-1">
+              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold text-casino-accent tabular-nums">
+                <Sparkles size={14} />
+                <span>{inventory.spinTokens || 0}</span>
+                <button
+                  onClick={() => {
+                    setInventory((prev) => {
+                      const updated = { ...prev, spinTokens: (prev.spinTokens || 0) + 100 };
+                      if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
+                      return updated;
+                    });
+                  }}
+                  className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-casino-accent/20 text-casino-accent hover:bg-casino-accent/30 transition-colors"
+                  title="Debug: +100 tokens"
+                >
+                  +100
+                </button>
               </div>
-            )}
-            <div className="glass px-3 py-1.5 rounded-full flex items-center gap-1.5 text-sm font-semibold text-white tabular-nums">
-              <Paperclip size={14} className="text-casino-text-secondary" />
-              <span>{inventory.clips.length}</span>
-            </div>
-            <div className="glass px-3 py-1.5 rounded-full flex items-center gap-1.5 text-sm font-semibold tabular-nums" style={{ color: 'var(--color-casino-accent)' }}>
-              <Crown size={14} />
-              <span>T{inventory.activeTier}</span>
+              <div className="w-px h-5 bg-white/10" />
+              {(inventory.rainmakerRemaining || 0) > 0 && (
+                <>
+                  <div className="rainmaker-badge px-2.5 py-1 flex items-center gap-1 text-[11px] font-bold text-casino-accent tabular-nums">
+                    <CloudRain size={12} />
+                    <span>{inventory.rainmakerRemaining}</span>
+                  </div>
+                  <div className="w-px h-5 bg-white/10" />
+                </>
+              )}
+              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold text-white tabular-nums">
+                <Paperclip size={14} className="text-casino-text-secondary" />
+                <span>{inventory.clips.length}</span>
+              </div>
+              <div className="w-px h-5 bg-white/10" />
+              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold tabular-nums" style={{ color: 'var(--color-casino-accent)' }}>
+                <Crown size={14} />
+                <span>T{inventory.activeTier}</span>
+              </div>
             </div>
             <button
               onClick={() => { playClick(); const newState = toggleMute(); setIsMuted(newState); }}
@@ -734,7 +743,7 @@ function App() {
           <div className="mb-6">
             {!showBonusWheel ? (
               <div className="glass-strong glow-gold p-6 flex flex-col items-center">
-                <p className="text-sm font-semibold text-white mb-6">Spin the Wheel</p>
+                <p className="font-heading text-sm text-white mb-6 tracking-tight">Spin the Wheel</p>
                 <MainWheel
                   activeTier={inventory.activeTier}
                   spinTokens={inventory.spinTokens || 0}
@@ -810,7 +819,7 @@ function App() {
 
           <div className={`mb-6 ${mobileView !== 'jars' ? 'hidden' : ''}`}>
             <div className="flex items-center justify-between mb-3">
-              <p className="section-label">Jars</p>
+              <p className="font-heading text-sm text-white tracking-tight">Jars</p>
               <button
                 onClick={() => setShowCreateJar(true)}
                 className="btn-ghost text-xs flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-casino-accent)' }}
@@ -841,7 +850,7 @@ function App() {
           <div className={`${mobileView !== 'history' ? 'hidden' : ''}`}>
             <div className="glass p-5">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm font-semibold text-white">History</p>
+                <p className="font-heading text-sm text-white tracking-tight">History</p>
                 {history.length > 0 && (
                   <button
                     onClick={handleClearHistory}
@@ -946,7 +955,7 @@ function App() {
             <div className="space-y-6">
               {!showBonusWheel ? (
                 <div className="glass-strong glow-gold p-8 flex flex-col items-center">
-                  <p className="text-sm font-semibold text-white mb-6">Spin the Wheel</p>
+                <p className="font-heading text-sm text-white mb-6 tracking-tight">Spin the Wheel</p>
                   <MainWheel
                     activeTier={inventory.activeTier}
                     spinTokens={inventory.spinTokens || 0}
@@ -1003,7 +1012,7 @@ function App() {
 
               {/* Recent Spins */}
               <div className="glass p-5">
-                <p className="text-sm font-semibold text-white mb-4">Recent Spins</p>
+                <p className="font-heading text-sm text-white mb-4 tracking-tight">Recent Spins</p>
                 {history.filter((h) => h.type === 'main-wheel').length === 0 ? (
                   <p className="text-casino-text-tertiary text-center py-4 text-sm">No spins yet. Give it a go!</p>
                 ) : (
@@ -1041,7 +1050,7 @@ function App() {
           {mobileView === 'rewards' && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-semibold text-white">Unclaimed Rewards</p>
+                <p className="font-heading text-sm text-white tracking-tight">Unclaimed Rewards</p>
                 <button
                   onClick={() => setShowRewardCatalog(true)}
                   className="btn-pill btn-ghost text-xs font-semibold"
@@ -1061,7 +1070,7 @@ function App() {
           {mobileView === 'jars' && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="section-label">Jars</p>
+                <p className="font-heading text-sm text-white tracking-tight">Jars</p>
                 <button
                   onClick={() => setShowCreateJar(true)}
                   className="btn-ghost text-xs flex items-center gap-1.5 font-semibold" style={{ color: 'var(--color-casino-accent)' }}
@@ -1077,7 +1086,7 @@ function App() {
           {mobileView === 'history' && (
             <div className="glass p-5">
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm font-semibold text-white">History</p>
+                <p className="font-heading text-sm text-white tracking-tight">History</p>
                 {history.length > 0 && (
                   <button
                     onClick={handleClearHistory}
