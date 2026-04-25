@@ -188,7 +188,7 @@ export default function BonusWheel({ onBonusComplete, onExtraSpin }) {
           <circle cx="15" cy="36" r="2" fill="rgba(255,255,255,0.7)" />
         </svg>
 
-        <div className="relative" style={{ width: 300, height: 300, filter: isSpinning ? 'blur(1.5px)' : 'blur(0px)', transition: 'filter 0.3s ease-out' }}>
+        <div className="relative" style={{ width: 300, height: 300 }}>
           <motion.svg
             width="300"
             height="300"
@@ -281,12 +281,29 @@ export default function BonusWheel({ onBonusComplete, onExtraSpin }) {
                 </text>
               );
             })}
-          </motion.svg>
+            </motion.svg>
 
-          {/* Center Hub */}
-          <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center"
-            style={{ width: 100, height: 100 }}
+            {/* Speed lines overlay — stationary, appears during spin */}
+            <svg
+              className="absolute inset-0 z-[15] pointer-events-none"
+              width="300" height="300" viewBox="0 0 300 300"
+              style={{ opacity: isSpinning ? 1 : 0, transition: 'opacity 0.2s ease-out' }}
+            >
+              {Array.from({ length: 20 }).map((_, i) => {
+                const angle = i * 18;
+                const p1 = polarToCartesian(150, 150, 65, angle);
+                const p2 = polarToCartesian(150, 150, 145, angle);
+                return (
+                  <line key={i} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
+                    stroke="rgba(255,255,255,0.35)" strokeWidth={i % 3 === 0 ? 2 : 1} strokeLinecap="round" />
+                );
+              })}
+            </svg>
+
+            {/* Center Hub */}
+            <div
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center"
+              style={{ width: 100, height: 100 }}
           >
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />

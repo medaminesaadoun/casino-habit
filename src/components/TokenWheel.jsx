@@ -104,7 +104,7 @@ export default function TokenWheel({ onComplete }) {
           </svg>
 
           {/* SVG Wheel */}
-          <div className="relative" style={{ width: 200, height: 200, filter: isSpinning ? 'blur(1.5px)' : 'blur(0px)', transition: 'filter 0.3s ease-out' }}>
+          <div className="relative" style={{ width: 200, height: 200 }}>
             <motion.svg
               width="200" height="200" viewBox="0 0 200 200"
               animate={controls}
@@ -201,9 +201,26 @@ export default function TokenWheel({ onComplete }) {
               })}
             </motion.svg>
 
+            {/* Speed lines overlay — stationary, appears during spin */}
+            <svg
+              className="absolute inset-0 z-[15] pointer-events-none"
+              width="200" height="200" viewBox="0 0 200 200"
+              style={{ opacity: isSpinning ? 1 : 0, transition: 'opacity 0.2s ease-out' }}
+            >
+              {Array.from({ length: 16 }).map((_, i) => {
+                const angle = i * 22.5;
+                const p1 = polarToCartesian(100, 100, 55, angle);
+                const p2 = polarToCartesian(100, 100, 95, angle);
+                return (
+                  <line key={i} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
+                    stroke="rgba(255,255,255,0.35)" strokeWidth={i % 3 === 0 ? 2 : 1} strokeLinecap="round" />
+                );
+              })}
+            </svg>
+
             {/* Center hub */}
             <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[56px] h-[56px] rounded-full flex items-center justify-center"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 w-[56px] h-[56px] rounded-full flex items-center justify-center"
               style={{
                 background: 'linear-gradient(135deg, var(--color-casino-surface), var(--color-casino-bg))',
                 border: '2px solid rgba(255,255,255,0.1)',

@@ -238,12 +238,7 @@ export default function MainWheel({
         {/* SVG Wheel */}
         <div
           className="relative"
-          style={{
-            width: 340,
-            height: 340,
-            filter: isSpinning ? 'blur(2px)' : 'blur(0px)',
-            transition: 'filter 0.4s ease-out',
-          }}
+          style={{ width: 340, height: 340 }}
         >
           <motion.svg
             width="340"
@@ -355,6 +350,34 @@ export default function MainWheel({
               );
             })}
           </motion.svg>
+
+          {/* Speed lines overlay — stationary, appears during spin */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none z-[15]"
+            viewBox="0 0 340 340"
+            style={{ opacity: isSpinning ? 0.35 : 0, transition: 'opacity 0.2s ease-out' }}
+          >
+            {Array.from({ length: 24 }).map((_, i) => {
+              const angle = (i * 360) / 24;
+              const rad = (angle * Math.PI) / 180;
+              const x1 = 170 + Math.cos(rad) * 70;
+              const y1 = 170 + Math.sin(rad) * 70;
+              const x2 = 170 + Math.cos(rad) * 165;
+              const y2 = 170 + Math.sin(rad) * 165;
+              return (
+                <line
+                  key={i}
+                  x1={x1}
+                  y1={y1}
+                  x2={x2}
+                  y2={y2}
+                  stroke="rgba(255,255,255,0.5)"
+                  strokeWidth={i % 3 === 0 ? 2 : 1}
+                  strokeLinecap="round"
+                />
+              );
+            })}
+          </svg>
 
           {/* Center Hub with progress ring */}
           <div
