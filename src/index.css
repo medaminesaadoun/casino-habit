@@ -1,0 +1,323 @@
+@import "tailwindcss";
+
+@theme {
+  --color-casino-bg: #121214;
+  --color-casino-surface: #1a1a1f;
+  --color-casino-card: rgba(255, 255, 255, 0.03);
+  --color-casino-card-hover: rgba(255, 255, 255, 0.05);
+  --color-casino-border: rgba(255, 255, 255, 0.06);
+  --color-casino-border-hover: rgba(255, 255, 255, 0.12);
+  --color-casino-accent: #e8b931;
+  --color-casino-accent-dim: #c49a2a;
+  --color-casino-gold: #e8b931;
+  --color-casino-text: #fafaf9;
+  --color-casino-text-secondary: rgba(255, 255, 255, 0.55);
+  --color-casino-text-tertiary: rgba(255, 255, 255, 0.3);
+  --color-casino-success: #22c55e;
+  --color-casino-warning: #f59e0b;
+  --color-casino-danger: #ef4444;
+  --color-clip-red: #ef4444;
+  --color-clip-blue: #3b82f6;
+  --color-clip-green: #22c55e;
+  --color-clip-yellow: #eab308;
+  --color-clip-purple: #a855f7;
+  --color-clip-orange: #f97316;
+  --color-clip-gold: #e8b931;
+}
+
+[data-theme="purple"] {
+  --color-casino-bg: #12101a;
+  --color-casino-surface: #1a1725;
+  --color-casino-card: rgba(192, 132, 252, 0.04);
+  --color-casino-card-hover: rgba(192, 132, 252, 0.07);
+  --color-casino-border: rgba(192, 132, 252, 0.08);
+  --color-casino-border-hover: rgba(192, 132, 252, 0.16);
+  --color-casino-accent: #c084fc;
+  --color-casino-accent-dim: #a855f7;
+  --color-casino-gold: #c084fc;
+  --color-casino-text: #fafaf9;
+  --color-casino-text-secondary: rgba(255, 255, 255, 0.55);
+  --color-casino-text-tertiary: rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="black"] {
+  --color-casino-bg: #0a0a0c;
+  --color-casino-surface: #141418;
+  --color-casino-card: rgba(212, 165, 116, 0.04);
+  --color-casino-card-hover: rgba(212, 165, 116, 0.07);
+  --color-casino-border: rgba(212, 165, 116, 0.08);
+  --color-casino-border-hover: rgba(212, 165, 116, 0.16);
+  --color-casino-accent: #d4a574;
+  --color-casino-accent-dim: #b8956a;
+  --color-casino-gold: #d4a574;
+  --color-casino-text: #fafaf9;
+  --color-casino-text-secondary: rgba(255, 255, 255, 0.55);
+  --color-casino-text-tertiary: rgba(255, 255, 255, 0.3);
+}
+
+body {
+  background-color: var(--color-casino-bg);
+  color: var(--color-casino-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+/* ===== GLASSMORPHIC CARD ===== */
+.glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass:hover {
+  background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+  border-color: rgba(255,255,255,0.1);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.glass:active { transform: scale(0.985); }
+
+.glass-strong {
+  background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* ===== AMBIENT GLOW ===== */
+.glow-gold {
+  box-shadow: 0 0 40px color-mix(in srgb, var(--color-casino-accent) 12%, transparent),
+              0 0 80px color-mix(in srgb, var(--color-casino-accent) 6%, transparent),
+              0 8px 32px rgba(0,0,0,0.3);
+}
+.glow-subtle {
+  box-shadow: 0 0 30px color-mix(in srgb, var(--color-casino-accent) 8%, transparent),
+              0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* ===== BUTTONS ===== */
+.btn-pill {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 24px; border-radius: 9999px; font-weight: 600; font-size: 14px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border: none; outline: none;
+  letter-spacing: -0.01em;
+}
+.btn-pill:active { transform: scale(0.96); }
+.btn-gold {
+  background: linear-gradient(135deg, var(--color-casino-accent) 0%, var(--color-casino-accent-dim) 100%);
+  color: #0a0a0c;
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--color-casino-accent) 25%, transparent),
+              0 0 20px color-mix(in srgb, var(--color-casino-accent) 10%, transparent);
+}
+.btn-gold:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--color-casino-accent) 35%, transparent),
+              0 0 40px color-mix(in srgb, var(--color-casino-accent) 15%, transparent);
+}
+.btn-glass {
+  background: rgba(255,255,255,0.05);
+  color: var(--color-casino-text);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.btn-glass:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.14);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--color-casino-text-secondary);
+}
+.btn-ghost:hover { color: var(--color-casino-text); background: rgba(255,255,255,0.04); }
+
+/* ===== WHEEL ===== */
+.wheel-glow {
+  position: relative;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  padding: 10px;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-casino-accent) 15%, transparent) 0%, transparent 60%);
+}
+.wheel-inner {
+  position: relative; width: 300px; height: 300px;
+  border-radius: 50%; overflow: hidden;
+  box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.3);
+}
+.wheel-hub {
+  position: absolute; top: 50%; left: 50%;
+  width: 48px; height: 48px; border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(135deg, var(--color-casino-surface), var(--color-casino-bg));
+  border: 2px solid var(--color-casino-accent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-casino-accent) 30%, transparent),
+              0 0 40px color-mix(in srgb, var(--color-casino-accent) 15%, transparent),
+              inset 0 2px 4px rgba(255,255,255,0.1);
+  z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+}
+
+@keyframes wheelSpinPulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.15);
+  }
+}
+.wheel-spin-pulse {
+  animation: wheelSpinPulse 1.5s ease-in-out infinite;
+}
+
+/* ===== MEGA SPIN ===== */
+@keyframes megaModePulse {
+  0%, 100% {
+    box-shadow: 0 0 40px color-mix(in srgb, var(--color-casino-accent) 10%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 60px color-mix(in srgb, var(--color-casino-accent) 25%, transparent);
+  }
+}
+.mega-mode-active {
+  animation: megaModePulse 2s ease-in-out infinite;
+}
+
+.mega-hub-glow {
+  animation: megaModePulse 1.5s ease-in-out infinite;
+}
+
+.mega-spin-btn {
+  background: linear-gradient(135deg, var(--color-casino-accent), var(--color-casino-accent-dim));
+  color: #000;
+  box-shadow: 0 0 24px color-mix(in srgb, var(--color-casino-accent) 30%, transparent),
+              0 4px 12px rgba(0,0,0,0.3);
+}
+.mega-spin-btn:hover {
+  box-shadow: 0 0 32px color-mix(in srgb, var(--color-casino-accent) 45%, transparent),
+              0 4px 12px rgba(0,0,0,0.3);
+  transform: translateY(-1px);
+}
+
+/* ===== JACKPOT CHOICE ===== */
+.jackpot-choice-card:hover {
+  border-color: var(--color-casino-accent) !important;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-casino-accent) 20%, transparent),
+              inset 0 1px 2px rgba(255,255,255,0.08);
+  transform: translateY(-2px);
+}
+
+/* ===== RAINMAKER ===== */
+@keyframes rainmakerPulse {
+  0%, 100% {
+    box-shadow: 0 0 6px color-mix(in srgb, var(--color-casino-accent) 20%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 12px color-mix(in srgb, var(--color-casino-accent) 40%, transparent);
+  }
+}
+.rainmaker-badge {
+  animation: rainmakerPulse 2s ease-in-out infinite;
+}
+
+/* ===== CLIP ===== */
+.clip-visual {
+  position: relative; width: 44px; height: 40px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  transition: transform 0.2s ease;
+}
+.clip-visual:hover { transform: translateY(-2px) scale(1.05); }
+.clip-handle-left, .clip-handle-right {
+  position: absolute; top: 0; width: 7px; height: 16px;
+  border: 1.5px solid #8b8680; border-bottom: none; border-radius: 3px 3px 0 0;
+  z-index: 1; background: transparent;
+}
+.clip-handle-left { left: 9px; transform: rotate(-12deg); }
+.clip-handle-right { right: 9px; transform: rotate(12deg); }
+.clip-body {
+  position: relative; width: 44px; height: 24px;
+  border-radius: 3px 3px 8px 8px;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.15), 0 2px 4px rgba(0,0,0,0.2);
+  overflow: hidden; z-index: 2;
+}
+.clip-body::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.05) 100%);
+  z-index: 2; pointer-events: none;
+}
+.clip-crease {
+  position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
+  background: rgba(0,0,0,0.12); transform: translateX(-50%); z-index: 3;
+}
+.clip-label {
+  position: absolute; bottom: 2px; left: 0; right: 0; text-align: center;
+  font-size: 6px; font-weight: 800; color: rgba(0,0,0,0.5);
+  text-transform: uppercase; letter-spacing: 0.2px; z-index: 4;
+}
+
+/* ===== JAR ===== */
+.jar-visual {
+  position: relative; width: 60px; height: 80px;
+}
+.jar-lid {
+  width: 40px; height: 8px;
+  background: linear-gradient(180deg, #555 0%, #333 100%);
+  border-radius: 3px; margin: 0 auto; position: relative; z-index: 3;
+}
+.jar-neck {
+  width: 28px; height: 5px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px; margin: 0 auto; position: relative; z-index: 2;
+}
+.jar-body {
+  width: 50px; height: 66px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.04) 100%);
+  border: 1px solid rgba(255,255,255,0.06); border-top: none;
+  border-radius: 4px 4px 12px 12px; margin: 0 auto;
+  position: relative; overflow: hidden; z-index: 1;
+}
+.jar-fill {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  border-radius: 0 0 11px 11px;
+  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.75;
+}
+.jar-fill::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+}
+.jar-count {
+  position: absolute; bottom: 4px; left: 0; right: 0; text-align: center;
+  font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.8); z-index: 2;
+}
+
+/* ===== MODAL ===== */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; padding: 16px;
+}
+.modal-panel {
+  background: linear-gradient(135deg, rgba(30,30,35,0.95) 0%, rgba(18,18,20,0.98) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 28px;
+  max-width: 480px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+/* ===== UTILS ===== */
+.text-shadow-sm { text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.tabular-nums { font-variant-numeric: tabular-nums; }
