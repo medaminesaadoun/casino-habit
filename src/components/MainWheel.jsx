@@ -282,13 +282,13 @@ export default function MainWheel({
               {/* Depth overlay gradient */}
               <radialGradient id="wheelDepth" cx="50%" cy="35%" r="65%">
                 <stop offset="0%"   stopColor="rgba(255,255,255,0)" />
-                <stop offset="55%"  stopColor="rgba(0,0,0,0)" />
-                <stop offset="100%" stopColor="rgba(0,0,0,0.5)" />
+                <stop offset="75%"  stopColor="rgba(0,0,0,0)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0.15)" />
               </radialGradient>
               {/* Outer edge vignette */}
               <radialGradient id="wheelVignette" cx="50%" cy="50%" r="50%">
-                <stop offset="75%"  stopColor="rgba(0,0,0,0)" />
-                <stop offset="100%" stopColor="rgba(0,0,0,0.45)" />
+                <stop offset="80%"  stopColor="rgba(0,0,0,0)" />
+                <stop offset="100%" stopColor="rgba(0,0,0,0.1)" />
               </radialGradient>
             </defs>
 

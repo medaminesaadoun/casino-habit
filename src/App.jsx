@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Diamond, Plus, Trash2, Sparkles, Orbit, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy } from 'lucide-react';
 import { playComplete, playClipDrop, playCashIn, playRewardWon, playClick, toggleMute, getMuteState } from './sounds';
@@ -96,6 +96,12 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [useApi, setUseApi] = useState(true);
   const [isMuted, setIsMuted] = useState(() => getMuteState());
+  const inventoryRef = useRef(inventory);
+
+  // Keep inventoryRef in sync for stale-closure-safe access
+  useEffect(() => {
+    inventoryRef.current = inventory;
+  }, [inventory]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -225,7 +231,7 @@ function App() {
       return prev;
     });
     if (pendingTokenHabit) {
-      if (isCashingEligible(inventory.clips, inventory.activeTier)) {
+      if (isCashingEligible(inventoryRef.current.clips, inventoryRef.current.activeTier)) {
         setCashingDefaultJarId(pendingTokenHabit.jarId);
         setShowCashing(true);
       }
@@ -577,7 +583,6 @@ function App() {
   const handleDeleteJar = async (id) => {
     if (!window.confirm('Delete this jar?')) return;
     setJars((prev) => prev.filter((j) => j.id !== id));
-    setHabits((prev) => prev.filter((h) => h.jarId !== id));
     if (useApi) api.deleteJar(id).catch(() => setUseApi(false));
   };
 
@@ -1291,9 +1296,18 @@ function App() {
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Linked Jar</label>
-                  <select value={newHabitJarId} onChange={(e) => setNewHabitJarId(e.target.value)} className="input">
-                    {jars.map((jar) => <option key={jar.id} value={jar.id}>{jar.name}</option>)}
-                  </select>
+                  <div className="flex gap-2">
+                    <select value={newHabitJarId} onChange={(e) => setNewHabitJarId(e.target.value)} className="input flex-1">
+                      {jars.map((jar) => <option key={jar.id} value={jar.id}>{jar.name}</option>)}
+                    </select>
+                    <button
+                      onClick={() => setShowCreateJar(true)}
+                      className="w-10 h-10 rounded-xl flex items-center justify-center glass btn-ghost shrink-0"
+                      title="Create new jar"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Color</label>
