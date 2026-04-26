@@ -571,6 +571,8 @@ function App() {
     setJars((prev) => [...prev, newJar]);
     setNewJarName('');
     setShowCreateJar(false);
+    // Reopen habit form if it was closed to create this jar
+    setShowCreateHabit(true);
     if (useApi) api.createJar(newJar).catch(() => setUseApi(false));
   };
 
@@ -1308,7 +1310,7 @@ function App() {
                       {jars.map((jar) => <option key={jar.id} value={jar.id}>{jar.name}</option>)}
                     </select>
                     <button
-                      onClick={() => setShowCreateJar(true)}
+                      onClick={() => { setShowCreateHabit(false); setShowCreateJar(true); }}
                       className="w-10 h-10 rounded-xl flex items-center justify-center glass btn-ghost shrink-0"
                       title="Create new jar"
                     >
