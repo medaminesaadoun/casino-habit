@@ -263,50 +263,16 @@ export default function MainWheel({
             }}
             style={{ transformOrigin: '170px 170px' }}
           >
-            <defs>
-              {/* Per-segment gradients — brighter at center, darker at outer edge */}
-              {segments.map((seg, idx) => (
-                <linearGradient
-                  key={`mwGrad-${idx}`}
-                  id={`mwGrad-${idx}`}
-                  gradientUnits="userSpaceOnUse"
-                  x1={CX} y1={CY}
-                  x2={polarToCartesian(CX, CY, OUTER_R, (seg.start + seg.end) / 2).x}
-                  y2={polarToCartesian(CX, CY, OUTER_R, (seg.start + seg.end) / 2).y}
-                >
-                  <stop offset="0%"   stopColor={lightenColor(seg.color, 40)} />
-                  <stop offset="50%"  stopColor={seg.color} />
-                  <stop offset="100%" stopColor={seg.color} stopOpacity="0.85" />
-                </linearGradient>
-              ))}
-              {/* Depth overlay — darkens the bottom side */}
-              <radialGradient id="mwDepth" cx="50%" cy="35%" r="65%">
-                <stop offset="0%"   stopColor="rgba(255,255,255,0)" />
-                <stop offset="55%"  stopColor="rgba(0,0,0,0)" />
-                <stop offset="100%" stopColor="rgba(0,0,0,0.45)" />
-              </radialGradient>
-              {/* Outer vignette */}
-              <radialGradient id="mwVignette" cx="50%" cy="50%" r="50%">
-                <stop offset="75%"  stopColor="rgba(0,0,0,0)" />
-                <stop offset="100%" stopColor="rgba(0,0,0,0.4)" />
-              </radialGradient>
-            </defs>
-
-            {/* Segments — gradient fill matching TokenWheel approach */}
-            {segments.map((seg, idx) => (
+            {/* Segments — solid colors, CSS depth on container */}
+            {segments.map((seg) => (
               <path
                 key={seg.label}
                 d={describeDonutSegment(CX, CY, INNER_R, OUTER_R, seg.start, seg.end)}
-                fill={`url(#mwGrad-${idx})`}
-                stroke="rgba(0,0,0,0.45)"
-                strokeWidth="1"
+                fill={seg.color}
+                stroke="rgba(0,0,0,0.35)"
+                strokeWidth="1.5"
               />
             ))}
-
-            {/* Depth overlay — mirrors TokenWheel's mixBlendMode */}
-            <circle cx={CX} cy={CY} r={OUTER_R} fill="url(#mwDepth)" style={{ mixBlendMode: 'multiply', pointerEvents: 'none' }} />
-            {/* Outer vignette */}
-            <circle cx={CX} cy={CY} r={OUTER_R} fill="url(#mwVignette)" style={{ pointerEvents: 'none' }} />
 
             {/* Decorative divider spokes between segments */}
             {segments.map((seg) => {
@@ -376,6 +342,15 @@ export default function MainWheel({
               <circle cx="170" cy="170" r="156" fill="none" stroke="white" strokeWidth="1" strokeDasharray="40 280" strokeLinecap="round" opacity="0.5" />
             </svg>
           </motion.div>
+
+          {/* CSS depth overlay — inset shadow for vignette */}
+          <div
+            className="absolute inset-0 z-[16] pointer-events-none"
+            style={{
+              borderRadius: '50%',
+              boxShadow: 'inset 0 -40px 60px rgba(0,0,0,0.5), inset 0 0 40px rgba(0,0,0,0.3)',
+            }}
+          />
 
           {/* Center Hub with progress ring */}
           <div
