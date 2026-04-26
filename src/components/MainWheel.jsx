@@ -343,12 +343,15 @@ export default function MainWheel({
             </svg>
           </motion.div>
 
-          {/* CSS depth overlay — inset shadow for vignette */}
+          {/* CSS depth overlay — inset shadow for vignette + light highlight */}
           <div
             className="absolute inset-0 z-[16] pointer-events-none"
             style={{
               borderRadius: '50%',
-              boxShadow: 'inset 0 -40px 60px rgba(0,0,0,0.5), inset 0 0 40px rgba(0,0,0,0.3)',
+              boxShadow:
+                'inset 0 -50px 80px rgba(0,0,0,0.55), ' +
+                'inset 0 0 50px rgba(0,0,0,0.3), ' +
+                'inset 25px -25px 60px rgba(255,255,255,0.05)',
             }}
           />
 

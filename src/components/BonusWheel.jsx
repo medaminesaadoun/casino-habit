@@ -270,6 +270,15 @@ export default function BonusWheel({ onBonusComplete, onExtraSpin, onShowConfett
               </svg>
             </motion.div>
 
+          {/* CSS depth overlay — inset shadow for vignette */}
+          <div
+            className="absolute inset-0 z-[16] pointer-events-none"
+            style={{
+              borderRadius: '50%',
+              boxShadow: 'inset 0 -40px 60px rgba(0,0,0,0.5), inset 0 0 40px rgba(0,0,0,0.3), inset 20px -20px 50px rgba(255,255,255,0.04)',
+            }}
+          />
+
             {/* Center Hub */}
             <div
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex items-center justify-center"
