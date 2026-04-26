@@ -62,7 +62,7 @@
 body {
   background-color: var(--color-casino-bg);
   color: var(--color-casino-text);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-family: 'Outfit', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* Noise texture + ambient lighting */
@@ -74,17 +74,17 @@ body {
 
 /* Typography */
 .font-display {
-  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-family: 'Syne', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 .font-heading {
-  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-family: 'Syne', system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 .font-body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Outfit', system-ui, sans-serif;
   font-weight: 500;
 }
 
@@ -99,30 +99,29 @@ body {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 16px 16px 16px 4px;
+  border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .glass:hover {
   background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
   border-color: rgba(255,255,255,0.1);
   box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.25);
-  transform: translateY(-2px);
 }
-.glass:active { transform: scale(0.985) translateY(0); }
+.glass:active { transform: scale(0.985); }
 
 .glass-strong {
   background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
+  border-radius: 16px;
   box-shadow: 0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.2);
 }
 
 /* ===== SHAPES ===== */
-.shape-card { border-radius: 16px 16px 16px 4px; }
-.shape-card-alt { border-radius: 4px 16px 16px 16px; }
+.shape-card { border-radius: 14px; }
+.shape-card-alt { border-radius: 14px; }
 .shape-squircle { border-radius: 12px; }
 .shape-pill { border-radius: 9999px; }
 
@@ -143,7 +142,7 @@ body {
   padding: 10px 24px; border-radius: 12px; font-weight: 600; font-size: 14px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border: none; outline: none;
   letter-spacing: -0.01em;
-  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  font-family: 'Outfit', system-ui, sans-serif;
 }
 .btn-pill:active { transform: scale(0.96); }
 .btn-gold {
@@ -208,6 +207,15 @@ body {
 }
 .wheel-spin-pulse {
   animation: wheelSpinPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes resultFlash {
+  0% { filter: brightness(1); }
+  30% { filter: brightness(1.6); }
+  100% { filter: brightness(1); }
+}
+.result-flash {
+  animation: resultFlash 0.5s ease-out;
 }
 
 /* ===== MEGA SPIN ===== */
@@ -341,11 +349,44 @@ body {
 .modal-panel {
   background: linear-gradient(135deg, rgba(30,30,35,0.95) 0%, rgba(18,18,20,0.98) 100%);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 28px;
   max-width: 480px; width: 100%;
   max-height: 90vh; overflow-y: auto;
   box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* ===== INPUTS ===== */
+.input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: var(--color-casino-text);
+  font-family: 'Outfit', system-ui, sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.input:focus {
+  border-color: color-mix(in srgb, var(--color-casino-accent) 40%, transparent);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-casino-accent) 8%, transparent);
+}
+.input::placeholder { color: var(--color-casino-text-tertiary); }
+.input option { background: var(--color-casino-surface); color: var(--color-casino-text); }
+
+/* ===== SECTION LABEL ===== */
+.section-label {
+  font-family: 'Syne', system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-casino-text-tertiary);
 }
 
 /* ===== UTILS ===== */

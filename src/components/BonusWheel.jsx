@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { Timer, Zap, X } from 'lucide-react';
 import { playSpinStart, playTickIfPassed, resetTickTracking, playSpinLand, playTimerTick } from '../sounds';
+import JackpotConfetti from './JackpotConfetti';
 
 const BONUS_SEGMENTS = [
   { label: '75%', color: '#22c55e', start: 0, end: 120, weight: 33.3 },
@@ -346,12 +347,15 @@ export default function BonusWheel({ onBonusComplete, onExtraSpin }) {
       )}
 
       {result && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-4 glass p-5 text-center max-w-xs w-full relative overflow-hidden"
-          style={{ borderTop: `3px solid ${result.color}`, boxShadow: `0 8px 32px rgba(0,0,0,0.4), 0 0 20px ${result.color}20` }}
-        >
+        <>
+          {result.label === 'FREE' && <JackpotConfetti />}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.3 }}
+            animate={{ opacity: 1, scale: [0.3, 1.08, 0.95, 1] }}
+            transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 15 }}
+            className="mt-4 glass p-5 text-center max-w-xs w-full relative overflow-hidden result-flash"
+            style={{ borderTop: `3px solid ${result.color}`, boxShadow: `0 8px 32px rgba(0,0,0,0.4), 0 0 20px ${result.color}20` }}
+          >
           <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${result.color}, transparent 70%)` }} />
           <div className="text-xl font-bold mb-1" style={{ color: result.color, textShadow: `0 0 16px ${result.color}40` }}>
             {result.label}
@@ -383,6 +387,7 @@ export default function BonusWheel({ onBonusComplete, onExtraSpin }) {
             </>
           )}
         </motion.div>
+        </>
       )}
 
       {/* Legend */}

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, useAnimation } from 'framer-motion';
 import { Sparkles, Lock, Zap } from 'lucide-react';
 import { playSpinStart, playTickIfPassed, resetTickTracking, playSpinLand } from '../sounds';
+import JackpotConfetti from './JackpotConfetti';
 
 const NORMAL_SEGMENTS = [
   { label: 'Tier 1', color: '#ef4444', start: 0, end: 144, weight: 40 },
@@ -104,6 +105,7 @@ export default function MainWheel({
   const [result, setResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [megaMode, setMegaMode] = useState(false);
+  const [hubPulse, setHubPulse] = useState(false);
   const controls = useAnimation();
   const rotationRef = useRef(0);
 
@@ -139,6 +141,7 @@ export default function MainWheel({
       setResult({ landed: 'Jackpot', effective: 'Jackpot', color: '#e8b931' });
       setShowResult(true);
       setIsSpinning(false);
+      setHubPulse(false);
       playSpinLand('Jackpot');
       onSpinComplete({ landed: 'Jackpot', effective: 'Jackpot', isBonus: false }, { isMegaSpin: false, isFreeJackpot: true });
       return;
@@ -179,6 +182,7 @@ export default function MainWheel({
     setResult({ landed: landed.label, effective: effectiveResult, color: landed.color });
     setShowResult(true);
     setIsSpinning(false);
+    setHubPulse(false);
     playSpinLand(effectiveResult);
     onSpinComplete(
       { landed: landed.label, effective: effectiveResult, isBonus: effectiveResult === 'Bonus' },
@@ -246,7 +250,12 @@ export default function MainWheel({
             viewBox="0 0 340 340"
             animate={controls}
             onUpdate={(latest) => {
-              if (typeof latest.rotate === 'number') playTickIfPassed(latest.rotate);
+              if (typeof latest.rotate === 'number') {
+                playTickIfPassed(latest.rotate);
+                // Track rotation delta for hub pulse intensity
+                const delta = Math.abs(latest.rotate - (rotationRef.current - 360));
+                if (delta > 5) setHubPulse(true);
+              }
             }}
             style={{ transformOrigin: '170px 170px' }}
           >
@@ -415,7 +424,10 @@ export default function MainWheel({
               }}
             >
               {isSpinning ? (
-                <motion.div animate={{ rotate: 360 }} transition={{ duration: megaMode ? 1.2 : 2, repeat: Infinity, ease: 'linear' }}>
+                <motion.div
+                  animate={hubPulse ? { rotate: 360, scale: [1, 1.3, 1] } : { rotate: 360 }}
+                  transition={{ rotate: { duration: megaMode ? 1.2 : 2, repeat: Infinity, ease: 'linear' }, scale: { duration: 0.3, type: 'spring' } }}
+                >
                   <Sparkles size={24} className="text-casino-accent" />
                 </motion.div>
               ) : isFreeJackpotSpin ? (
@@ -481,31 +493,35 @@ export default function MainWheel({
 
       {/* Result card */}
       {showResult && result && (
-        <motion.div
-          initial={{ opacity: 0, y: 12, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="mt-6 glass p-5 text-center max-w-xs w-full relative overflow-hidden"
-          style={{ borderTop: `3px solid ${result.color}`, boxShadow: `0 8px 32px rgba(0,0,0,0.4), 0 0 24px ${result.color}20` }}
-        >
-          <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${result.color}, transparent 70%)` }} />
+        <>
+          {result.effective === 'Jackpot' && <JackpotConfetti />}
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1 }}
-            className="text-2xl font-bold mb-1"
-            style={{ color: result.color, textShadow: `0 0 24px ${result.color}50` }}
+            initial={{ opacity: 0, scale: 0.3 }}
+            animate={{ opacity: 1, scale: [0.3, 1.08, 0.95, 1] }}
+            transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 15 }}
+            className="mt-6 glass p-5 text-center max-w-xs w-full relative overflow-hidden result-flash"
+            style={{ borderTop: `3px solid ${result.color}`, boxShadow: `0 8px 32px rgba(0,0,0,0.4), 0 0 24px ${result.color}20` }}
           >
-            {result.landed}
-          </motion.div>
-          {result.landed !== result.effective && (
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-xs text-casino-text-tertiary mb-1">
-              Tier not active — awarded {result.effective}
+            <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${result.color}, transparent 70%)` }} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 }}
+              className="text-2xl font-bold mb-1"
+              style={{ color: result.color, textShadow: `0 0 24px ${result.color}50` }}
+            >
+              {result.landed}
+            </motion.div>
+            {result.landed !== result.effective && (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-xs text-casino-text-tertiary mb-1">
+                Tier not active — awarded {result.effective}
+              </motion.p>
+            )}
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-sm text-casino-text-secondary">
+              You won a <span className="font-semibold" style={{ color: result.color }}>{result.effective}</span> reward
             </motion.p>
-          )}
-          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-sm text-casino-text-secondary">
-            You won a <span className="font-semibold" style={{ color: result.color }}>{result.effective}</span> reward
-          </motion.p>
-        </motion.div>
+          </motion.div>
+        </>
       )}
 
       {/* Legend */}

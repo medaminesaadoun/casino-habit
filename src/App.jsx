@@ -651,7 +651,7 @@ function App() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-0" style={{ backgroundColor: 'var(--color-casino-bg)' }}>
-      <div className="max-w-6xl mx-auto px-4 md:px-6 pt-6 md:pt-8">
+      <div className="max-w-4xl mx-auto px-4 md:px-6 pt-6 md:pt-8">
 
         {/* Header */}
         <header className="flex items-center justify-between mb-10">
@@ -672,7 +672,14 @@ function App() {
             <div className="glass rounded-xl p-1 flex items-center gap-1">
               <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold text-casino-accent tabular-nums">
                 <Sparkles size={14} />
-                <span>{inventory.spinTokens || 0}</span>
+                <motion.span
+                  key={inventory.spinTokens}
+                  initial={{ scale: 1.5, color: '#e8b931' }}
+                  animate={{ scale: 1, color: 'var(--color-casino-accent)' }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                >
+                  {inventory.spinTokens || 0}
+                </motion.span>
                 <button
                   onClick={() => {
                     setInventory((prev) => {
