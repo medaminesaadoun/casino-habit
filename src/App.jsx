@@ -15,6 +15,7 @@ import RewardPicker from './components/RewardPicker';
 import RewardCatalog from './components/RewardCatalog';
 import RewardWonModal from './components/RewardWonModal';
 import JackpotChoiceModal from './components/JackpotChoiceModal';
+import JackpotConfetti from './components/JackpotConfetti';
 import ActiveRewards from './components/ActiveRewards';
 import ThemeSelector from './components/ThemeSelector';
 import BottomNav from './components/BottomNav';
@@ -89,6 +90,7 @@ function App() {
   const [wonTier, setWonTier] = useState(1);
   const [showJackpotChoice, setShowJackpotChoice] = useState(false);
   const [freeJackpotSpin, setFreeJackpotSpin] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [mobileView, setMobileView] = useState('wheel');
   const [loading, setLoading] = useState(true);
@@ -104,6 +106,13 @@ function App() {
     const saved = localStorage.getItem('ch_theme');
     if (saved) setTheme(saved);
   }, []);
+
+  useEffect(() => {
+    if (showConfetti) {
+      const t = setTimeout(() => setShowConfetti(false), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [showConfetti]);
 
   useEffect(() => {
     async function loadData() {
@@ -751,22 +760,24 @@ function App() {
             {!showBonusWheel ? (
               <div className="glass-strong glow-gold p-6 flex flex-col items-center">
                 <p className="font-heading text-sm text-white mb-6 tracking-tight">Spin the Wheel</p>
-                <MainWheel
-                  activeTier={inventory.activeTier}
-                  spinTokens={inventory.spinTokens || 0}
-                  canMegaSpin={(inventory.spinTokens || 0) >= 5}
-                  isFreeJackpotSpin={freeJackpotSpin}
-                  onConsumeToken={handleConsumeToken}
-                  onConsumeMegaToken={handleConsumeMegaToken}
-                  onSpinComplete={handleSpinComplete}
-                />
-              </div>
-            ) : (
-              <div className="glass-strong glow-subtle p-6 flex flex-col items-center">
-                <p className="text-sm font-semibold text-casino-success mb-6">Bonus Spin</p>
-                <BonusWheel
-                  onBonusComplete={handleBonusComplete}
-                  onExtraSpin={() => {
+                  <MainWheel
+                    activeTier={inventory.activeTier}
+                    spinTokens={inventory.spinTokens || 0}
+                    canMegaSpin={(inventory.spinTokens || 0) >= 5}
+                    isFreeJackpotSpin={freeJackpotSpin}
+                    onConsumeToken={handleConsumeToken}
+                    onConsumeMegaToken={handleConsumeMegaToken}
+                    onSpinComplete={handleSpinComplete}
+                    onShowConfetti={() => setShowConfetti(true)}
+                  />
+                </div>
+              ) : (
+                <div className="glass-strong glow-subtle p-6 flex flex-col items-center">
+                  <p className="text-sm font-semibold text-casino-success mb-6">Bonus Spin</p>
+                  <BonusWheel
+                    onBonusComplete={handleBonusComplete}
+                    onShowConfetti={() => setShowConfetti(true)}
+                    onExtraSpin={() => {
                     setInventory((prev) => {
                       const updated = { ...prev, spinTokens: (prev.spinTokens || 0) + 1 };
                       if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
@@ -971,6 +982,7 @@ function App() {
                     onConsumeToken={handleConsumeToken}
                     onConsumeMegaToken={handleConsumeMegaToken}
                     onSpinComplete={handleSpinComplete}
+                    onShowConfetti={() => setShowConfetti(true)}
                   />
                 </div>
               ) : (
@@ -978,6 +990,7 @@ function App() {
                   <p className="text-sm font-semibold text-casino-success mb-6">Bonus Spin</p>
                   <BonusWheel
                     onBonusComplete={handleBonusComplete}
+                    onShowConfetti={() => setShowConfetti(true)}
                     onExtraSpin={() => {
                       setInventory((prev) => {
                         const updated = { ...prev, spinTokens: (prev.spinTokens || 0) + 1 };
@@ -1341,6 +1354,9 @@ function App() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Confetti — rendered outside any transforms so fixed positioning works */}
+      {showConfetti && <JackpotConfetti />}
     </div>
   );
 }

@@ -218,51 +218,7 @@ body {
   animation: resultFlash 0.5s ease-out;
 }
 
-/* ===== MEGA SPIN ===== */
-@keyframes megaModePulse {
-  0%, 100% {
-    box-shadow: 0 0 40px color-mix(in srgb, var(--color-casino-accent) 10%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 60px color-mix(in srgb, var(--color-casino-accent) 25%, transparent);
-  }
-}
-.mega-mode-active {
-  animation: megaModePulse 2s ease-in-out infinite;
-}
-
-.mega-hub-glow {
-  animation: megaModePulse 1.5s ease-in-out infinite;
-}
-
-.mega-spin-btn {
-  background: linear-gradient(135deg, var(--color-casino-accent), var(--color-casino-accent-dim));
-  color: #000;
-  box-shadow: 0 0 24px color-mix(in srgb, var(--color-casino-accent) 30%, transparent),
-              0 4px 12px rgba(0,0,0,0.3);
-}
-.mega-spin-btn:hover {
-  box-shadow: 0 0 32px color-mix(in srgb, var(--color-casino-accent) 45%, transparent),
-              0 4px 12px rgba(0,0,0,0.3);
-  transform: translateY(-1px);
-}
-
-/* ===== EXPIRING REWARD ===== */
-@keyframes expiringPulse {
-  0%, 100% { box-shadow: 0 0 8px color-mix(in srgb, var(--color-casino-danger) 30%, transparent); }
-  50%       { box-shadow: 0 0 20px color-mix(in srgb, var(--color-casino-danger) 60%, transparent); }
-}
-.reward-expiring { animation: expiringPulse 1.2s ease-in-out infinite; }
-
-/* ===== RAINMAKER ===== */
-@keyframes rainmakerPulse {
-  0%, 100% {
-    box-shadow: 0 0 6px color-mix(in srgb, var(--color-casino-accent) 20%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 12px color-mix(in srgb, var(--color-casino-accent) 40%, transparent);
-  }
-}
+/* ===== SPINNING EDGE RING ===== */
 .rainmaker-badge {
   animation: rainmakerPulse 2s ease-in-out infinite;
 }

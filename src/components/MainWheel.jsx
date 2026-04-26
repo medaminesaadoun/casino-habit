@@ -100,12 +100,14 @@ export default function MainWheel({
   onConsumeToken,
   onConsumeMegaToken,
   onSpinComplete,
+  onShowConfetti,
 }) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [megaMode, setMegaMode] = useState(false);
   const [hubPulse, setHubPulse] = useState(false);
+  const [ringRotation, setRingRotation] = useState(0);
   const controls = useAnimation();
   const rotationRef = useRef(0);
 
@@ -137,6 +139,7 @@ export default function MainWheel({
       const offset = 360 - finalAngle;
       const snapped = Math.floor(rotationRef.current / 360) * 360;
       rotationRef.current = snapped + extraSpins * 360 + offset;
+      setRingRotation((prev) => prev + 10 * 360);
       await controls.start({ rotate: rotationRef.current, transition: { duration: 3.5, ease: [0.15, 0.85, 0.35, 1] } });
       setResult({ landed: 'Jackpot', effective: 'Jackpot', color: '#e8b931' });
       setShowResult(true);
@@ -169,6 +172,7 @@ export default function MainWheel({
     const offset = 360 - finalAngle;
     const snapped = Math.floor(rotationRef.current / 360) * 360;
     rotationRef.current = snapped + extraSpins * 360 + offset;
+    setRingRotation((prev) => prev + 10 * 360);
 
     await controls.start({ rotate: rotationRef.current, transition: { duration: 3.5, ease: [0.15, 0.85, 0.35, 1] } });
 
@@ -360,33 +364,18 @@ export default function MainWheel({
             })}
           </motion.svg>
 
-          {/* Speed lines overlay — stationary, appears during spin */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none z-[15]"
-            viewBox="0 0 340 340"
-            style={{ opacity: isSpinning ? 0.35 : 0, transition: 'opacity 0.2s ease-out' }}
+          {/* Spinning edge ring — same easing as wheel */}
+          <motion.div
+            className="absolute inset-0 pointer-events-none z-[15]"
+            animate={{ rotate: ringRotation }}
+            transition={{ duration: 3.5, ease: [0.15, 0.85, 0.35, 1] }}
+            style={{ transformOrigin: '170px 170px', opacity: isSpinning ? 1 : 0, transition: 'opacity 0.2s ease-out' }}
           >
-            {Array.from({ length: 24 }).map((_, i) => {
-              const angle = (i * 360) / 24;
-              const rad = (angle * Math.PI) / 180;
-              const x1 = 170 + Math.cos(rad) * 70;
-              const y1 = 170 + Math.sin(rad) * 70;
-              const x2 = 170 + Math.cos(rad) * 165;
-              const y2 = 170 + Math.sin(rad) * 165;
-              return (
-                <line
-                  key={i}
-                  x1={x1}
-                  y1={y1}
-                  x2={x2}
-                  y2={y2}
-                  stroke="rgba(255,255,255,0.5)"
-                  strokeWidth={i % 3 === 0 ? 2 : 1}
-                  strokeLinecap="round"
-                />
-              );
-            })}
-          </svg>
+            <svg viewBox="0 0 340 340" className="w-full h-full">
+              <circle cx="170" cy="170" r="156" fill="none" stroke="var(--color-casino-accent)" strokeWidth="2.5" strokeDasharray="80 240" strokeLinecap="round" opacity="0.7" />
+              <circle cx="170" cy="170" r="156" fill="none" stroke="white" strokeWidth="1" strokeDasharray="40 280" strokeLinecap="round" opacity="0.5" />
+            </svg>
+          </motion.div>
 
           {/* Center Hub with progress ring */}
           <div
@@ -494,7 +483,7 @@ export default function MainWheel({
       {/* Result card */}
       {showResult && result && (
         <>
-          {result.effective === 'Jackpot' && <JackpotConfetti />}
+          {result.effective === 'Jackpot' && onShowConfetti?.()}
           <motion.div
             initial={{ opacity: 0, scale: 0.3 }}
             animate={{ opacity: 1, scale: [0.3, 1.08, 0.95, 1] }}

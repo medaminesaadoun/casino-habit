@@ -77,11 +77,12 @@ function lightenColor(hex, amount = 35) {
   return `rgb(${r},${g},${b})`;
 }
 
-export default function BonusWheel({ onBonusComplete, onExtraSpin }) {
+export default function BonusWheel({ onBonusComplete, onExtraSpin, onShowConfetti }) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState(null);
   const [timerActive, setTimerActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600);
+  const [ringRotation, setRingRotation] = useState(0);
   const controls = useAnimation();
   const timerRef = useRef(null);
 
@@ -122,6 +123,7 @@ export default function BonusWheel({ onBonusComplete, onExtraSpin }) {
     const offset = 360 - actualAngle;
     const snapped = Math.floor(rotationRef.current / 360) * 360;
     rotationRef.current = snapped + baseSpins * 360 + offset;
+    setRingRotation((prev) => prev + 8 * 360);
 
     await controls.start({ rotate: rotationRef.current, transition: { duration: 3.5, ease: [0.2, 0.8, 0.2, 1] } });
 
@@ -131,6 +133,7 @@ export default function BonusWheel({ onBonusComplete, onExtraSpin }) {
     playSpinLand(landedSegment.label);
 
     if (landedSegment.label === 'FREE') {
+      onShowConfetti?.();
       setTimeout(() => { onBonusComplete({ result: 'FREE', claimed: true }); }, 1500);
     } else if (landedSegment.label === 'EXTRA') {
       // user must click claim
@@ -284,22 +287,18 @@ export default function BonusWheel({ onBonusComplete, onExtraSpin }) {
             })}
             </motion.svg>
 
-            {/* Speed lines overlay — stationary, appears during spin */}
-            <svg
+            {/* Spinning edge ring — same easing as wheel */}
+            <motion.div
               className="absolute inset-0 z-[15] pointer-events-none"
-              width="300" height="300" viewBox="0 0 300 300"
-              style={{ opacity: isSpinning ? 1 : 0, transition: 'opacity 0.2s ease-out' }}
+              animate={{ rotate: ringRotation }}
+              transition={{ duration: 3.5, ease: [0.2, 0.8, 0.2, 1] }}
+              style={{ transformOrigin: '150px 150px', opacity: isSpinning ? 1 : 0, transition: 'opacity 0.2s ease-out' }}
             >
-              {Array.from({ length: 20 }).map((_, i) => {
-                const angle = i * 18;
-                const p1 = polarToCartesian(150, 150, 65, angle);
-                const p2 = polarToCartesian(150, 150, 145, angle);
-                return (
-                  <line key={i} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-                    stroke="rgba(255,255,255,0.35)" strokeWidth={i % 3 === 0 ? 2 : 1} strokeLinecap="round" />
-                );
-              })}
-            </svg>
+              <svg width="300" height="300" viewBox="0 0 300 300" className="w-full h-full">
+                <circle cx="150" cy="150" r="136" fill="none" stroke="var(--color-casino-accent)" strokeWidth="2" strokeDasharray="70 210" strokeLinecap="round" opacity="0.7" />
+                <circle cx="150" cy="150" r="136" fill="none" stroke="white" strokeWidth="1" strokeDasharray="35 245" strokeLinecap="round" opacity="0.4" style={{ transform: 'rotate(180deg)', transformOrigin: '150px 150px' }} />
+              </svg>
+            </motion.div>
 
             {/* Center Hub */}
             <div

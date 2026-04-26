@@ -39,6 +39,7 @@ export default function TokenWheel({ onComplete }) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
+  const [ringRotation, setRingRotation] = useState(0);
   const controls = useAnimation();
 
   const spin = async () => {
@@ -60,6 +61,7 @@ export default function TokenWheel({ onComplete }) {
       else finalAngle = 250 + Math.random() * 80;
     }
 
+    setRingRotation((prev) => prev + 6 * 360);
     const targetRotation = baseSpins * 360 + (360 - finalAngle);
     await controls.start({ rotate: targetRotation, transition: { duration: 3, ease: [0.15, 0.85, 0.35, 1] } });
 
@@ -201,22 +203,18 @@ export default function TokenWheel({ onComplete }) {
               })}
             </motion.svg>
 
-            {/* Speed lines overlay — stationary, appears during spin */}
-            <svg
+            {/* Spinning edge ring — same easing as wheel */}
+            <motion.div
               className="absolute inset-0 z-[15] pointer-events-none"
-              width="200" height="200" viewBox="0 0 200 200"
-              style={{ opacity: isSpinning ? 1 : 0, transition: 'opacity 0.2s ease-out' }}
+              animate={{ rotate: ringRotation }}
+              transition={{ duration: 3, ease: [0.15, 0.85, 0.35, 1] }}
+              style={{ transformOrigin: '100px 100px', opacity: isSpinning ? 1 : 0, transition: 'opacity 0.2s ease-out' }}
             >
-              {Array.from({ length: 16 }).map((_, i) => {
-                const angle = i * 22.5;
-                const p1 = polarToCartesian(100, 100, 55, angle);
-                const p2 = polarToCartesian(100, 100, 95, angle);
-                return (
-                  <line key={i} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
-                    stroke="rgba(255,255,255,0.35)" strokeWidth={i % 3 === 0 ? 2 : 1} strokeLinecap="round" />
-                );
-              })}
-            </svg>
+              <svg width="200" height="200" viewBox="0 0 200 200" className="w-full h-full">
+                <circle cx="100" cy="100" r="87" fill="none" stroke="rgba(34,197,94,0.5)" strokeWidth="1.5" strokeDasharray="45 180" strokeLinecap="round" />
+                <circle cx="100" cy="100" r="87" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="0.8" strokeDasharray="20 200" strokeLinecap="round" style={{ transform: 'rotate(180deg)', transformOrigin: '100px 100px' }} />
+              </svg>
+            </motion.div>
 
             {/* Center hub */}
             <div
