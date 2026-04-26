@@ -231,7 +231,7 @@ export function playTickIfPassed(rotation) {
     const filter = makeFilter('bandpass', 800, 2.5);
     const g = makeGain(0);
     g.gain.setValueAtTime(0, t);
-    g.gain.linearRampToValueAtTime(0.2, t + 0.003);
+    g.gain.linearRampToValueAtTime(0.35, t + 0.003);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
     osc.connect(filter);
     filter.connect(g);
@@ -239,11 +239,11 @@ export function playTickIfPassed(rotation) {
     osc.start(t);
     osc.stop(t + 0.045);
 
-    // Subtle low thud for body (wood resonance)
+    // Body thud for wood resonance
     const thud = makeOsc('sine', 120, 0);
     const tg = makeGain(0);
     tg.gain.setValueAtTime(0, t);
-    tg.gain.linearRampToValueAtTime(0.06, t + 0.002);
+    tg.gain.linearRampToValueAtTime(0.12, t + 0.002);
     tg.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
     thud.connect(tg);
     tg.connect(master);
