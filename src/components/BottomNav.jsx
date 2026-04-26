@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { id: 'history', label: 'History', icon: Clock },
 ];
 
-export default function BottomNav({ active, onChange }) {
+export default function BottomNav({ active, onChange, unseenRewards }) {
   return (
     <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 md:hidden">
       <div className="flex items-center gap-1 px-2 py-2 rounded-2xl glass" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
@@ -40,8 +40,17 @@ export default function BottomNav({ active, onChange }) {
               <motion.div
                 animate={{ scale: isActive ? [1, 1.2, 1] : 1 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="relative"
               >
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
+                {item.id === 'rewards' && unseenRewards > 0 && (
+                  <span
+                    className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-0.5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center"
+                    style={{ boxShadow: '0 0 6px rgba(239,68,68,0.6)' }}
+                  >
+                    {unseenRewards > 9 ? '9+' : unseenRewards}
+                  </span>
+                )}
               </motion.div>
               <span className={`text-[10px] font-semibold relative z-10 font-heading tracking-tight ${isActive ? 'text-casino-accent' : ''}`}>{item.label}</span>
             </motion.button>

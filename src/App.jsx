@@ -92,6 +92,7 @@ function App() {
   const [freeJackpotSpin, setFreeJackpotSpin] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
+  const [unseenRewards, setUnseenRewards] = useState(0);
   const [mobileView, setMobileView] = useState('wheel');
   const [loading, setLoading] = useState(true);
   const [useApi, setUseApi] = useState(true);
@@ -102,6 +103,11 @@ function App() {
   useEffect(() => {
     inventoryRef.current = inventory;
   }, [inventory]);
+
+  // Clear unseen rewards badge when viewing the Rewards tab
+  useEffect(() => {
+    if (mobileView === 'rewards') setUnseenRewards(0);
+  }, [mobileView]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -327,6 +333,7 @@ function App() {
 
   const addRewardToBank = (reward, tier) => {
     playRewardWon(tier);
+    setUnseenRewards((prev) => prev + 1);
     const bankEntry = {
       id: `bank-${Date.now()}`,
       tier,
@@ -755,7 +762,7 @@ function App() {
 
         {/* Desktop Top Nav */}
         <div className="hidden lg:block">
-          <TopNav active={mobileView} onChange={setMobileView} />
+          <TopNav active={mobileView} onChange={setMobileView} unseenRewards={unseenRewards} />
         </div>
 
         {/* Mobile: Always show wheel + bento sections */}
@@ -1166,7 +1173,7 @@ function App() {
       </div>
 
       {/* Bottom Nav */}
-      <BottomNav active={mobileView} onChange={setMobileView} />
+      <BottomNav active={mobileView} onChange={setMobileView} unseenRewards={unseenRewards} />
 
       {/* Modals */}
       <AnimatePresence>

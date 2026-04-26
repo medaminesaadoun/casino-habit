@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { id: 'history', label: 'History', icon: Clock },
 ];
 
-export default function TopNav({ active, onChange }) {
+export default function TopNav({ active, onChange, unseenRewards }) {
   return (
     <nav className="hidden lg:flex items-center gap-1 mb-8 glass rounded-xl p-1.5 sticky top-4 z-30">
       {NAV_ITEMS.map((item) => {
@@ -39,6 +39,14 @@ export default function TopNav({ active, onChange }) {
             )}
             <Icon size={18} strokeWidth={isActive ? 2.5 : 1.5} />
             <span className="text-sm font-semibold relative z-10 tracking-tight">{item.label}</span>
+            {item.id === 'rewards' && unseenRewards > 0 && (
+              <span
+                className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center z-20"
+                style={{ boxShadow: '0 0 8px rgba(239,68,68,0.6)' }}
+              >
+                {unseenRewards > 9 ? '9+' : unseenRewards}
+              </span>
+            )}
           </motion.button>
         );
       })}
