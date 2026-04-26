@@ -320,7 +320,7 @@ function App() {
   };
 
   const addRewardToBank = (reward, tier) => {
-    playRewardWon();
+    playRewardWon(tier);
     const bankEntry = {
       id: `bank-${Date.now()}`,
       tier,

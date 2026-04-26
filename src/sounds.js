@@ -252,17 +252,18 @@ export function playTickIfPassed(rotation) {
   }
 }
 
-// 5. Spin Land — impact thump + rich chord with detuned warmth
+// 5. Spin Land — tier-scaled impact thump + chord fanfare
 export function playSpinLand(tier) {
   if (isMuted) return;
   const { ctx, master } = getAudioContext();
   const t = now();
 
-  // Impact thump — low frequency punch before chord
+  // === Impact thump (all tiers, slightly louder for higher) ===
+  const thumpVol = tier === 'Jackpot' ? 0.4 : tier === 'Bonus' ? 0.35 : tier === 'Tier 3' ? 0.3 : 0.25;
   const thumpOsc = makeOsc('sine', 60, 0);
   const thumpG = makeGain(0);
   thumpG.gain.setValueAtTime(0, t);
-  thumpG.gain.linearRampToValueAtTime(0.3, t + 0.01);
+  thumpG.gain.linearRampToValueAtTime(thumpVol, t + 0.01);
   thumpG.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
   const thumpFilter = makeFilter('lowpass', 120, 1);
   thumpOsc.connect(thumpFilter);
@@ -271,11 +272,11 @@ export function playSpinLand(tier) {
   thumpOsc.start(t);
   thumpOsc.stop(t + 0.2);
 
-  // Sub-bass thud layer
+  // Sub-bass
   const sub = makeOsc('sine', 40, 0);
   const subG = makeGain(0);
   subG.gain.setValueAtTime(0, t);
-  subG.gain.linearRampToValueAtTime(0.2, t + 0.005);
+  subG.gain.linearRampToValueAtTime(thumpVol * 0.7, t + 0.005);
   subG.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
   const subFilter = makeFilter('lowpass', 80, 1);
   sub.connect(subFilter);
@@ -284,35 +285,144 @@ export function playSpinLand(tier) {
   sub.start(t);
   sub.stop(t + 0.15);
 
+  // === Pre-chord arpeggio (T3+) ===
+  const chordStart = t + 0.12;
+  if (tier === 'Jackpot') {
+    // Full ascending arpeggio over 300ms
+    [261.63, 329.63, 392.00, 523.25, 659.25].forEach((freq, i) => {
+      const osc = makeOsc('triangle', freq, 0);
+      const g = makeGain(0);
+      g.gain.setValueAtTime(0, chordStart - 0.3 + i * 0.06);
+      g.gain.linearRampToValueAtTime(0.15, chordStart - 0.3 + i * 0.06 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, chordStart - 0.3 + i * 0.06 + 0.08);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(chordStart - 0.3 + i * 0.06);
+      osc.stop(chordStart - 0.3 + i * 0.06 + 0.1);
+    });
+  } else if (tier === 'Bonus') {
+    // Upward shimmer sweep over 200ms
+    const sweep = makeOsc('sine', 400, 0);
+    const sg = makeGain(0);
+    sg.gain.setValueAtTime(0, chordStart - 0.2);
+    sg.gain.linearRampToValueAtTime(0.12, chordStart - 0.2 + 0.01);
+    sg.gain.exponentialRampToValueAtTime(0.001, chordStart - 0.02);
+    sweep.frequency.setValueAtTime(400, chordStart - 0.2);
+    sweep.frequency.exponentialRampToValueAtTime(1800, chordStart - 0.02);
+    sweep.connect(sg);
+    sg.connect(master);
+    sweep.start(chordStart - 0.2);
+    sweep.stop(chordStart);
+  } else if (tier === 'Tier 3') {
+    // Fast rising arpeggio over 150ms
+    [392.00, 493.88, 587.33, 739.99].forEach((freq, i) => {
+      const osc = makeOsc('triangle', freq, 0);
+      const g = makeGain(0);
+      g.gain.setValueAtTime(0, chordStart - 0.15 + i * 0.035);
+      g.gain.linearRampToValueAtTime(0.12, chordStart - 0.15 + i * 0.035 + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.001, chordStart - 0.15 + i * 0.035 + 0.06);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(chordStart - 0.15 + i * 0.035);
+      osc.stop(chordStart - 0.15 + i * 0.035 + 0.08);
+    });
+  }
+
+  // === Main chord (tier-scaled) ===
   const chords = {
-    'Tier 1': [[523.25, 659.25, 783.99], 0.25],     // C major
-    'Tier 2': [[587.33, 739.99, 880.00], 0.28],     // D major
-    'Tier 3': [[659.25, 830.61, 987.77], 0.30],     // E major
-    'Bonus': [[783.99, 987.77, 1174.66], 0.32],     // G major
-    'Jackpot': [[523.25, 659.25, 783.99, 1046.50], 0.35], // C major + octave
-    '75%': [[587.33, 739.99, 880.00], 0.28],
-    '50%': [[587.33, 739.99, 880.00], 0.28],
-    '25%': [[587.33, 739.99, 880.00], 0.28],
-    'FREE': [[783.99, 987.77, 1174.66], 0.32],
-    'EXTRA': [[783.99, 987.77, 1174.66], 0.32],
+    'Tier 1': { freqs: [523.25, 659.25, 783.99], vol: 0.25, type: 'sine', decay: 0.4 },
+    'Tier 2': { freqs: [587.33, 739.99, 880.00, 1108.73], vol: 0.30, type: 'sine', decay: 0.55 },
+    'Tier 3': { freqs: [659.25, 830.61, 987.77, 1318.51], vol: 0.35, type: 'triangle', decay: 0.7 },
+    'Bonus': { freqs: [783.99, 987.77, 1174.66, 1567.98], vol: 0.40, type: 'triangle', decay: 0.8 },
+    'Jackpot': { freqs: [523.25, 659.25, 783.99, 1046.50, 1318.51], vol: 0.50, type: 'triangle', decay: 1.0 },
+    '75%': { freqs: [587.33, 739.99, 880.00], vol: 0.28, type: 'sine', decay: 0.5 },
+    '50%': { freqs: [587.33, 739.99, 880.00], vol: 0.28, type: 'sine', decay: 0.5 },
+    '25%': { freqs: [587.33, 739.99, 880.00], vol: 0.28, type: 'sine', decay: 0.5 },
+    'FREE': { freqs: [783.99, 987.77, 1174.66], vol: 0.32, type: 'sine', decay: 0.6 },
+    'EXTRA': { freqs: [783.99, 987.77, 1174.66], vol: 0.32, type: 'sine', decay: 0.6 },
   };
 
-  const [notes, baseVol] = chords[tier] || chords['Tier 1'];
-
-  notes.forEach((freq, i) => {
-    // Each note: 2 detuned sines for warmth
-    const osc1 = makeOsc('sine', freq, 5);
-    const osc2 = makeOsc('sine', freq, -5);
+  const c = chords[tier] || chords['Tier 1'];
+  c.freqs.forEach((freq, i) => {
+    const osc1 = makeOsc(c.type, freq, 5);
+    const osc2 = makeOsc(c.type, freq, -5);
     const g = makeGain(0);
-    env(g, t + i * 0.06, 0.03, 0.08, baseVol, 0.35);
+    g.gain.setValueAtTime(0, chordStart + i * 0.05);
+    g.gain.linearRampToValueAtTime(c.vol, chordStart + i * 0.05 + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.001, chordStart + i * 0.05 + c.decay);
     osc1.connect(g);
     osc2.connect(g);
     g.connect(master);
-    osc1.start(t + i * 0.06);
-    osc2.start(t + i * 0.06);
-    osc1.stop(t + i * 0.06 + 1.2);
-    osc2.stop(t + i * 0.06 + 1.2);
+    osc1.start(chordStart + i * 0.05);
+    osc2.start(chordStart + i * 0.05);
+    osc1.stop(chordStart + i * 0.05 + c.decay + 0.5);
+    osc2.stop(chordStart + i * 0.05 + c.decay + 0.5);
+
+    // Jackpot: extra octave layer for richness
+    if (tier === 'Jackpot') {
+      const oct = makeOsc('sine', freq * 2, 3);
+      const og = makeGain(0);
+      og.gain.setValueAtTime(0, chordStart + i * 0.05);
+      og.gain.linearRampToValueAtTime(c.vol * 0.3, chordStart + i * 0.05 + 0.03);
+      og.gain.exponentialRampToValueAtTime(0.001, chordStart + i * 0.05 + c.decay * 0.8);
+      oct.connect(og);
+      og.connect(master);
+      oct.start(chordStart + i * 0.05);
+      oct.stop(chordStart + i * 0.05 + c.decay + 0.3);
+    }
   });
+
+  // === Post-chord effects ===
+  if (tier === 'Jackpot') {
+    // Echo chord at half volume, 400ms later
+    setTimeout(() => {
+      if (isMuted) return;
+      const t2 = now() + chordStart;
+      c.freqs.forEach((freq, i) => {
+        const osc = makeOsc('sine', freq, 3);
+        const g = makeGain(0);
+        g.gain.setValueAtTime(0, t2 + i * 0.05);
+        g.gain.linearRampToValueAtTime(c.vol * 0.35, t2 + i * 0.05 + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.001, t2 + i * 0.05 + 0.4);
+        osc.connect(g);
+        g.connect(master);
+        osc.start(t2 + i * 0.05);
+        osc.stop(t2 + i * 0.05 + 0.6);
+      });
+    }, 400);
+  } else if (tier === 'Bonus') {
+    // Pitch wobble at end of sustain
+    c.freqs.forEach((freq, i) => {
+      const wobble = makeOsc('sine', freq, 0);
+      const wg = makeGain(0);
+      wg.gain.setValueAtTime(0, chordStart + i * 0.05 + c.decay * 0.6);
+      wg.gain.linearRampToValueAtTime(c.vol * 0.2, chordStart + i * 0.05 + c.decay * 0.6 + 0.02);
+      wg.gain.exponentialRampToValueAtTime(0.001, chordStart + i * 0.05 + c.decay + 0.2);
+      wobble.frequency.setValueAtTime(freq, chordStart + i * 0.05 + c.decay * 0.6);
+      wobble.frequency.setValueAtTime(freq * 1.03, chordStart + i * 0.05 + c.decay * 0.65);
+      wobble.frequency.setValueAtTime(freq, chordStart + i * 0.05 + c.decay * 0.7);
+      wobble.connect(wg);
+      wg.connect(master);
+      wobble.start(chordStart + i * 0.05 + c.decay * 0.6);
+      wobble.stop(chordStart + i * 0.05 + c.decay + 0.3);
+    });
+  } else if (tier === 'Tier 3') {
+    // Gentle vibrato tail
+    c.freqs.forEach((freq, i) => {
+      const vib = makeOsc('sine', freq, 0);
+      const vg = makeGain(0);
+      vg.gain.setValueAtTime(0, chordStart + i * 0.05 + c.decay * 0.7);
+      vg.gain.linearRampToValueAtTime(c.vol * 0.15, chordStart + i * 0.05 + c.decay * 0.7 + 0.02);
+      vg.gain.exponentialRampToValueAtTime(0.001, chordStart + i * 0.05 + c.decay + 0.2);
+      vib.frequency.setValueAtTime(freq, chordStart + i * 0.05 + c.decay * 0.7);
+      vib.frequency.linearRampToValueAtTime(freq * 1.01, chordStart + i * 0.05 + c.decay * 0.7 + 0.1);
+      vib.frequency.linearRampToValueAtTime(freq, chordStart + i * 0.05 + c.decay + 0.15);
+      vib.connect(vg);
+      vg.connect(master);
+      vib.start(chordStart + i * 0.05 + c.decay * 0.7);
+      vib.stop(chordStart + i * 0.05 + c.decay + 0.25);
+    });
+  }
 }
 
 // 6. Cash In — weighty coin cascade with metallic ring
@@ -346,36 +456,79 @@ export function playCashIn() {
   });
 }
 
-// 7. Reward Won — euphoric shimmer fanfare
-export function playRewardWon() {
+// 7. Reward Won — tier-scaled euphoric fanfare
+export function playRewardWon(tier) {
   if (isMuted) return;
   const { ctx, master } = getAudioContext();
   const t = now();
 
-  const baseFreqs = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+  const tierConfigs = {
+    1: { freqs: [659.25, 783.99], vol: 0.15, sparkle: false, echo: false },
+    2: { freqs: [659.25, 783.99, 1046.50], vol: 0.18, sparkle: false, echo: false },
+    3: { freqs: [523.25, 659.25, 783.99, 1046.50, 1318.51], vol: 0.20, sparkle: true, echo: false },
+    4: { freqs: [523.25, 659.25, 783.99, 1046.50, 1318.51], vol: 0.25, sparkle: true, echo: true },
+  };
 
-  baseFreqs.forEach((freq, i) => {
-    // 3 detuned layers per note for shimmer
+  const cfg = tierConfigs[tier] || tierConfigs[1];
+
+  // Main arpeggio fanfare
+  cfg.freqs.forEach((freq, i) => {
     [-7, 0, 7].forEach((detune) => {
       const osc = makeOsc('sine', freq, detune);
       const g = makeGain(0);
-      const vol = detune === 0 ? 0.12 : 0.05;
-      env(g, t + i * 0.1, 0.04, 0.1, vol, 0.5);
+      const vol = detune === 0 ? cfg.vol : cfg.vol * 0.4;
+      g.gain.setValueAtTime(0, t + i * 0.1);
+      g.gain.linearRampToValueAtTime(vol, t + i * 0.1 + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.1 + 0.5 + (tier >= 3 ? 0.3 : 0));
       osc.connect(g);
       g.connect(master);
       osc.start(t + i * 0.1);
-      osc.stop(t + i * 0.1 + 1.5);
+      osc.stop(t + i * 0.1 + 0.8);
     });
   });
 
-  // Subtle sparkle overlay on last note
-  const spark = makeOsc('triangle', 2093.00, 0);
-  const sg = makeGain(0);
-  env(sg, t + 0.4, 0.05, 0.15, 0.08, 0.4);
-  spark.connect(sg);
-  sg.connect(master);
-  spark.start(t + 0.4);
-  spark.stop(t + 1.5);
+  // Sparkle overlay (Tier 3+)
+  if (cfg.sparkle) {
+    const spark = makeOsc('triangle', 2093.00, 0);
+    const sg = makeGain(0);
+    sg.gain.setValueAtTime(0, t + 0.3);
+    sg.gain.linearRampToValueAtTime(0.1, t + 0.32);
+    sg.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+    spark.connect(sg);
+    sg.connect(master);
+    spark.start(t + 0.3);
+    spark.stop(t + 1.5);
+
+    // Secondary sparkle higher
+    const spark2 = makeOsc('triangle', 2793.00, 0);
+    const sg2 = makeGain(0);
+    sg2.gain.setValueAtTime(0, t + 0.5);
+    sg2.gain.linearRampToValueAtTime(0.06, t + 0.52);
+    sg2.gain.exponentialRampToValueAtTime(0.001, t + 0.9);
+    spark2.connect(sg2);
+    sg2.connect(master);
+    spark2.start(t + 0.5);
+    spark2.stop(t + 1.2);
+  }
+
+  // Echo reverb (Tier 4 / Jackpot)
+  if (cfg.echo) {
+    setTimeout(() => {
+      if (isMuted) return;
+      const t2 = now();
+      cfg.freqs.slice(0, 3).forEach((freq, i) => {
+        const osc = makeOsc('sine', freq, 3);
+        const g = makeGain(0);
+        g.gain.setValueAtTime(0, t2 + i * 0.08);
+        g.gain.linearRampToValueAtTime(cfg.vol * 0.3, t2 + i * 0.08 + 0.03);
+        g.gain.exponentialRampToValueAtTime(0.001, t2 + i * 0.08 + 0.4);
+        osc.connect(g);
+        g.connect(master);
+        osc.start(t2 + i * 0.08);
+        osc.stop(t2 + i * 0.08 + 0.5);
+      });
+    }, 500);
+  }
 }
 
 // 8. Bonus Timer Tick — soft urgent pulse
