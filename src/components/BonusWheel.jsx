@@ -203,40 +203,14 @@ export default function BonusWheel({ onBonusComplete, onExtraSpin, onShowConfett
             }}
             style={{ transformOrigin: '150px 150px' }}
           >
-            <defs>
-              {BONUS_SEGMENTS.map((seg, idx) => (
-                <linearGradient
-                  key={`bgrad-${idx}`}
-                  id={`bsegGrad-${idx}`}
-                  gradientUnits="userSpaceOnUse"
-                  x1={CX} y1={CY}
-                  x2={polarToCartesian(CX, CY, OUTER_R, (seg.start + seg.end) / 2).x}
-                  y2={polarToCartesian(CX, CY, OUTER_R, (seg.start + seg.end) / 2).y}
-                >
-                  <stop offset="0%" stopColor={lightenColor(seg.color, 30)} stopOpacity="1" />
-                  <stop offset="45%" stopColor={seg.color} stopOpacity="1" />
-                  <stop offset="100%" stopColor={seg.color} stopOpacity="0.85" />
-                </linearGradient>
-              ))}
-              <radialGradient id="bonusDepth" cx="50%" cy="35%" r="65%">
-                <stop offset="0%"   stopColor="rgba(255,255,255,0)" />
-                <stop offset="75%"  stopColor="rgba(0,0,0,0)" />
-                <stop offset="100%" stopColor="rgba(0,0,0,0.15)" />
-              </radialGradient>
-              <radialGradient id="bonusVignette" cx="50%" cy="50%" r="50%">
-                <stop offset="80%"  stopColor="rgba(0,0,0,0)" />
-                <stop offset="100%" stopColor="rgba(0,0,0,0.1)" />
-              </radialGradient>
-            </defs>
-
-            {/* Segments */}
-            {BONUS_SEGMENTS.map((seg, idx) => (
+            {/* Segments — solid colors, no gradient overlays */}
+            {BONUS_SEGMENTS.map((seg) => (
               <path
                 key={seg.label}
                 d={describeDonutSegment(CX, CY, INNER_R, OUTER_R, seg.start, seg.end)}
-                fill={`url(#bsegGrad-${idx})`}
-                stroke="rgba(0,0,0,0.5)"
-                strokeWidth="1"
+                fill={seg.color}
+                stroke="rgba(0,0,0,0.35)"
+                strokeWidth="1.5"
               />
             ))}
 
@@ -259,10 +233,6 @@ export default function BonusWheel({ onBonusComplete, onExtraSpin, onShowConfett
               const p = polarToCartesian(CX, CY, OUTER_R - 6, seg.start);
               return <circle key={`btick-${seg.label}`} cx={p.x} cy={p.y} r={3} fill="rgba(255,255,255,0.55)" />;
             })}
-
-            {/* Depth + vignette overlays */}
-            <circle cx={CX} cy={CY} r={OUTER_R} fill="url(#bonusDepth)" style={{ mixBlendMode: 'multiply', pointerEvents: 'none' }} />
-            <circle cx={CX} cy={CY} r={OUTER_R} fill="url(#bonusVignette)" style={{ pointerEvents: 'none' }} />
 
             {/* Rotated labels */}
             {BONUS_SEGMENTS.map((seg) => {

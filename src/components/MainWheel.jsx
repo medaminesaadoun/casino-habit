@@ -263,43 +263,14 @@ export default function MainWheel({
             }}
             style={{ transformOrigin: '170px 170px' }}
           >
-            <defs>
-              {/* Per-segment inner-edge highlight gradients */}
-              {segments.map((seg, idx) => (
-                <linearGradient
-                  key={`grad-${idx}`}
-                  id={`segGrad-${idx}`}
-                  gradientUnits="userSpaceOnUse"
-                  x1={CX} y1={CY}
-                  x2={polarToCartesian(CX, CY, OUTER_R, (seg.start + seg.end) / 2).x}
-                  y2={polarToCartesian(CX, CY, OUTER_R, (seg.start + seg.end) / 2).y}
-                >
-                  <stop offset="0%" stopColor={lightenColor(seg.color, 30)} stopOpacity="1" />
-                  <stop offset="45%" stopColor={seg.color} stopOpacity="1" />
-                  <stop offset="100%" stopColor={seg.color} stopOpacity="0.85" />
-                </linearGradient>
-              ))}
-              {/* Depth overlay gradient */}
-              <radialGradient id="wheelDepth" cx="50%" cy="35%" r="65%">
-                <stop offset="0%"   stopColor="rgba(255,255,255,0)" />
-                <stop offset="75%"  stopColor="rgba(0,0,0,0)" />
-                <stop offset="100%" stopColor="rgba(0,0,0,0.15)" />
-              </radialGradient>
-              {/* Outer edge vignette */}
-              <radialGradient id="wheelVignette" cx="50%" cy="50%" r="50%">
-                <stop offset="80%"  stopColor="rgba(0,0,0,0)" />
-                <stop offset="100%" stopColor="rgba(0,0,0,0.1)" />
-              </radialGradient>
-            </defs>
-
-            {/* Segments with gradient fill */}
-            {segments.map((seg, idx) => (
+            {/* Segments — solid colors, no gradient overlays */}
+            {segments.map((seg) => (
               <path
                 key={seg.label}
                 d={describeDonutSegment(CX, CY, INNER_R, OUTER_R, seg.start, seg.end)}
-                fill={`url(#segGrad-${idx})`}
-                stroke="rgba(0,0,0,0.5)"
-                strokeWidth="1"
+                fill={seg.color}
+                stroke="rgba(0,0,0,0.35)"
+                strokeWidth="1.5"
               />
             ))}
 
@@ -330,11 +301,6 @@ export default function MainWheel({
                 <circle key={`tick-${seg.label}`} cx={p.x} cy={p.y} r={3} fill="rgba(255,255,255,0.55)" />
               );
             })}
-
-            {/* Depth overlay */}
-            <circle cx={CX} cy={CY} r={OUTER_R} fill="url(#wheelDepth)" style={{ mixBlendMode: 'multiply', pointerEvents: 'none' }} />
-            {/* Outer vignette */}
-            <circle cx={CX} cy={CY} r={OUTER_R} fill="url(#wheelVignette)" style={{ pointerEvents: 'none' }} />
 
             {/* Rotated labels — follow segment angle, never upside-down */}
             {segments.map((seg) => {
