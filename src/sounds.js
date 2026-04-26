@@ -69,121 +69,141 @@ function env(gainNode, t, attack, decay, sustainLevel, release) {
 
 // ===== SOUNDS =====
 
-// 1. Habit Complete — soft satisfying chime with gentle whoosh
+// 1. Habit Complete — bright casino ding with warm body
 export function playComplete() {
   if (isMuted) return;
   const { ctx, master } = getAudioContext();
   const t = now();
 
-  // Layer 1: main chime (sine + triangle for body)
-  const osc1 = makeOsc('sine', 880, 3);
-  const osc2 = makeOsc('triangle', 880, -2);
+  // Layer 1: bright main ding (triangle + sine for bell-like attack)
+  const osc1 = makeOsc('triangle', 1046.50, 4);
+  const osc2 = makeOsc('sine', 1046.50, -3);
   const g1 = makeGain(0);
-  env(g1, t, 0.02, 0.1, 0.2, 0.25);
+  g1.gain.setValueAtTime(0, t);
+  g1.gain.linearRampToValueAtTime(0.28, t + 0.005);
+  g1.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
   osc1.connect(g1); osc2.connect(g1);
   g1.connect(master);
   osc1.start(t); osc2.start(t);
-  osc1.stop(t + 0.6); osc2.stop(t + 0.6);
+  osc1.stop(t + 0.5); osc2.stop(t + 0.5);
 
-  // Layer 2: harmony (5th above)
-  const osc3 = makeOsc('sine', 1318.5, -1);
+  // Layer 2: bright fifth above for sparkle
+  const osc3 = makeOsc('sine', 1567.98, -1);
   const g2 = makeGain(0);
-  env(g2, t + 0.05, 0.03, 0.12, 0.12, 0.3);
+  g2.gain.setValueAtTime(0, t + 0.04);
+  g2.gain.linearRampToValueAtTime(0.15, t + 0.045);
+  g2.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
   osc3.connect(g2);
   g2.connect(master);
-  osc3.start(t + 0.05);
-  osc3.stop(t + 0.7);
+  osc3.start(t + 0.04);
+  osc3.stop(t + 0.45);
 
-  // Layer 3: subtle high sparkle
-  const osc4 = makeOsc('sine', 1760, 2);
+  // Layer 3: fast decaying high sparkle
+  const osc4 = makeOsc('sine', 2093.00, 3);
   const g3 = makeGain(0);
-  env(g3, t + 0.1, 0.04, 0.15, 0.08, 0.2);
+  g3.gain.setValueAtTime(0, t + 0.08);
+  g3.gain.linearRampToValueAtTime(0.1, t + 0.085);
+  g3.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
   osc4.connect(g3);
   g3.connect(master);
-  osc4.start(t + 0.1);
-  osc4.stop(t + 0.6);
+  osc4.start(t + 0.08);
+  osc4.stop(t + 0.3);
 }
 
-// 2. Clip Drop — rich metallic click with resonant decay
+// 2. Clip Drop — poker chip rattle with multi-tap cascade
 export function playClipDrop() {
   if (isMuted) return;
   const { ctx, master } = getAudioContext();
   const t = now();
 
-  // Metallic ping (filtered noise burst)
-  const bufferSize = ctx.sampleRate * 0.08;
-  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) {
-    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.012));
+  function chipHit(startTime, freq, vol, dur) {
+    const osc1 = makeOsc('sine', freq, 0);
+    const osc2 = makeOsc('triangle', freq * 1.02, 2);
+    const g = makeGain(0);
+    g.gain.setValueAtTime(0, startTime);
+    g.gain.linearRampToValueAtTime(vol, startTime + 0.001);
+    g.gain.exponentialRampToValueAtTime(0.001, startTime + dur);
+    osc1.connect(g); osc2.connect(g);
+    g.connect(master);
+    osc1.start(startTime); osc2.start(startTime);
+    osc1.stop(startTime + dur); osc2.stop(startTime + dur);
   }
 
+  // Fast cascade of chip taps — acrylic/rattle resonance
+  chipHit(t, 3200, 0.35, 0.08);
+  chipHit(t + 0.035, 2800, 0.25, 0.07);
+  chipHit(t + 0.07, 2400, 0.2, 0.06);
+  chipHit(t + 0.095, 3600, 0.15, 0.05);
+  chipHit(t + 0.12, 2000, 0.12, 0.06);
+
+  // Subtle noise rattle layer
+  const bufSize = ctx.sampleRate * 0.06;
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.01));
   const noise = ctx.createBufferSource();
-  noise.buffer = buffer;
-  const filter = makeFilter('bandpass', 3500, 12);
-  const g = makeGain(0.4);
-  g.gain.setValueAtTime(0.4, t);
-  g.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
-  noise.connect(filter);
-  filter.connect(g);
-  g.connect(master);
+  noise.buffer = buf;
+  const bp = makeFilter('highpass', 4000, 4);
+  const ng = makeGain(0);
+  ng.gain.setValueAtTime(0.15, t);
+  ng.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+  noise.connect(bp);
+  bp.connect(ng);
+  ng.connect(master);
   noise.start(t);
-
-  // Resonant tonal ping (like a metal clip)
-  const osc = makeOsc('sine', 2600, 0);
-  const g2 = makeGain(0);
-  env(g2, t, 0.001, 0.02, 0.3, 0.04);
-  osc.connect(g2);
-  g2.connect(master);
-  osc.start(t);
-  osc.stop(t + 0.15);
-
-  // Second quieter clack
-  setTimeout(() => {
-    if (isMuted) return;
-    const t2 = now();
-    const noise2 = ctx.createBufferSource();
-    noise2.buffer = buffer;
-    const filter2 = makeFilter('bandpass', 2200, 15);
-    const g3 = makeGain(0.2);
-    g3.gain.setValueAtTime(0.2, t2);
-    g3.gain.exponentialRampToValueAtTime(0.01, t2 + 0.06);
-    noise2.connect(filter2);
-    filter2.connect(g3);
-    g3.connect(master);
-    noise2.start(t2);
-  }, 50);
 }
 
-// 3. Spin Start — mechanical whoosh + subtle click
+// 3. Spin Start — slot lever tension with metallic scrape + click
 export function playSpinStart() {
   if (isMuted) return;
   const { ctx, master } = getAudioContext();
   const t = now();
 
-  // Low mechanical sweep
-  const osc = makeOsc('sawtooth', 60, 0);
-  const filter = makeFilter('lowpass', 200, 2);
+  // Layer 1: tension build — rising filter sweep
+  const osc = makeOsc('sawtooth', 80, 0);
+  const filter = makeFilter('lowpass', 150, 3);
   const g = makeGain(0);
-  env(g, t, 0.05, 0.1, 0.12, 0.15);
-  osc.frequency.setValueAtTime(60, t);
-  osc.frequency.exponentialRampToValueAtTime(250, t + 0.25);
-  filter.frequency.setValueAtTime(200, t);
-  filter.frequency.exponentialRampToValueAtTime(2000, t + 0.25);
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.15, t + 0.05);
+  g.gain.linearRampToValueAtTime(0.08, t + 0.25);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+  osc.frequency.setValueAtTime(80, t);
+  osc.frequency.exponentialRampToValueAtTime(400, t + 0.3);
+  filter.frequency.setValueAtTime(150, t);
+  filter.frequency.exponentialRampToValueAtTime(3000, t + 0.3);
   osc.connect(filter);
   filter.connect(g);
   g.connect(master);
   osc.start(t);
   osc.stop(t + 0.4);
 
-  // Subtle click at start
-  const click = makeOsc('triangle', 1200, 0);
+  // Layer 2: metallic scrape (bandpassed noise)
+  const bufSize = ctx.sampleRate * 0.12;
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.035));
+  const noise = ctx.createBufferSource();
+  noise.buffer = buf;
+  const bp = makeFilter('bandpass', 2500, 8);
+  const ng = makeGain(0);
+  ng.gain.setValueAtTime(0, t);
+  ng.gain.linearRampToValueAtTime(0.12, t + 0.04);
+  ng.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+  noise.connect(bp);
+  bp.connect(ng);
+  ng.connect(master);
+  noise.start(t);
+
+  // Layer 3: crisp lever click at end
+  const click = makeOsc('triangle', 1800, 0);
   const cg = makeGain(0);
-  env(cg, t, 0.001, 0.01, 0.15, 0.02);
+  cg.gain.setValueAtTime(0, t + 0.25);
+  cg.gain.linearRampToValueAtTime(0.2, t + 0.255);
+  cg.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
   click.connect(cg);
   cg.connect(master);
-  click.start(t);
-  click.stop(t + 0.05);
+  click.start(t + 0.25);
+  click.stop(t + 0.35);
 }
 
 // 4. Rotation-synced Spin Tick
@@ -206,25 +226,63 @@ export function playTickIfPassed(rotation) {
     const { ctx, master } = getAudioContext();
     const t = now();
 
-    // Mechanical tick — short, punchy, filtered
-    const osc = makeOsc('square', 900 + Math.random() * 100, 0);
-    const filter = makeFilter('highpass', 600, 1);
-    const g = makeGain(0.15);
-    g.gain.setValueAtTime(0.15, t);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 0.035);
+    // Wooden mechanical tick — short, warm, resonant
+    const osc = makeOsc('triangle', 600 + Math.random() * 80, 0);
+    const filter = makeFilter('bandpass', 800, 2.5);
+    const g = makeGain(0);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.2, t + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
     osc.connect(filter);
     filter.connect(g);
     g.connect(master);
     osc.start(t);
-    osc.stop(t + 0.035);
+    osc.stop(t + 0.045);
+
+    // Subtle low thud for body (wood resonance)
+    const thud = makeOsc('sine', 120, 0);
+    const tg = makeGain(0);
+    tg.gain.setValueAtTime(0, t);
+    tg.gain.linearRampToValueAtTime(0.06, t + 0.002);
+    tg.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
+    thud.connect(tg);
+    tg.connect(master);
+    thud.start(t);
+    thud.stop(t + 0.04);
   }
 }
 
-// 5. Spin Land — rich chord with detuned warmth
+// 5. Spin Land — impact thump + rich chord with detuned warmth
 export function playSpinLand(tier) {
   if (isMuted) return;
   const { ctx, master } = getAudioContext();
   const t = now();
+
+  // Impact thump — low frequency punch before chord
+  const thumpOsc = makeOsc('sine', 60, 0);
+  const thumpG = makeGain(0);
+  thumpG.gain.setValueAtTime(0, t);
+  thumpG.gain.linearRampToValueAtTime(0.3, t + 0.01);
+  thumpG.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+  const thumpFilter = makeFilter('lowpass', 120, 1);
+  thumpOsc.connect(thumpFilter);
+  thumpFilter.connect(thumpG);
+  thumpG.connect(master);
+  thumpOsc.start(t);
+  thumpOsc.stop(t + 0.2);
+
+  // Sub-bass thud layer
+  const sub = makeOsc('sine', 40, 0);
+  const subG = makeGain(0);
+  subG.gain.setValueAtTime(0, t);
+  subG.gain.linearRampToValueAtTime(0.2, t + 0.005);
+  subG.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+  const subFilter = makeFilter('lowpass', 80, 1);
+  sub.connect(subFilter);
+  subFilter.connect(subG);
+  subG.connect(master);
+  sub.start(t);
+  sub.stop(t + 0.15);
 
   const chords = {
     'Tier 1': [[523.25, 659.25, 783.99], 0.25],     // C major
