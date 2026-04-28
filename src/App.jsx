@@ -22,6 +22,7 @@ import ActiveRewards from './components/ActiveRewards';
 import BottomNav from './components/BottomNav';
 import TopNav from './components/TopNav';
 import UndoToast from './components/UndoToast';
+import OnboardingModal from './components/OnboardingModal';
 
 const CLIP_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'gold'];
 const CLIP_WEIGHTS = [20, 20, 20, 20, 15, 4.9, 0.1];
