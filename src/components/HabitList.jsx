@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Trash2, Pencil, Flame, Zap, Calendar } from 'lucide-react';
 
@@ -31,10 +31,39 @@ function getLastCompletedText(dates) {
   return `${diffDays} days ago`;
 }
 
-function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
+function getRecencyLevel(dates) {
+  if (dates.length === 0) return 'very-stale';
+  const last = new Date(dates[dates.length - 1]);
+  const now = new Date();
+  const diffMs = now - last;
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffMs < 86400000 && last.getDate() === now.getDate()) return 'today';
+  if (diffDays <= 1) return 'yesterday';
+  if (diffDays <= 3) return 'stale';
+  return 'very-stale';
+}
+
+function getWeeklyCompletions(habits) {
+  const now = new Date();
+  const weekAgo = new Date(now.getTime() - 7 * 86400000);
+  return habits.reduce((total, h) => {
+    return total + (h.completedDates || []).filter((d) => new Date(d) > weekAgo).length;
+  }, 0);
+}
+
+const RECENCY_STYLES = {
+  today: { barGlow: 0.9, barOpacity: 1, staleText: false },
+  yesterday: { barGlow: 0.4, barOpacity: 1, staleText: false },
+  stale: { barGlow: 0, barOpacity: 0.5, staleText: true },
+  'very-stale': { barGlow: 0, barOpacity: 0.4, staleText: true },
+};
+
+function HabitCard({ habit, jar, onComplete, onEdit, onDelete, index }) {
   const streak = getStreak(habit.completedDates);
   const lastText = getLastCompletedText(habit.completedDates);
   const hasStreak = streak >= 3;
+  const recency = getRecencyLevel(habit.completedDates);
+  const styles = RECENCY_STYLES[recency];
 
   return (
     <motion.div
@@ -44,20 +73,33 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
       exit={{ opacity: 0, x: -20, scale: 0.95 }}
       whileHover={{ y: -3, boxShadow: `0 16px 48px rgba(0,0,0,0.45), 0 0 0 1px ${habit.color}30` }}
       whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className="glass shape-card overflow-hidden"
+      transition={{ type: 'spring', stiffness: 400, damping: 25, delay: index * 0.04 }}
+      className="glass shape-card overflow-hidden relative"
     >
+      {/* Stale alert dot */}
+      {recency === 'very-stale' && (
+        <motion.div
+          className="absolute top-2 right-2 w-2 h-2 rounded-full z-10"
+          style={{ backgroundColor: '#f59e0b' }}
+          animate={{ scale: [1, 1.4, 1], opacity: [1, 0.6, 1] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        />
+      )}
+
       <div className="flex">
         {/* Left accent bar */}
         <div
           className="w-[3px] shrink-0 rounded-l-2xl"
           style={{
             backgroundColor: habit.color,
-            boxShadow: hasStreak ? `0 0 12px ${habit.color}80` : undefined,
+            opacity: styles.barOpacity,
+            boxShadow: styles.barGlow > 0
+              ? `0 0 ${12 * styles.barGlow}px ${habit.color}${Math.round(80 * styles.barGlow).toString(16).padStart(2, '0')}`
+              : undefined,
           }}
         />
         <div className="flex-1 p-4">
-          {/* Top row: color indicator + actions */}
+          {/* Top row */}
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
               <div
@@ -71,6 +113,9 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
                 >
                   {jar.name}
                 </span>
+              )}
+              {recency === 'today' && (
+                <span className="text-[9px] font-bold uppercase tracking-wider text-casino-success">Done</span>
               )}
             </div>
             <div className="flex gap-0.5">
@@ -89,9 +134,18 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
             </div>
           </div>
 
-          {/* Name + desc */}
+          {/* Name + description + tags */}
           <h3 className="font-heading text-white text-base leading-tight mb-1">{habit.name}</h3>
-          <p className="text-xs text-casino-text-tertiary mb-3 line-clamp-1">{habit.description}</p>
+          <p className="text-xs text-casino-text-tertiary mb-1 line-clamp-1">{habit.description}</p>
+          {(habit.tags || []).length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-3">
+              {(habit.tags || []).map((tag) => (
+                <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-md bg-white/5 text-casino-text-tertiary">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Stats row */}
           <div className="flex items-center gap-3 mb-4 text-xs text-casino-text-tertiary">
@@ -111,7 +165,7 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
             )}
             <div className="flex items-center gap-1">
               <Calendar size={12} />
-              <span>{lastText}</span>
+              <span className={styles.staleText ? 'text-casino-text-tertiary/50' : ''}>{lastText}</span>
             </div>
           </div>
 
@@ -135,32 +189,71 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete }) {
   );
 }
 
-export default function HabitList({ habits, jars, onComplete, onEdit, onDelete, onAdd }) {
+export default function HabitList({ habits, jars, tags, onComplete, onEdit, onDelete, onAdd, onQuickTask }) {
+  const [activeTag, setActiveTag] = useState(null);
+  const weeklyTotal = getWeeklyCompletions(habits);
+  const filtered = activeTag ? habits.filter((h) => (h.tags || []).includes(activeTag)) : habits;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm font-semibold text-white">Your Habits</p>
-        <button onClick={onAdd} className="btn-pill btn-ghost text-xs font-semibold flex items-center gap-1.5">
-          <PlusIcon size={14} /> Add Habit
-        </button>
-      </div>
-
-      {habits.length === 0 ? (
-        <div className="glass p-10 text-center rounded-2xl">
-          <p className="text-casino-text-secondary text-sm mb-2">No habits yet</p>
-          <button onClick={onAdd} className="btn-pill btn-gold text-sm">
-            Create your first habit
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-white">Your Habits</p>
+          <span className="glass px-2 py-0.5 rounded-full text-xs text-casino-text-tertiary tabular-nums">{habits.length} habits</span>
+          <span className="glass px-2 py-0.5 rounded-full text-xs text-casino-text-tertiary tabular-nums">{weeklyTotal} this week</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {onQuickTask && (
+            <button onClick={onQuickTask} className="text-[10px] font-semibold text-casino-text-tertiary hover:text-casino-text-secondary transition-colors px-2 py-1.5 rounded-xl hover:bg-white/5">
+              <Zap size={12} className="inline mr-1" />Just Done
+            </button>
+          )}
+          <button onClick={onAdd} className="btn-pill btn-ghost text-xs font-semibold flex items-center gap-1.5">
+            <PlusIcon size={14} /> Add Habit
           </button>
         </div>
+      </div>
+
+      {/* Tag filter bar */}
+      {tags && tags.length > 0 && (
+        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 scrollbar-hide">
+          <button
+            onClick={() => setActiveTag(null)}
+            className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all whitespace-nowrap ${!activeTag ? 'bg-casino-accent text-black' : 'glass text-casino-text-tertiary hover:text-casino-text-secondary'}`}
+          >
+            All
+          </button>
+          {tags.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setActiveTag(tag)}
+              className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all whitespace-nowrap ${activeTag === tag ? 'bg-casino-accent text-black' : 'glass text-casino-text-tertiary hover:text-casino-text-secondary'}`}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {habits.length === 0 ? (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="glass p-10 text-center rounded-2xl">
+          <motion.div className="empty-float text-4xl mb-4">🎯</motion.div>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="text-casino-text-secondary text-sm mb-1">No habits yet</motion.p>
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }} className="text-casino-text-tertiary text-xs mb-5">Create one to start earning clips</motion.p>
+          <motion.button onClick={onAdd} className="btn-pill btn-gold text-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
+            Create your first habit
+          </motion.button>
+        </motion.div>
       ) : (
         <AnimatePresence mode="popLayout">
-          {habits.map((habit) => {
+          {filtered.map((habit, index) => {
             const jar = jars.find((j) => j.id === habit.jarId);
             return (
               <HabitCard
                 key={habit.id}
                 habit={habit}
                 jar={jar}
+                index={index}
                 onComplete={onComplete}
                 onEdit={onEdit}
                 onDelete={onDelete}

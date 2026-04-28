@@ -24,6 +24,7 @@ const CX = 170;
 const CY = 170;
 const OUTER_R = 160;
 const INNER_R = 62;
+const TIER_COLORS = { 1: '#ef4444', 2: '#3b82f6', 3: '#a855f7' };
 
 function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
   const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
@@ -361,6 +362,9 @@ export default function MainWheel({
             style={{ width: 120, height: 120 }}
           >
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 120 120">
+              {/* Tier ring — thin circle colored by active tier */}
+              <circle cx="60" cy="60" r="52" fill="none" stroke={TIER_COLORS[activeTier] || TIER_COLORS[1]} strokeWidth="2" opacity="0.35" />
+              {/* Progress ring track */}
               <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
               <circle
                 cx="60" cy="60" r="52"
@@ -421,7 +425,7 @@ export default function MainWheel({
           }`}
           style={!megaMode ? { boxShadow: '0 0 16px color-mix(in srgb, var(--color-casino-accent) 40%, transparent)' } : {}}
         >
-          Normal · 1 token
+          Normal · 1 token · <span style={{ color: TIER_COLORS[activeTier] || TIER_COLORS[1] }}>T{activeTier}</span>
         </button>
         <button
           onClick={() => canMegaSpin && setMegaMode(true)}
@@ -448,8 +452,17 @@ export default function MainWheel({
             ? 'opacity-40 cursor-not-allowed bg-white/5 text-casino-text-tertiary'
             : megaMode || isFreeJackpotSpin
             ? 'mega-spin-btn'
-            : 'btn-gold'
+            : ''
         }`}
+        style={
+          !isSpinning && !isLocked && !megaMode && !isFreeJackpotSpin
+            ? {
+                background: `linear-gradient(135deg, ${TIER_COLORS[activeTier] || TIER_COLORS[1]}, ${TIER_COLORS[activeTier] || TIER_COLORS[1]}cc)`,
+                color: '#fff',
+                boxShadow: `0 2px 12px ${(TIER_COLORS[activeTier] || TIER_COLORS[1])}50, 0 0 20px ${(TIER_COLORS[activeTier] || TIER_COLORS[1])}20`,
+              }
+            : undefined
+        }
       >
         {isSpinning ? 'Spinning...'
           : isLocked ? <><Lock size={18} />{megaMode ? 'Need 5 Tokens' : 'Complete a Habit'}</>

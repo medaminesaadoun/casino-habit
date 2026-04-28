@@ -115,7 +115,7 @@ body {
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
+  border-radius: 14px;
   box-shadow: 0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.2);
 }
 
@@ -305,7 +305,7 @@ body {
 .modal-panel {
   background: linear-gradient(135deg, rgba(30,30,35,0.95) 0%, rgba(18,18,20,0.98) 100%);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 16px;
+  border-radius: 14px;
   padding: 28px;
   max-width: 480px; width: 100%;
   max-height: 90vh; overflow-y: auto;
@@ -350,3 +350,21 @@ body {
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .tabular-nums { font-variant-numeric: tabular-nums; }
+
+/* ===== VALIDATION ===== */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.input-shake { animation: shake 0.4s ease; }
+.input-error { border-color: var(--color-casino-danger) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-casino-danger) 12%, transparent) !important; }
+
+/* ===== EMPTY STATE ===== */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.empty-float { animation: float 3s ease-in-out infinite; }

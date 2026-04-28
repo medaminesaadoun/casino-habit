@@ -16,6 +16,8 @@ import RewardCatalog from './components/RewardCatalog';
 import RewardWonModal from './components/RewardWonModal';
 import JackpotChoiceModal from './components/JackpotChoiceModal';
 import JackpotConfetti from './components/JackpotConfetti';
+import QuickTaskModal from './components/QuickTaskModal';
+import GlassSelect from './components/GlassSelect';
 import ActiveRewards from './components/ActiveRewards';
 import ThemeSelector from './components/ThemeSelector';
 import BottomNav from './components/BottomNav';
@@ -90,6 +92,7 @@ function App() {
   const [wonTier, setWonTier] = useState(1);
   const [showJackpotChoice, setShowJackpotChoice] = useState(false);
   const [freeJackpotSpin, setFreeJackpotSpin] = useState(false);
+  const [showQuickTask, setShowQuickTask] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [unseenRewards, setUnseenRewards] = useState(0);
@@ -612,12 +615,14 @@ function App() {
       jarId,
       color: newHabitColor,
       completedDates: [],
+      tags: newHabitTags,
       createdAt: new Date().toISOString(),
     };
     setHabits((prev) => [...prev, newHabit]);
     setNewHabitName('');
     setNewHabitDesc('');
     setNewHabitJarId(jars[0]?.id || '');
+    setNewHabitTags([]);
     setShowCreateHabit(false);
     if (useApi) api.createHabit(newHabit).catch(() => setUseApi(false));
   };
@@ -654,12 +659,41 @@ function App() {
     setHistory([]);
   };
 
+  const handleQuickTaskComplete = (name, jarId) => {
+    playComplete();
+    const now = new Date().toISOString();
+    const clip = getRandomClip();
+    setInventory((prev) => {
+      const updated = { ...prev, clips: [...prev.clips, clip] };
+      if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
+      return updated;
+    });
+    setLastClip(clip);
+    setTimeout(() => playClipDrop(), 300);
+
+    const entry = {
+      id: `hist-${Date.now()}`,
+      type: 'quick-task',
+      habitName: name,
+      jarId: jarId || null,
+      timestamp: now,
+    };
+    setHistory((prev) => [...prev, entry]);
+    if (useApi) api.addHistory(entry).catch(() => setUseApi(false));
+
+    setShowQuickTask(false);
+    setPendingTokenHabit(null);
+    setShowTokenWheel(true);
+  };
+
   const [newJarName, setNewJarName] = useState('');
   const [newJarColor, setNewJarColor] = useState('#ef4444');
   const [newHabitName, setNewHabitName] = useState('');
   const [newHabitDesc, setNewHabitDesc] = useState('');
   const [newHabitJarId, setNewHabitJarId] = useState('');
   const [newHabitColor, setNewHabitColor] = useState('#ef4444');
+  const [newHabitTags, setNewHabitTags] = useState([]);
+  const [editingHabitTags, setEditingHabitTags] = useState([]);
 
   if (loading) {
     return (
@@ -671,6 +705,7 @@ function App() {
 
   const unclaimedRewards = inventory.rewardBank || [];
   const activeRewardList = inventory.activeRewards || [];
+  const allTags = [...new Set(habits.flatMap((h) => h.tags || []))];
 
   return (
     <div className="min-h-screen pb-24 md:pb-0" style={{ backgroundColor: 'var(--color-casino-bg)' }}>
@@ -809,10 +844,12 @@ function App() {
             <HabitList
               habits={habits}
               jars={jars}
+              tags={allTags}
               onComplete={handleCompleteHabit}
               onEdit={handleEditHabit}
               onDelete={handleDeleteHabit}
               onAdd={() => setShowCreateHabit(true)}
+              onQuickTask={() => setShowQuickTask(true)}
             />
             <AnimatePresence>
               {lastClip && (
@@ -943,10 +980,12 @@ function App() {
               <HabitList
                 habits={habits}
                 jars={jars}
+                tags={allTags}
                 onComplete={handleCompleteHabit}
                 onEdit={handleEditHabit}
                 onDelete={handleDeleteHabit}
                 onAdd={() => setShowCreateHabit(true)}
+                onQuickTask={() => setShowQuickTask(true)}
               />
               <AnimatePresence>
                 {lastClip && (
@@ -1151,6 +1190,10 @@ function App() {
                         <span className="flex-1 mx-3 text-casino-text text-xs">
                           Finished <span className="font-semibold text-casino-accent">{item.rewardName}</span>
                         </span>
+                      ) : item.type === 'quick-task' ? (
+                        <span className="flex-1 mx-3 text-casino-text text-xs">
+                          Quick <span className="font-semibold text-casino-text">{item.habitName}</span>
+                        </span>
                       ) : (
                         <span className="flex-1 mx-3 text-casino-text text-xs">
                           {item.isMegaSpin ? 'Mega ' : ''}Wheel → <span className="font-semibold" style={{
@@ -1163,7 +1206,7 @@ function App() {
                         </span>
                       )}
                       <span className="text-[10px] text-casino-text-tertiary uppercase tracking-wider shrink-0">
-                        {item.type === 'habit' ? 'Habit' : item.type === 'reward-claimed' ? 'Claimed' : item.type === 'reward-completed' ? 'Done' : 'Spin'}
+                        {item.type === 'quick-task' ? 'Quick' : item.type === 'habit' ? 'Habit' : item.type === 'reward-claimed' ? 'Claimed' : item.type === 'reward-completed' ? 'Done' : 'Spin'}
                       </span>
                     </div>
                   ))}
@@ -1328,6 +1371,29 @@ function App() {
                     ))}
                   </div>
                 </div>
+                <div>
+                  <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Tags</label>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {newHabitTags.map((tag, i) => (
+                      <span key={i} className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-casino-accent/15 text-casino-accent">
+                        {tag}
+                        <button onClick={() => setNewHabitTags(newHabitTags.filter((_, j) => j !== i))} className="hover:text-white">&times;</button>
+                      </span>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Add tag, press Enter"
+                    className="input"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && e.target.value.trim()) {
+                        const val = e.target.value.trim();
+                        if (!newHabitTags.includes(val)) setNewHabitTags([...newHabitTags, val]);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+                </div>
                 <div className="flex gap-3 pt-2">
                   <button onClick={() => setShowCreateHabit(false)} className="btn btn-secondary flex-1">Cancel</button>
                   <button onClick={handleCreateHabit} className="btn btn-primary flex-1">Create</button>
@@ -1368,6 +1434,30 @@ function App() {
                     ))}
                   </div>
                 </div>
+                <div>
+                  <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Tags</label>
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {(editingHabit.tags || []).map((tag, i) => (
+                      <span key={i} className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-casino-accent/15 text-casino-accent">
+                        {tag}
+                        <button onClick={() => setEditingHabit({ ...editingHabit, tags: editingHabit.tags.filter((_, j) => j !== i) })} className="hover:text-white">&times;</button>
+                      </span>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Add tag, press Enter"
+                    className="input"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && e.target.value.trim()) {
+                        const val = e.target.value.trim();
+                        const current = editingHabit.tags || [];
+                        if (!current.includes(val)) setEditingHabit({ ...editingHabit, tags: [...current, val] });
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+                </div>
                 <div className="flex gap-3 pt-2">
                   <button onClick={() => { setShowEditHabit(false); setEditingHabit(null); }} className="btn btn-secondary flex-1">Cancel</button>
                   <button onClick={handleSaveEditHabit} className="btn btn-primary flex-1">Save</button>
@@ -1379,6 +1469,13 @@ function App() {
       </AnimatePresence>
 
       {/* Confetti — rendered outside any transforms so fixed positioning works */}
+      {/* Quick Task Modal */}
+      <AnimatePresence>
+        {showQuickTask && (
+          <QuickTaskModal jars={jars} onComplete={handleQuickTaskComplete} onClose={() => setShowQuickTask(false)} />
+        )}
+      </AnimatePresence>
+
       {showConfetti && <JackpotConfetti />}
     </div>
   );
