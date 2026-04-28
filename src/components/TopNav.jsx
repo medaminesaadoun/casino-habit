@@ -41,7 +41,7 @@ export default function TopNav({ active, onChange, unseenRewards }) {
             <span className="text-sm font-semibold relative z-10 tracking-tight">{item.label}</span>
             {item.id === 'rewards' && unseenRewards > 0 && (
               <span
-                className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center z-20"
+                className="absolute -top-1.5 -right-1.5 min-w-[22px] h-[22px] px-1 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center z-20 badge-pulse"
                 style={{ boxShadow: '0 0 8px rgba(239,68,68,0.6)' }}
               >
                 {unseenRewards > 9 ? '9+' : unseenRewards}

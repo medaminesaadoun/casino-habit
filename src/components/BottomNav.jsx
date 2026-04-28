@@ -45,8 +45,8 @@ export default function BottomNav({ active, onChange, unseenRewards }) {
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />
                 {item.id === 'rewards' && unseenRewards > 0 && (
                   <span
-                    className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-0.5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center"
-                    style={{ boxShadow: '0 0 6px rgba(239,68,68,0.6)' }}
+                    className="absolute -top-2 -right-2 min-w-[20px] h-[20px] px-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center badge-pulse"
+                    style={{ boxShadow: '0 0 8px rgba(239,68,68,0.6)' }}
                   >
                     {unseenRewards > 9 ? '9+' : unseenRewards}
                   </span>

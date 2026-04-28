@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Clock, Trash2 } from 'lucide-react';
 
@@ -9,13 +9,33 @@ const TIER_BORDERS = {
   4: 'var(--color-tier-jackpot)',
 };
 
+const TIER_COLORS = {
+  1: '#ef4444',
+  2: '#3b82f6',
+  3: '#a855f7',
+  4: '#e8b931',
+};
+
+const TIER_LABELS = {
+  1: 'Tier 1',
+  2: 'Tier 2',
+  3: 'Tier 3',
+  4: 'Jackpot',
+};
+
+const FILTER_OPTIONS = ['All', 'Tier 1', 'Tier 2', 'Tier 3', 'Jackpot'];
+
 function getDaysOld(wonAt) {
   const diff = Date.now() - new Date(wonAt).getTime();
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
 export default function RewardBank({ rewards, onClaim, onDeleteAll }) {
+  const [filter, setFilter] = useState('All');
   const sorted = [...rewards].sort((a, b) => new Date(b.wonAt) - new Date(a.wonAt));
+  const filtered = filter === 'All'
+    ? sorted
+    : sorted.filter((r) => TIER_LABELS[r.tier] === filter);
 
   return (
     <div className="glass shape-card p-5">
@@ -33,16 +53,48 @@ export default function RewardBank({ rewards, onClaim, onDeleteAll }) {
         )}
       </div>
 
+      {/* Tier filter pills */}
+      <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+        {FILTER_OPTIONS.map((label) => {
+          const tierNum = label === 'All' ? 0 : label === 'Jackpot' ? 4 : parseInt(label.replace('Tier ', ''));
+          const color = tierNum === 0 ? 'var(--color-casino-accent)' : TIER_COLORS[tierNum];
+          const isActive = filter === label;
+          return (
+            <button
+              key={label}
+              onClick={() => setFilter(label)}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all shrink-0 ${
+                isActive
+                  ? ''
+                  : 'glass text-casino-text-tertiary hover:text-casino-text-secondary'
+              }`}
+              style={
+                isActive
+                  ? { backgroundColor: color + '20', color: color, border: `1px solid ${color}40`, boxShadow: `0 0 12px ${color}20` }
+                  : {}
+              }
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
       {rewards.length === 0 ? (
         <div className="text-center py-10">
           <Gift size={32} className="mx-auto mb-3 text-casino-text-tertiary opacity-20" />
           <p className="text-casino-text-secondary text-sm">No rewards yet</p>
           <p className="text-casino-text-tertiary text-xs mt-1">Spin the wheel to win prizes</p>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-10">
+          <p className="text-casino-text-secondary text-sm">No {filter} rewards</p>
+          <p className="text-casino-text-tertiary text-xs mt-1">Try another filter or spin for more prizes</p>
+        </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3">
           <AnimatePresence mode="popLayout">
-            {sorted.map((reward) => {
+            {filtered.map((reward) => {
               const daysOld = getDaysOld(reward.wonAt);
               const tierColor = TIER_BORDERS[reward.tier] || TIER_BORDERS[1];
               const showNudge = daysOld >= 3;

@@ -65,6 +65,7 @@ function RarityGlow({ color, children }) {
 function getHintMessage(clips, counts, activeTier) {
   if (clips.length === 0) return { text: 'Complete habits to collect clips', type: 'empty' };
   if (counts.gold && activeTier < 3) return { text: 'Gold ready — instant Tier 3!', type: 'gold' };
+  if (counts.gold && activeTier >= 3) return { text: 'Gold clip ready! Spin to reset your tier', type: 'gold' };
   const needed = activeTier === 1 ? 2 : activeTier === 2 ? 3 : 99;
   if (activeTier < 3) {
     const ready = Object.entries(counts).find(([c, n]) => c !== 'gold' && n >= needed);
@@ -114,7 +115,7 @@ export default function ClipInventory({ clips, activeTier, onDeleteAll }) {
         </motion.div>
       ) : (
         <AnimatePresence mode="popLayout">
-          <div className="flex flex-wrap gap-5 justify-center">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-4 gap-3">
             {sorted.map(([color, count]) => {
               const isEligible = color === 'gold'
                 ? activeTier < 3

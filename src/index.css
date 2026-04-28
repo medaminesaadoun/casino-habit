@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-casino-bg: #121214;
-  --color-casino-surface: #1a1a1f;
+  --color-casino-bg: #0a0a0c;
+  --color-casino-surface: #131318;
   --color-casino-card: rgba(255, 255, 255, 0.03);
-  --color-casino-card-hover: rgba(255, 255, 255, 0.05);
+  --color-casino-card-hover: rgba(255, 255, 255, 0.06);
   --color-casino-border: rgba(255, 255, 255, 0.06);
   --color-casino-border-hover: rgba(255, 255, 255, 0.12);
   --color-casino-accent: #e8b931;
@@ -29,94 +29,202 @@
   --color-tier-jackpot: #e8b931;
 }
 
-[data-theme="purple"] {
-  --color-casino-bg: #12101a;
-  --color-casino-surface: #1a1725;
-  --color-casino-card: rgba(192, 132, 252, 0.04);
-  --color-casino-card-hover: rgba(192, 132, 252, 0.07);
-  --color-casino-border: rgba(192, 132, 252, 0.08);
-  --color-casino-border-hover: rgba(192, 132, 252, 0.16);
-  --color-casino-accent: #c084fc;
-  --color-casino-accent-dim: #a855f7;
-  --color-casino-gold: #c084fc;
-  --color-casino-text: #fafaf9;
-  --color-casino-text-secondary: rgba(255, 255, 255, 0.55);
-  --color-casino-text-tertiary: rgba(255, 255, 255, 0.3);
-}
-
-[data-theme="black"] {
-  --color-casino-bg: #0a0a0c;
-  --color-casino-surface: #141418;
-  --color-casino-card: rgba(212, 165, 116, 0.04);
-  --color-casino-card-hover: rgba(212, 165, 116, 0.07);
-  --color-casino-border: rgba(212, 165, 116, 0.08);
-  --color-casino-border-hover: rgba(212, 165, 116, 0.16);
-  --color-casino-accent: #d4a574;
-  --color-casino-accent-dim: #b8956a;
-  --color-casino-gold: #d4a574;
-  --color-casino-text: #fafaf9;
-  --color-casino-text-secondary: rgba(255, 255, 255, 0.55);
-  --color-casino-text-tertiary: rgba(255, 255, 255, 0.3);
-}
-
+/* ===== FOUNDATION ===== */
 body {
   background-color: var(--color-casino-bg);
   color: var(--color-casino-text);
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Noise texture + ambient lighting */
   background-image:
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse 80% 50% at 50% -10%, color-mix(in srgb, var(--color-casino-accent) 6%, transparent), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 100%, color-mix(in srgb, var(--color-casino-accent) 3%, transparent), transparent);
+    radial-gradient(ellipse 90% 60% at 20% 0%, color-mix(in srgb, var(--color-casino-accent) 8%, transparent), transparent),
+    radial-gradient(ellipse 70% 40% at 80% 100%, color-mix(in srgb, var(--color-casino-accent) 5%, transparent), transparent),
+    radial-gradient(ellipse 50% 30% at 50% 50%, rgba(0,0,0,0), rgba(0,0,0,0.6)),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+  background-attachment: fixed;
 }
 
 /* Typography */
 .font-display {
-  font-family: 'Syne', system-ui, sans-serif;
+  font-family: 'Playfair Display', Georgia, serif;
   font-weight: 800;
+  font-style: italic;
   letter-spacing: -0.02em;
 }
 .font-heading {
-  font-family: 'Syne', system-ui, sans-serif;
+  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 .font-body {
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   font-weight: 500;
 }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+/* Gold gradient text */
+.gold-text {
+  background: linear-gradient(135deg, #f0d060 0%, var(--color-casino-accent) 35%, #d4942a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gold-text-static {
+  background: linear-gradient(to bottom, #f5d78c 0%, var(--color-casino-accent) 50%, #c49a2a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
 
-/* ===== GLASSMORPHIC CARD ===== */
+/* ===== FLOATING GOLD PARTICLES ===== */
+@keyframes particleUp {
+  0% { transform: translateY(100vh) translateX(0) scale(0); opacity: 0; }
+  10% { opacity: 0.5; }
+  50% { opacity: 0.3; }
+  90% { opacity: 0.1; }
+  100% { transform: translateY(-10vh) translateX(40px) scale(1); opacity: 0; }
+}
+@keyframes particleUp2 {
+  0% { transform: translateY(100vh) translateX(0) scale(0); opacity: 0; }
+  15% { opacity: 0.4; }
+  60% { opacity: 0.2; }
+  100% { transform: translateY(-5vh) translateX(-30px) scale(0.8); opacity: 0; }
+}
+@keyframes particleUp3 {
+  0% { transform: translateY(100vh) translateX(0) scale(0); opacity: 0; }
+  20% { opacity: 0.35; }
+  55% { opacity: 0.15; }
+  100% { transform: translateY(-15vh) translateX(20px) scale(1.2); opacity: 0; }
+}
+.gold-particle { position: fixed; width: 3px; height: 3px; border-radius: 50%; background: var(--color-casino-accent); pointer-events: none; z-index: 0; }
+.gold-particle:nth-child(odd) { width: 2px; height: 2px; background: #f0d060; }
+.gold-particle:nth-child(3n) { width: 4px; height: 4px; opacity: 0.6; }
+
+/* Moving light pools */
+@keyframes driftPool1 {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(10vw, -5vh) scale(1.3); }
+  66% { transform: translate(-5vw, 8vh) scale(0.8); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+@keyframes driftPool2 {
+  0% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-8vw, 6vh) scale(1.2); }
+  66% { transform: translate(12vw, -3vh) scale(0.9); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+.light-pool {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(120px); opacity: 0.08;
+}
+.light-pool-1 { width: 600px; height: 600px; background: var(--color-casino-accent); top: -10%; left: -15%; animation: driftPool1 25s ease-in-out infinite; }
+.light-pool-2 { width: 500px; height: 500px; background: #d4942a; bottom: -15%; right: -10%; animation: driftPool2 30s ease-in-out infinite; }
+
+/* ===== 4-LAYER DEPTH SYSTEM ===== */
+/* Level 0 - Flat surface, no blur */
+.glass-flat {
+  background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+.glass-flat:hover {
+  border-color: rgba(255,255,255,0.1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04), 0 0 0 1px color-mix(in srgb, var(--color-casino-accent) 10%, transparent);
+}
+
+/* Level 1 - Standard glass card */
 .glass {
-  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.06);
   border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.2);
-  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.3),
+    0 1px 2px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    inset 0 -1px 0 rgba(0,0,0,0.15);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .glass:hover {
-  background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
-  border-color: rgba(255,255,255,0.1);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.25);
+  border-color: color-mix(in srgb, var(--color-casino-accent) 15%, rgba(255,255,255,0.08));
+  box-shadow:
+    0 8px 40px rgba(0,0,0,0.45),
+    0 2px 8px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 -40px 40px color-mix(in srgb, var(--color-casino-accent) 6%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-casino-accent) 12%, transparent);
+  transform: perspective(800px) rotateX(1deg) rotateY(-0.5deg);
 }
 .glass:active { transform: scale(0.985); }
 
-.glass-strong {
+/* Level 2 - Elevated glass (cards that should "float") */
+.glass-float {
   background: linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 14px;
-  box-shadow: 0 16px 48px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.2);
+  box-shadow:
+    0 16px 48px rgba(0,0,0,0.5),
+    0 4px 16px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.2);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-float:hover {
+  border-color: color-mix(in srgb, var(--color-casino-accent) 20%, rgba(255,255,255,0.1));
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.55),
+    0 6px 20px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -60px 60px color-mix(in srgb, var(--color-casino-accent) 8%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--color-casino-accent) 18%, transparent);
+}
+
+/* Level 3 - Modal depth */
+.glass-modal {
+  background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%);
+  backdrop-filter: blur(48px);
+  -webkit-backdrop-filter: blur(48px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  box-shadow:
+    0 32px 80px rgba(0,0,0,0.6),
+    0 8px 24px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
+}
+
+/* Level 3 - Modal backdrop */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; padding: 16px;
+}
+.modal-panel {
+  background: linear-gradient(135deg, rgba(24,24,30,0.95) 0%, rgba(10,10,12,0.98) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 480px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow:
+    0 32px 80px rgba(0,0,0,0.6),
+    0 0 0 1px color-mix(in srgb, var(--color-casino-accent) 6%, transparent),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* ===== GLOW ACCENTS ===== */
+.glow-gold {
+  box-shadow: 0 0 60px color-mix(in srgb, var(--color-casino-accent) 15%, transparent),
+              0 0 120px color-mix(in srgb, var(--color-casino-accent) 8%, transparent),
+              0 12px 40px rgba(0,0,0,0.4);
+}
+.glow-subtle {
+  box-shadow: 0 0 40px color-mix(in srgb, var(--color-casino-accent) 10%, transparent),
+              0 8px 32px rgba(0,0,0,0.35);
 }
 
 /* ===== SHAPES ===== */
@@ -125,37 +233,67 @@ body {
 .shape-squircle { border-radius: 12px; }
 .shape-pill { border-radius: 9999px; }
 
-/* ===== AMBIENT GLOW ===== */
-.glow-gold {
-  box-shadow: 0 0 40px color-mix(in srgb, var(--color-casino-accent) 12%, transparent),
-              0 0 80px color-mix(in srgb, var(--color-casino-accent) 6%, transparent),
-              0 8px 32px rgba(0,0,0,0.3);
+/* ===== GOLD FOIL EDGE ===== */
+@keyframes goldShimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
-.glow-subtle {
-  box-shadow: 0 0 30px color-mix(in srgb, var(--color-casino-accent) 8%, transparent),
-              0 8px 32px rgba(0,0,0,0.3);
+.gold-foil {
+  position: relative;
+}
+.gold-foil::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from 0deg, var(--color-casino-accent), #f0d060, var(--color-casino-accent-dim), #d4942a, var(--color-casino-accent));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.gold-foil:hover::before {
+  opacity: 1;
+  animation: goldShimmer 2s linear infinite;
+  background-size: 300% 300%;
 }
 
 /* ===== BUTTONS ===== */
 .btn-pill {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   padding: 10px 24px; border-radius: 12px; font-weight: 600; font-size: 14px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border: none; outline: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; border: none; outline: none;
   letter-spacing: -0.01em;
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  position: relative; overflow: hidden;
 }
 .btn-pill:active { transform: scale(0.96); }
+
 .btn-gold {
   background: linear-gradient(135deg, var(--color-casino-accent) 0%, var(--color-casino-accent-dim) 100%);
   color: #0a0a0c;
-  box-shadow: 0 2px 12px color-mix(in srgb, var(--color-casino-accent) 25%, transparent),
-              0 0 20px color-mix(in srgb, var(--color-casino-accent) 10%, transparent);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--color-casino-accent) 30%, transparent),
+              0 0 20px color-mix(in srgb, var(--color-casino-accent) 12%, transparent);
 }
 .btn-gold:hover {
   filter: brightness(1.15);
-  box-shadow: 0 4px 20px color-mix(in srgb, var(--color-casino-accent) 35%, transparent),
-              0 0 40px color-mix(in srgb, var(--color-casino-accent) 15%, transparent);
+  box-shadow:
+    0 4px 24px color-mix(in srgb, var(--color-casino-accent) 45%, transparent),
+    0 0 40px color-mix(in srgb, var(--color-casino-accent) 20%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--color-casino-accent) 15%, transparent);
+  transform: translateY(-1px);
 }
+.btn-gold::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+  pointer-events: none;
+}
+
 .btn-glass {
   background: rgba(255,255,255,0.05);
   color: var(--color-casino-text);
@@ -164,64 +302,108 @@ body {
 .btn-glass:hover {
   background: rgba(255,255,255,0.08);
   border-color: rgba(255,255,255,0.14);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
 }
+
 .btn-ghost {
   background: transparent;
   color: var(--color-casino-text-secondary);
 }
 .btn-ghost:hover { color: var(--color-casino-text); background: rgba(255,255,255,0.04); }
 
-/* ===== WHEEL ===== */
-.wheel-glow {
-  position: relative;
-  width: 320px; height: 320px;
+/* ===== GLASS RIPPLE CLICK ===== */
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+.ripple-container {
+  position: relative; overflow: hidden;
+}
+.ripple-effect {
+  position: absolute;
   border-radius: 50%;
-  padding: 10px;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--color-casino-accent) 15%, transparent) 0%, transparent 60%);
-}
-.wheel-inner {
-  position: relative; width: 300px; height: 300px;
-  border-radius: 50%; overflow: hidden;
-  box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.3);
-}
-.wheel-hub {
-  position: absolute; top: 50%; left: 50%;
-  width: 48px; height: 48px; border-radius: 50%;
-  transform: translate(-50%, -50%);
-  background: linear-gradient(135deg, var(--color-casino-surface), var(--color-casino-bg));
-  border: 2px solid var(--color-casino-accent);
-  box-shadow: 0 0 20px color-mix(in srgb, var(--color-casino-accent) 30%, transparent),
-              0 0 40px color-mix(in srgb, var(--color-casino-accent) 15%, transparent),
-              inset 0 2px 4px rgba(255,255,255,0.1);
-  z-index: 10;
-  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-casino-accent) 40%, transparent), transparent);
+  pointer-events: none;
+  animation: ripple 0.6s ease-out forwards;
+  z-index: 1;
 }
 
+/* ===== LIQUID GOLD COUNTERS ===== */
+@keyframes liquidGold {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.liquid-gold {
+  background: linear-gradient(135deg, #f0d060, var(--color-casino-accent), #d4942a, var(--color-casino-accent), #f0d060);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: liquidGold 4s ease infinite;
+  display: inline-block;
+}
+
+/* ===== GOLD THREAD DIVIDERS ===== */
+.gold-thread {
+  position: relative;
+}
+.gold-thread::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-casino-accent) 30%, transparent) 30%, color-mix(in srgb, var(--color-casino-accent) 40%, transparent) 50%, color-mix(in srgb, var(--color-casino-accent) 30%, transparent) 70%, transparent);
+}
+
+/* ===== STAGGERED REVEAL ===== */
+@keyframes staggerReveal {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.stagger-reveal > * {
+  animation: staggerReveal 0.5s ease-out backwards;
+}
+.stagger-reveal > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-reveal > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-reveal > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-reveal > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-reveal > *:nth-child(5) { animation-delay: 200ms; }
+.stagger-reveal > *:nth-child(6) { animation-delay: 250ms; }
+.stagger-reveal > *:nth-child(7) { animation-delay: 300ms; }
+.stagger-reveal > *:nth-child(8) { animation-delay: 350ms; }
+.stagger-reveal > *:nth-child(9) { animation-delay: 400ms; }
+.stagger-reveal > *:nth-child(10) { animation-delay: 450ms; }
+
+/* ===== WHEEL ===== */
 @keyframes wheelSpinPulse {
-  0%, 100% {
-    filter: brightness(1);
-  }
-  50% {
-    filter: brightness(1.15);
-  }
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.15); }
 }
-.wheel-spin-pulse {
-  animation: wheelSpinPulse 1.5s ease-in-out infinite;
-}
+.wheel-spin-pulse { animation: wheelSpinPulse 1.5s ease-in-out infinite; }
 
 @keyframes resultFlash {
   0% { filter: brightness(1); }
   30% { filter: brightness(1.6); }
   100% { filter: brightness(1); }
 }
-.result-flash {
-  animation: resultFlash 0.5s ease-out;
+.result-flash { animation: resultFlash 0.5s ease-out; }
+
+.mega-hub-glow { animation: wheelSpinPulse 1.5s ease-in-out infinite; }
+.mega-spin-btn {
+  background: linear-gradient(135deg, var(--color-casino-accent), var(--color-casino-accent-dim));
+  color: #000;
+  box-shadow: 0 0 24px color-mix(in srgb, var(--color-casino-accent) 35%, transparent),
+              0 4px 12px rgba(0,0,0,0.3);
+}
+.mega-spin-btn:hover {
+  box-shadow: 0 0 36px color-mix(in srgb, var(--color-casino-accent) 50%, transparent),
+              0 0 60px color-mix(in srgb, var(--color-casino-accent) 20%, transparent),
+              0 4px 12px rgba(0,0,0,0.3);
 }
 
-/* ===== SPINNING EDGE RING ===== */
-.rainmaker-badge {
-  animation: rainmakerPulse 2s ease-in-out infinite;
-}
+/* ===== SNAP SCROLL ===== */
+.snap-x { scroll-snap-type: x mandatory; }
+.snap-start { scroll-snap-align: start; }
 
 /* ===== CLIP ===== */
 .clip-visual {
@@ -258,60 +440,6 @@ body {
   text-transform: uppercase; letter-spacing: 0.2px; z-index: 4;
 }
 
-/* ===== JAR ===== */
-.jar-visual {
-  position: relative; width: 60px; height: 80px;
-}
-.jar-lid {
-  width: 40px; height: 8px;
-  background: linear-gradient(180deg, #555 0%, #333 100%);
-  border-radius: 3px; margin: 0 auto; position: relative; z-index: 3;
-}
-.jar-neck {
-  width: 28px; height: 5px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 2px; margin: 0 auto; position: relative; z-index: 2;
-}
-.jar-body {
-  width: 50px; height: 66px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.04) 100%);
-  border: 1px solid rgba(255,255,255,0.06); border-top: none;
-  border-radius: 4px 4px 12px 12px; margin: 0 auto;
-  position: relative; overflow: hidden; z-index: 1;
-}
-.jar-fill {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  border-radius: 0 0 11px 11px;
-  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0.75;
-}
-.jar-fill::after {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
-}
-.jar-count {
-  position: absolute; bottom: 4px; left: 0; right: 0; text-align: center;
-  font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.8); z-index: 2;
-}
-
-/* ===== MODAL ===== */
-.modal-backdrop {
-  position: fixed; inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 50; padding: 16px;
-}
-.modal-panel {
-  background: linear-gradient(135deg, rgba(30,30,35,0.95) 0%, rgba(18,18,20,0.98) 100%);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 28px;
-  max-width: 480px; width: 100%;
-  max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.05);
-}
-
 /* ===== INPUTS ===== */
 .input {
   width: 100%;
@@ -320,7 +448,7 @@ body {
   border-radius: 10px;
   padding: 10px 14px;
   color: var(--color-casino-text);
-  font-family: 'Outfit', system-ui, sans-serif;
+  font-family: 'DM Sans', system-ui, sans-serif;
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s ease, background 0.2s ease;
@@ -337,8 +465,8 @@ body {
 
 /* ===== SECTION LABEL ===== */
 .section-label {
-  font-family: 'Syne', system-ui, sans-serif;
-  font-size: 11px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -368,3 +496,40 @@ body {
   50% { transform: translateY(-6px); }
 }
 .empty-float { animation: float 3s ease-in-out infinite; }
+
+/* ===== RAINMAKER ===== */
+@keyframes rainmakerPulse {
+  0%, 100% { box-shadow: 0 0 6px color-mix(in srgb, var(--color-casino-accent) 20%, transparent); }
+  50% { box-shadow: 0 0 12px color-mix(in srgb, var(--color-casino-accent) 40%, transparent); }
+}
+.rainmaker-badge { animation: rainmakerPulse 2s ease-in-out infinite; }
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.badge-pulse { animation: badgePulse 1.5s ease-in-out infinite; }
+
+/* ===== JAR ===== */
+.jar-visual { position: relative; width: 60px; height: 80px; }
+.jar-lid { width: 40px; height: 8px; background: linear-gradient(180deg, #555 0%, #333 100%); border-radius: 3px; margin: 0 auto; position: relative; z-index: 3; }
+.jar-neck { width: 28px; height: 5px; background: rgba(255,255,255,0.08); border-radius: 2px; margin: 0 auto; position: relative; z-index: 2; }
+.jar-body { width: 50px; height: 66px; background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.04) 100%); border: 1px solid rgba(255,255,255,0.06); border-top: none; border-radius: 4px 4px 12px 12px; margin: 0 auto; position: relative; overflow: hidden; z-index: 1; }
+.jar-fill { position: absolute; bottom: 0; left: 0; right: 0; border-radius: 0 0 11px 11px; transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0.75; }
+.jar-fill::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%); }
+.jar-count { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.8); z-index: 2; }
+
+/* ===== EXPIRING REWARD ===== */
+@keyframes expiringPulse {
+  0%, 100% { box-shadow: 0 0 8px color-mix(in srgb, var(--color-casino-danger) 30%, transparent); }
+  50% { box-shadow: 0 0 20px color-mix(in srgb, var(--color-casino-danger) 60%, transparent); }
+}
+.reward-expiring { animation: expiringPulse 1.2s ease-in-out infinite; }
+
+/* ===== JACKPOT CHOICE HOVER ===== */
+.jackpot-choice-card:hover {
+  border-color: var(--color-casino-accent) !important;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-casino-accent) 20%, transparent),
+              inset 0 1px 2px rgba(255,255,255,0.08);
+  transform: translateY(-2px);
+}

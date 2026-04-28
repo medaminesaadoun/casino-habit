@@ -246,20 +246,22 @@ export default function HabitList({ habits, jars, tags, onComplete, onEdit, onDe
         </motion.div>
       ) : (
         <AnimatePresence mode="popLayout">
-          {filtered.map((habit, index) => {
-            const jar = jars.find((j) => j.id === habit.jarId);
-            return (
-              <HabitCard
-                key={habit.id}
-                habit={habit}
-                jar={jar}
-                index={index}
-                onComplete={onComplete}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            );
-          })}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {filtered.map((habit, index) => {
+              const jar = jars.find((j) => j.id === habit.jarId);
+              return (
+                <HabitCard
+                  key={habit.id}
+                  habit={habit}
+                  jar={jar}
+                  index={index}
+                  onComplete={onComplete}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              );
+            })}
+          </div>
         </AnimatePresence>
       )}
     </div>

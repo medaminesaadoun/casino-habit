@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Diamond, Plus, Trash2, Sparkles, Orbit, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy } from 'lucide-react';
+import { Diamond, Plus, Trash2, Sparkles, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy, HelpCircle } from 'lucide-react';
 import { playComplete, playClipDrop, playCashIn, playRewardWon, playClick, toggleMute, getMuteState } from './sounds';
 import { api } from './api';
 import Jars from './components/Jars';
@@ -19,9 +19,9 @@ import JackpotConfetti from './components/JackpotConfetti';
 import QuickTaskModal from './components/QuickTaskModal';
 import GlassSelect from './components/GlassSelect';
 import ActiveRewards from './components/ActiveRewards';
-import ThemeSelector from './components/ThemeSelector';
 import BottomNav from './components/BottomNav';
 import TopNav from './components/TopNav';
+import OnboardingModal from './components/OnboardingModal';
 
 const CLIP_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'gold'];
 const CLIP_WEIGHTS = [20, 20, 20, 20, 15, 4.9, 0.1];
@@ -94,8 +94,8 @@ function App() {
   const [freeJackpotSpin, setFreeJackpotSpin] = useState(false);
   const [showQuickTask, setShowQuickTask] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [showThemeSelector, setShowThemeSelector] = useState(false);
   const [unseenRewards, setUnseenRewards] = useState(0);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [mobileView, setMobileView] = useState('wheel');
   const [loading, setLoading] = useState(true);
   const [useApi, setUseApi] = useState(true);
@@ -120,6 +120,10 @@ function App() {
   useEffect(() => {
     const saved = localStorage.getItem('ch_theme');
     if (saved) setTheme(saved);
+    // Show onboarding on first visit
+    if (!localStorage.getItem('ch_onboarded')) {
+      setShowOnboarding(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -708,8 +712,24 @@ function App() {
   const allTags = [...new Set(habits.flatMap((h) => h.tags || []))];
 
   return (
-    <div className="min-h-screen pb-24 md:pb-0" style={{ backgroundColor: 'var(--color-casino-bg)' }}>
-      <div className="max-w-4xl mx-auto px-4 md:px-6 pt-6 md:pt-8">
+    <div className="min-h-screen pb-24 md:pb-0 relative overflow-hidden" style={{ backgroundColor: 'var(--color-casino-bg)' }}>
+      {Array.from({ length: 15 }).map((_, i) => (
+        <div
+          key={`p-${i}`}
+          className="particle"
+          style={{
+            left: `${10 + (i * 37) % 80}%`,
+            animationDelay: `${i * 0.7}s`,
+            animationDuration: `${8 + (i % 5)}s`,
+            opacity: 0.3 + (i % 3) * 0.25,
+            width: `${2 + (i % 3)}px`,
+            height: `${2 + (i % 3)}px`,
+          }}
+        />
+      ))}
+      <div className="light-pool light-pool-1" />
+      <div className="light-pool light-pool-2" />
+      <div className="max-w-4xl mx-auto px-4 md:px-6 pt-6 md:pt-8 relative z-10">
 
         {/* Header */}
         <header className="flex items-center justify-between mb-10">
@@ -718,22 +738,23 @@ function App() {
               <Diamond size={22} className="text-casino-accent" />
             </div>
             <div>
-              <h1 className="font-display text-2xl md:text-3xl text-white leading-none tracking-tight">
-                CASINO<span className="text-casino-accent">HABIT</span>
+              <h1 className="font-display italic text-2xl md:text-3xl gold-text leading-none tracking-tight">
+                CasinoHabit
               </h1>
-              <p className="text-[10px] text-casino-text-tertiary uppercase tracking-[0.2em] mt-1 font-semibold">
+              <p className="text-[11px] text-casino-text-tertiary mt-1 font-medium">
                 Track · Spin · Win
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <div className="glass rounded-xl p-1 flex items-center gap-1">
-              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold text-casino-accent tabular-nums">
-                <Sparkles size={14} />
+              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-bold tabular-nums">
+                <Sparkles size={14} className="text-casino-accent" />
                 <motion.span
                   key={inventory.spinTokens}
-                  initial={{ scale: 1.5, color: '#e8b931' }}
-                  animate={{ scale: 1, color: 'var(--color-casino-accent)' }}
+                  className="liquid-gold"
+                  initial={{ scale: 1.5 }}
+                  animate={{ scale: 1 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
                   {inventory.spinTokens || 0}
@@ -780,11 +801,13 @@ function App() {
               {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
             </button>
             <button
-              onClick={() => setShowThemeSelector(true)}
+              onClick={() => { playClick(); setShowOnboarding(true); }}
               className="w-9 h-9 rounded-xl flex items-center justify-center glass btn-ghost"
+              title="How to play"
             >
-              <Orbit size={16} />
+              <HelpCircle size={16} />
             </button>
+
           </div>
         </header>
 
@@ -807,7 +830,7 @@ function App() {
           {/* Wheel — always visible on mobile */}
           <div className="mb-6">
             {!showBonusWheel ? (
-              <div className="glass-strong glow-gold p-6 flex flex-col items-center">
+              <div className="glass-float gold-foil p-6 flex flex-col items-center">
                 <p className="font-heading text-sm text-white mb-6 tracking-tight">Spin the Wheel</p>
                   <MainWheel
                     activeTier={inventory.activeTier}
@@ -821,7 +844,7 @@ function App() {
                   />
                 </div>
               ) : (
-                <div className="glass-strong glow-subtle p-6 flex flex-col items-center">
+                <div className="glass-float gold-foil p-6 flex flex-col items-center">
                   <p className="text-sm font-semibold text-casino-success mb-6">Bonus Spin</p>
                   <BonusWheel
                     onBonusComplete={handleBonusComplete}
@@ -869,7 +892,7 @@ function App() {
               )}
             </AnimatePresence>
             <div className="mt-4">
-              <ClipInventory clips={inventory.clips} onDeleteAll={handleDeleteAllClips} />
+              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} onDeleteAll={handleDeleteAllClips} />
               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
                 <button
                   onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
@@ -976,7 +999,7 @@ function App() {
         <div className="hidden lg:block">
           {/* Habits Tab */}
           {mobileView === 'habits' && (
-            <div className="space-y-6">
+            <div className="space-y-6 stagger-reveal">
               <HabitList
                 habits={habits}
                 jars={jars}
@@ -1004,7 +1027,7 @@ function App() {
                   </motion.div>
                 )}
               </AnimatePresence>
-              <ClipInventory clips={inventory.clips} onDeleteAll={handleDeleteAllClips} />
+              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} onDeleteAll={handleDeleteAllClips} />
               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
                 <button
                   onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
@@ -1023,9 +1046,9 @@ function App() {
 
           {/* Wheel Tab */}
           {mobileView === 'wheel' && (
-            <div className="space-y-6">
+            <div className="space-y-6 stagger-reveal">
               {!showBonusWheel ? (
-                <div className="glass-strong glow-gold p-8 flex flex-col items-center">
+                <div className="glass-float gold-foil p-8 flex flex-col items-center">
                 <p className="font-heading text-sm text-white mb-6 tracking-tight">Spin the Wheel</p>
                   <MainWheel
                     activeTier={inventory.activeTier}
@@ -1039,7 +1062,7 @@ function App() {
                   />
                 </div>
               ) : (
-                <div className="glass-strong glow-subtle p-8 flex flex-col items-center">
+                <div className="glass-float gold-foil p-8 flex flex-col items-center">
                   <p className="text-sm font-semibold text-casino-success mb-6">Bonus Spin</p>
                   <BonusWheel
                     onBonusComplete={handleBonusComplete}
@@ -1121,7 +1144,7 @@ function App() {
 
           {/* Rewards Tab */}
           {mobileView === 'rewards' && (
-            <div>
+            <div className="stagger-reveal">
               <div className="flex items-center justify-between mb-3">
                 <p className="font-heading text-sm text-white tracking-tight">Unclaimed Rewards</p>
                 <button
@@ -1141,7 +1164,7 @@ function App() {
 
           {/* Jars Tab */}
           {mobileView === 'jars' && (
-            <div>
+            <div className="stagger-reveal">
               <div className="flex items-center justify-between mb-3">
                 <p className="font-heading text-sm text-white tracking-tight">Jars</p>
                 <button
@@ -1157,7 +1180,7 @@ function App() {
 
           {/* History Tab */}
           {mobileView === 'history' && (
-            <div className="glass p-5">
+            <div className="glass p-5 stagger-reveal">
               <div className="flex items-center justify-between mb-4">
                 <p className="font-heading text-sm text-white tracking-tight">History</p>
                 {history.length > 0 && (
@@ -1249,9 +1272,6 @@ function App() {
         )}
         {showRewardCatalog && (
           <RewardCatalog catalog={rewardCatalog} onSave={handleSaveCatalog} onClose={() => setShowRewardCatalog(false)} />
-        )}
-        {showThemeSelector && (
-          <ThemeSelector currentTheme={theme} onSelect={setTheme} onClose={() => setShowThemeSelector(false)} />
         )}
       </AnimatePresence>
 
@@ -1473,6 +1493,9 @@ function App() {
       <AnimatePresence>
         {showQuickTask && (
           <QuickTaskModal jars={jars} onComplete={handleQuickTaskComplete} onClose={() => setShowQuickTask(false)} />
+        )}
+        {showOnboarding && (
+          <OnboardingModal onClose={() => { setShowOnboarding(false); localStorage.setItem('ch_onboarded', '1'); }} />
         )}
       </AnimatePresence>
 
