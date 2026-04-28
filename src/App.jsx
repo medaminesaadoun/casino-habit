@@ -759,19 +759,7 @@ function App() {
                 >
                   {inventory.spinTokens || 0}
                 </motion.span>
-                <button
-                  onClick={() => {
-                    setInventory((prev) => {
-                      const updated = { ...prev, spinTokens: (prev.spinTokens || 0) + 100 };
-                      if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
-                      return updated;
-                    });
-                  }}
-                  className="ml-1 text-[10px] px-1.5 py-0.5 rounded bg-casino-accent/20 text-casino-accent hover:bg-casino-accent/30 transition-colors"
-                  title="Debug: +100 tokens"
-                >
-                  +100
-                </button>
+
               </div>
               <div className="w-px h-5 bg-white/10" />
               {(inventory.rainmakerRemaining || 0) > 0 && (
