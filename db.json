@@ -120,42 +120,54 @@
         "name": "15 min YouTube",
         "icon": "📺",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 10
       },
       {
         "id": "r1-2",
         "name": "Coffee run",
         "icon": "☕",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 10
       },
       {
         "id": "r1-3",
         "name": "Favorite snack",
         "icon": "🍿",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 10
       },
       {
         "id": "r1-4",
         "name": "1 album / podcast",
         "icon": "🎧",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 10
       },
       {
         "id": "r1-5",
         "name": "10 min meditation",
         "icon": "🧘",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 10
       },
       {
         "id": "r1-6",
         "name": "Sit outside",
         "icon": "🌿",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 10
       }
     ],
     "tier2": [
@@ -164,35 +176,45 @@
         "name": "1 hour gaming",
         "icon": "🎮",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 30
       },
       {
         "id": "r2-2",
         "name": "1 episode / movie",
         "icon": "📺",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 30
       },
       {
         "id": "r2-3",
         "name": "Order takeout",
         "icon": "🍕",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 30
       },
       {
         "id": "r2-4",
         "name": "Call a friend",
         "icon": "👥",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 30
       },
       {
         "id": "r2-5",
         "name": "$20–30 purchase",
         "icon": "🛒",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 3,
+        "durationMinutes": 30
       }
     ],
     "tier3": [
@@ -201,35 +223,45 @@
         "name": "Day trip / beach",
         "icon": "🏖️",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 5,
+        "durationMinutes": 60
       },
       {
         "id": "r3-2",
         "name": "Movie theater",
         "icon": "🎬",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 5,
+        "durationMinutes": 60
       },
       {
         "id": "r3-3",
         "name": "Spa / massage",
         "icon": "💆",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 5,
+        "durationMinutes": 60
       },
       {
         "id": "r3-4",
         "name": "$50–100 shopping",
         "icon": "🛒",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 5,
+        "durationMinutes": 60
       },
       {
         "id": "r3-5",
         "name": "Host game night",
         "icon": "🎉",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 5,
+        "durationMinutes": 60
       }
     ],
     "jackpot": [
@@ -238,21 +270,27 @@
         "name": "Weekend pass",
         "icon": "🏝️",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 10,
+        "durationMinutes": 120
       },
       {
         "id": "rj-2",
         "name": "$100–200 splurge",
         "icon": "💰",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 10,
+        "durationMinutes": 120
       },
       {
         "id": "rj-3",
         "name": "Mini vacation",
         "icon": "✈️",
         "enabled": true,
-        "custom": false
+        "custom": false,
+        "gracePeriodMinutes": 10,
+        "durationMinutes": 120
       }
     ]
   },

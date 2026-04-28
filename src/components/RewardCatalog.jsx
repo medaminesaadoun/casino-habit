@@ -4,6 +4,12 @@ import { X, Plus, Trash2 } from 'lucide-react';
 
 const TIER_NAMES = { tier1: 'Tier 1 (Small)', tier2: 'Tier 2 (Medium)', tier3: 'Tier 3 (Large)', jackpot: 'Jackpot (Epic)' };
 const TIER_COLORS = { tier1: '#ef4444', tier2: '#3b82f6', tier3: '#a855f7', jackpot: '#e8b931' };
+const TIER_DEFAULTS = {
+  tier1: { grace: 3, duration: 10 },
+  tier2: { grace: 3, duration: 30 },
+  tier3: { grace: 5, duration: 60 },
+  jackpot: { grace: 10, duration: 120 },
+};
 
 export default function RewardCatalog({ catalog, onSave, onClose }) {
   const [localCatalog, setLocalCatalog] = useState(catalog);
@@ -13,13 +19,21 @@ export default function RewardCatalog({ catalog, onSave, onClose }) {
   const toggleReward = (tier, rewardId) => {
     setLocalCatalog((prev) => ({ ...prev, [tier]: prev[tier].map((r) => r.id === rewardId ? { ...r, enabled: !r.enabled } : r) }));
   };
+
+  const updateTimer = (tier, rewardId, field, value) => {
+    const num = parseInt(value) || 0;
+    setLocalCatalog((prev) => ({ ...prev, [tier]: prev[tier].map((r) => r.id === rewardId ? { ...r, [field]: Math.max(1, num) } : r) }));
+  };
+
   const deleteCustom = (tier, rewardId) => {
     setLocalCatalog((prev) => ({ ...prev, [tier]: prev[tier].filter((r) => r.id !== rewardId) }));
   };
+
   const addCustom = (tier) => {
     const name = newCustoms[tier].trim();
     if (!name) return;
-    setLocalCatalog((prev) => ({ ...prev, [tier]: [...(prev[tier] || []), { id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`, name, icon: newIcons[tier] || '🎁', enabled: true, custom: true }] }));
+    const defaults = TIER_DEFAULTS[tier];
+    setLocalCatalog((prev) => ({ ...prev, [tier]: [...(prev[tier] || []), { id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`, name, icon: newIcons[tier] || '🎁', enabled: true, custom: true, gracePeriodMinutes: defaults.grace, durationMinutes: defaults.duration }] }));
     setNewCustoms((prev) => ({ ...prev, [tier]: '' }));
   };
 
@@ -33,18 +47,42 @@ export default function RewardCatalog({ catalog, onSave, onClose }) {
           </button>
         </div>
 
-        <p className="text-xs text-casino-text-tertiary mb-5">Toggle rewards on/off. Custom rewards can be deleted.</p>
+        <p className="text-xs text-casino-text-tertiary mb-5">Toggle rewards on/off. Set grace & duration timers per reward. Custom rewards can be deleted.</p>
 
         {Object.entries(TIER_NAMES).map(([tierKey, tierLabel]) => (
           <div key={tierKey} className="mb-5">
             <h3 className="text-xs font-bold mb-2" style={{ color: TIER_COLORS[tierKey] }}>{tierLabel}</h3>
-            <div className="space-y-1.5 mb-2">
+            <div className="space-y-2 mb-2">
               {(localCatalog[tierKey] || []).map((reward) => (
-                <div key={reward.id} className={`flex items-center gap-2.5 p-2 rounded-xl border transition-colors ${reward.enabled ? 'border-white/8 bg-white/3' : 'border-white/3 bg-white/1 opacity-40'}`}>
-                  <span className="text-base">{reward.icon}</span>
-                  <span className="flex-1 text-xs font-medium text-white">{reward.name}</span>
-                  <button onClick={() => toggleReward(tierKey, reward.id)} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg transition-colors ${reward.enabled ? 'bg-green-500/15 text-green-400' : 'bg-white/5 text-casino-text-tertiary'}`}>{reward.enabled ? 'ON' : 'OFF'}</button>
-                  {reward.custom && <button onClick={() => deleteCustom(tierKey, reward.id)} className="p-0.5 text-casino-text-tertiary hover:text-casino-danger transition-colors"><Trash2 size={12} /></button>}
+                <div key={reward.id} className={`p-2.5 rounded-xl border transition-colors ${reward.enabled ? 'border-white/8 bg-white/3' : 'border-white/3 bg-white/1 opacity-40'}`}>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-base">{reward.icon}</span>
+                    <span className="flex-1 text-xs font-medium text-white truncate">{reward.name}</span>
+                    <button onClick={() => toggleReward(tierKey, reward.id)} className={`text-[10px] font-bold px-2.5 py-1 rounded-lg transition-colors shrink-0 ${reward.enabled ? 'bg-green-500/15 text-green-400' : 'bg-white/5 text-casino-text-tertiary'}`}>{reward.enabled ? 'ON' : 'OFF'}</button>
+                    {reward.custom && <button onClick={() => deleteCustom(tierKey, reward.id)} className="p-0.5 text-casino-text-tertiary hover:text-casino-danger transition-colors"><Trash2 size={12} /></button>}
+                  </div>
+                  <div className="flex items-center gap-3 mt-2 pl-7">
+                    <span className="text-[10px] text-casino-text-tertiary w-10 shrink-0">Grace:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="60"
+                      value={reward.gracePeriodMinutes ?? TIER_DEFAULTS[tierKey].grace}
+                      onChange={(e) => updateTimer(tierKey, reward.id, 'gracePeriodMinutes', e.target.value)}
+                      className="w-14 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[11px] text-white text-center focus:outline-none focus:border-casino-accent"
+                    />
+                    <span className="text-[10px] text-casino-text-tertiary">min</span>
+                    <span className="text-[10px] text-casino-text-tertiary w-14 shrink-0">Duration:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max="480"
+                      value={reward.durationMinutes ?? TIER_DEFAULTS[tierKey].duration}
+                      onChange={(e) => updateTimer(tierKey, reward.id, 'durationMinutes', e.target.value)}
+                      className="w-14 bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-[11px] text-white text-center focus:outline-none focus:border-casino-accent"
+                    />
+                    <span className="text-[10px] text-casino-text-tertiary">min</span>
+                  </div>
                 </div>
               ))}
             </div>

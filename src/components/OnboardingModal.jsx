@@ -3,139 +3,174 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft, X, Check, ListTodo, Gem, Dices, Gift } from 'lucide-react';
 
 const STEP1 = (
-  <svg viewBox="0 0 260 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="10" y="6" width="144" height="42" rx="8" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.35" />
-    <rect x="20" y="16" width="8" height="8" rx="2" fill="#e8b931" fillOpacity="0.25" />
-    <line x1="36" y1="20" x2="110" y2="20" stroke="#e8b931" strokeWidth="1" strokeOpacity="0.3" strokeLinecap="round" />
-    <text x="36" y="38" fill="#e8b931" fillOpacity="0.25" fontSize="9" fontFamily="DM Sans, sans-serif">Every day</text>
-    <rect x="120" y="16" width="24" height="22" rx="6" fill="#e8b931" fillOpacity="0.25" stroke="#e8b931" strokeWidth="1" strokeOpacity="0.4" />
-    <path d="M127 28 L130 31 L137 24" stroke="#e8b931" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M160 36 L174 56 L188 36" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.5" />
-    <rect x="162" y="60" width="24" height="22" rx="4" fill="#ef4444" fillOpacity="0.3" stroke="#ef4444" strokeWidth="1" strokeOpacity="0.5" />
-    <rect x="162" y="60" width="24" height="12" rx="3" fill="#ef4444" fillOpacity="0.15" />
-    <text x="174" y="76" textAnchor="middle" fill="#ef4444" fillOpacity="0.4" fontSize="5" fontWeight="700">CLIP</text>
-    <rect x="174" y="62" width="20" height="20" rx="4" fill="#3b82f6" fillOpacity="0.3" stroke="#3b82f6" strokeWidth="1" strokeOpacity="0.5" />
-    <rect x="174" y="62" width="20" height="10" rx="3" fill="#3b82f6" fillOpacity="0.15" />
-    <text x="184" y="76" textAnchor="middle" fill="#3b82f6" fillOpacity="0.4" fontSize="5" fontWeight="700">CLIP</text>
-    <rect x="190" y="64" width="16" height="16" rx="3" fill="#eab308" fillOpacity="0.35" stroke="#eab308" strokeWidth="1" strokeOpacity="0.5" />
-    <rect x="198" y="66" width="20" height="14" rx="3" fill="#e8b931" fillOpacity="0.45" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.6" />
-    <text x="208" y="77" textAnchor="middle" fill="#e8b931" fillOpacity="0.6" fontSize="5" fontWeight="800">GOLD</text>
-    <rect x="20" y="100" width="224" height="60" rx="8" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-    <text x="132" y="118" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="10" fontFamily="DM Sans, sans-serif" fontWeight="600">Rarity</text>
-    <circle cx="48" cy="138" r="6" fill="#ef4444" fillOpacity="0.5" stroke="#ef4444" strokeWidth="1" strokeOpacity="0.6" />
-    <text x="48" y="154" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="DM Sans, sans-serif">20%</text>
-    <circle cx="92" cy="138" r="5" fill="#3b82f6" fillOpacity="0.5" stroke="#3b82f6" strokeWidth="1" />
-    <text x="92" y="154" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="DM Sans, sans-serif">20%</text>
-    <circle cx="132" cy="138" r="4.5" fill="#a855f7" fillOpacity="0.5" stroke="#a855f7" strokeWidth="1" />
-    <text x="132" y="154" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="DM Sans, sans-serif">15%</text>
-    <circle cx="170" cy="138" r="3.5" fill="#f97316" fillOpacity="0.5" stroke="#f97316" strokeWidth="1" />
-    <text x="170" y="154" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="DM Sans, sans-serif">4.9%</text>
-    <circle cx="210" cy="138" r="2.5" fill="#e8b931" fillOpacity="0.6" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.7" />
-    <text x="210" y="154" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="DM Sans, sans-serif">0.1%</text>
+  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="10" y="10" width="156" height="58" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
+    <rect x="10" y="10" width="3" height="58" rx="1.5" fill="#ef4444" fillOpacity="0.7" />
+    <rect x="24" y="20" width="80" height="6" rx="3" fill="rgba(255,255,255,0.4)" />
+    <rect x="24" y="32" width="50" height="4" rx="2" fill="rgba(255,255,255,0.2)" />
+    <rect x="24" y="42" width="60" height="4" rx="2" fill="rgba(255,255,255,0.2)" />
+    <rect x="120" y="24" width="34" height="28" rx="8" fill="#e8b931" fillOpacity="0.35" stroke="#e8b931" strokeWidth="1.5" />
+    <path d="M130 38 L133 42 L147 30" stroke="#e8b931" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M168 85 L196 85" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.6" strokeDasharray="4 3" />
+    <circle cx="220" cy="85" r="38" fill="rgba(0,0,0,0.4)" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.6" />
+    <circle cx="220" cy="85" r="32" stroke="#22c55e" strokeWidth="2" strokeOpacity="0.5" />
+    <path d="M220 47 L220 63" stroke="#e8b931" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.7" />
+    <text x="220" y="93" textAnchor="middle" fill="#22c55e" fillOpacity="0.8" fontSize="11" fontWeight="700">WIN</text>
+    <text x="220" y="107" textAnchor="middle" fill="#22c55e" fillOpacity="0.5" fontSize="9" fontWeight="600">60%</text>
+    <text x="140" y="170" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="11" fontWeight="600" fontFamily="DM Sans, sans-serif">Complete habit → spin Token Wheel</text>
   </svg>
 );
 
 const STEP2 = (
-  <svg viewBox="0 0 260 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="10" y="14" width="80" height="52" rx="8" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-    <rect x="20" y="40" width="20" height="18" rx="3" fill="#ef4444" fillOpacity="0.4" stroke="#ef4444" strokeWidth="1" strokeOpacity="0.5" />
-    <text x="48" y="52" fill="rgba(255,255,255,0.5)" fontSize="11" fontFamily="DM Sans, sans-serif" fontWeight="700">2+</text>
-    <path d="M96 44 L118 44" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.6" markerEnd="url(#arrowGold)" />
-    <defs>
-      <marker id="arrowGold" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-        <polygon points="0 0, 8 3, 0 6" fill="#e8b931" fillOpacity="0.6" />
-      </marker>
-    </defs>
-    <rect x="122" y="48" width="22" height="22" rx="6" fill="#e8b931" fillOpacity="0.15" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.5" />
-    <text x="133" y="63" textAnchor="middle" fill="#e8b931" fillOpacity="0.7" fontSize="9" fontFamily="DM Sans, sans-serif" fontWeight="700">T1</text>
-    <path d="M144 59 L150 59" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.4" />
-    <rect x="154" y="48" width="22" height="22" rx="6" fill="#3b82f6" fillOpacity="0.15" stroke="#3b82f6" strokeWidth="2" strokeOpacity="0.5" />
-    <text x="165" y="63" textAnchor="middle" fill="#3b82f6" fillOpacity="0.7" fontSize="9" fontFamily="DM Sans, sans-serif" fontWeight="700">T2</text>
-    <path d="M176 59 L182 59" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.4" />
-    <rect x="186" y="48" width="22" height="22" rx="6" fill="#a855f7" fillOpacity="0.15" stroke="#a855f7" strokeWidth="2" strokeOpacity="0.5" />
-    <text x="197" y="63" textAnchor="middle" fill="#a855f7" fillOpacity="0.7" fontSize="9" fontFamily="DM Sans, sans-serif" fontWeight="700">T3</text>
-    <rect x="10" y="90" width="240" height="22" rx="6" fill="#e8b931" fillOpacity="0.06" stroke="#e8b931" strokeWidth="1" strokeOpacity="0.2" />
-    <rect x="20" y="100" width="8" height="8" rx="2" fill="#e8b931" fillOpacity="0.35" />
-    <text x="34" y="108" fill="rgba(255,255,255,0.5)" fontSize="10" fontFamily="DM Sans, sans-serif" fontWeight="600">Gold clip = instant Tier 3</text>
-    <text x="130" y="142" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="10" fontFamily="DM Sans, sans-serif">Higher tier → better wheel odds</text>
-    <text x="130" y="158" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="8" fontFamily="DM Sans, sans-serif">Tier resets after every spin</text>
+  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <text x="140" y="18" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="12" fontWeight="700" fontFamily="DM Sans, sans-serif">Every habit drops a clip</text>
+    {[
+      { c: '#ef4444', l: '20%', x: 22 },
+      { c: '#3b82f6', l: '20%', x: 76 },
+      { c: '#22c55e', l: '20%', x: 130 },
+      { c: '#eab308', l: '20%', x: 184 },
+      { c: '#a855f7', l: '15%', x: 238 },
+    ].map(({ c, l, x }) => (
+      <g key={c}>
+        <rect x={x - 2} y="35" width="6" height="12" rx="2" fill="#8b8680" fillOpacity="0.6" />
+        <rect x={x + 18} y="35" width="6" height="12" rx="2" fill="#8b8680" fillOpacity="0.6" />
+        <rect x={x - 8} y="42" width="42" height="30" rx="5" fill={c} fillOpacity="0.55" stroke={c} strokeWidth="1.5" strokeOpacity="0.7" />
+        <text x={x + 13} y="62" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="8" fontWeight="700">{l}</text>
+      </g>
+    ))}
+    {[
+      { c: '#f97316', l: '4.9%', x: 60 },
+      { c: '#e8b931', l: '0.1%', x: 180 },
+    ].map(({ c, l, x }) => (
+      <g key={c}>
+        <rect x={x - 2} y="105" width="6" height="12" rx="2" fill="#8b8680" fillOpacity="0.6" />
+        <rect x={x + 18} y="105" width="6" height="12" rx="2" fill="#8b8680" fillOpacity="0.6" />
+        <rect x={x - 8} y="112" width={c === '#e8b931' ? '46' : '42'} height="30" rx="5" fill={c} fillOpacity="0.6" stroke={c} strokeWidth={c === '#e8b931' ? '2' : '1.5'} strokeOpacity="0.8" />
+        <text x={x + 13} y="132" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="8" fontWeight="700">{l}</text>
+      </g>
+    ))}
+    <text x="140" y="172" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="10" fontWeight="500" fontFamily="DM Sans, sans-serif">7 clip colors · collect matching ones to cash in</text>
   </svg>
 );
 
 const STEP3 = (
-  <svg viewBox="0 0 260 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="58" cy="50" r="36" stroke="#22c55e" strokeWidth="2" strokeOpacity="0.3" />
-    <circle cx="58" cy="50" r="30" stroke="#22c55e" strokeWidth="1.5" strokeOpacity="0.2" />
-    <path d="M58 14 L58 28" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.5" strokeLinecap="round" />
-    <text x="58" y="56" textAnchor="middle" fill="#22c55e" fillOpacity="0.5" fontSize="8" fontWeight="700">60%</text>
-    <text x="58" y="68" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="7" fontFamily="DM Sans, sans-serif">Token</text>
-    <path d="M98 50 L122 50" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.4" />
-    <circle cx="140" cy="50" r="6" fill="#e8b931" fillOpacity="0.3" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.5" />
-    <text x="140" y="70" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="8" fontFamily="DM Sans, sans-serif">+1 token</text>
-    <circle cx="126" cy="108" r="48" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.35" />
-    <circle cx="126" cy="108" r="40" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.25" />
-    <circle cx="126" cy="108" r="18" fill="#e8b931" fillOpacity="0.08" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.4" />
-    <path d="M126 60 L134 70 Q126 64 118 70 Z" fill="#e8b931" fillOpacity="0.4" />
-    <rect x="88" y="100" width="28" height="16" rx="4" fill="#ef4444" fillOpacity="0.2" stroke="#ef4444" strokeWidth="1" strokeOpacity="0.4" />
-    <text x="102" y="111" textAnchor="middle" fill="#ef4444" fillOpacity="0.5" fontSize="6" fontWeight="700">T1</text>
-    <rect x="118" y="96" width="28" height="16" rx="4" fill="#e8b931" fillOpacity="0.2" stroke="#e8b931" strokeWidth="1" strokeOpacity="0.5" />
-    <text x="132" y="107" textAnchor="middle" fill="#e8b931" fillOpacity="0.55" fontSize="6" fontWeight="700">JACKPOT</text>
-    <text x="126" y="174" textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize="9" fontFamily="DM Sans, sans-serif">Normal 1 token · Mega 5 tokens</text>
-    <line x1="190" y1="88" x2="232" y2="88" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-    <text x="240" y="92" fill="#e8b931" fillOpacity="0.35" fontSize="7" fontFamily="DM Sans, sans-serif" fontWeight="700">BONUS</text>
+  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g>
+      <rect x="24" y="20" width="22" height="32" rx="4" fill="#ef4444" fillOpacity="0.5" stroke="#ef4444" strokeWidth="1.5" strokeOpacity="0.7" />
+      <rect x="26" y="22" width="22" height="32" rx="4" fill="#ef4444" fillOpacity="0.4" stroke="#ef4444" strokeWidth="1.5" strokeOpacity="0.7" />
+      <rect x="28" y="24" width="22" height="32" rx="4" fill="#ef4444" fillOpacity="0.55" stroke="#ef4444" strokeWidth="1.5" strokeOpacity="0.8" />
+    </g>
+    <text x="35" y="72" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="9" fontWeight="600" fontFamily="DM Sans, sans-serif">2+ matching</text>
+    <path d="M70 52 L102 52" stroke="#e8b931" strokeWidth="2.5" strokeOpacity="0.7" strokeLinecap="round" markerEnd="url(#arrGold2)" />
+    <defs>
+      <marker id="arrGold2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#e8b931" fillOpacity="0.7" />
+      </marker>
+    </defs>
+    <g transform="translate(110, 20)">
+      <rect x="0" y="0" width="36" height="24" rx="8" fill="#e8b931" fillOpacity="0.2" stroke="#e8b931" strokeWidth="2.5" strokeOpacity="0.6" />
+      <text x="18" y="17" textAnchor="middle" fill="#e8b931" fillOpacity="0.85" fontSize="11" fontWeight="800">T1</text>
+      <path d="M40 12 L52 12" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.4" />
+      <rect x="56" y="0" width="36" height="24" rx="8" fill="#3b82f6" fillOpacity="0.2" stroke="#3b82f6" strokeWidth="2.5" strokeOpacity="0.6" />
+      <text x="74" y="17" textAnchor="middle" fill="#3b82f6" fillOpacity="0.85" fontSize="11" fontWeight="800">T2</text>
+      <path d="M96 12 L108 12" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.4" />
+      <rect x="112" y="0" width="36" height="24" rx="8" fill="#a855f7" fillOpacity="0.2" stroke="#a855f7" strokeWidth="2.5" strokeOpacity="0.6" />
+      <text x="130" y="17" textAnchor="middle" fill="#a855f7" fillOpacity="0.85" fontSize="11" fontWeight="800">T3</text>
+    </g>
+    <rect x="20" y="120" width="240" height="28" rx="8" fill="#e8b931" fillOpacity="0.08" stroke="#e8b931" strokeWidth="1" strokeOpacity="0.3" />
+    <text x="140" y="139" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="10" fontWeight="600" fontFamily="DM Sans, sans-serif">Gold clip = instant Tier 3</text>
+    <text x="140" y="168" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="9" fontWeight="500" fontFamily="DM Sans, sans-serif">Tier resets after each spin</text>
   </svg>
 );
 
 const STEP4 = (
-  <svg viewBox="0 0 260 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="10" y="10" width="144" height="58" rx="8" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-    <rect x="22" y="22" width="8" height="8" rx="2" fill="#22c55e" fillOpacity="0.4" />
-    <text x="36" y="30" fill="rgba(255,255,255,0.6)" fontSize="10" fontFamily="DM Sans, sans-serif" fontWeight="600">Reward in bank</text>
-    <rect x="22" y="42" width="120" height="14" rx="4" fill="#e8b931" fillOpacity="0.1" stroke="#e8b931" strokeWidth="1" strokeOpacity="0.2" />
-    <text x="82" y="52" textAnchor="middle" fill="#e8b931" fillOpacity="0.4" fontSize="8" fontFamily="DM Sans, sans-serif" fontWeight="600">Claim</text>
-    <path d="M158 44 L182 44" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.35" />
-    <rect x="188" y="18" width="62" height="42" rx="8" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-    <text x="219" y="34" textAnchor="middle" fill="#22c55e" fillOpacity="0.5" fontSize="8" fontWeight="700">GRACE</text>
-    <text x="219" y="46" textAnchor="middle" fill="rgba(255,255,255,0.25)" fontSize="7" fontFamily="DM Sans, sans-serif">5 min</text>
-    <text x="219" y="56" textAnchor="middle" fill="rgba(255,255,255,0.15)" fontSize="6" fontFamily="DM Sans, sans-serif">Skip · Cancel</text>
-    <rect x="30" y="90" width="200" height="50" rx="8" stroke="#e8b931" strokeWidth="1" strokeOpacity="0.25" />
-    <rect x="44" y="106" width="172" height="6" rx="3" fill="#a855f7" fillOpacity="0.3" />
-    <rect x="44" y="106" width="120" height="6" rx="3" fill="#a855f7" fillOpacity="0.5" />
-    <text x="130" y="122" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="9" fontFamily="DM Sans, sans-serif" fontWeight="600">Active — 60 min</text>
-    <text x="130" y="136" textAnchor="middle" fill="rgba(255,255,255,0.2)" fontSize="7" fontFamily="DM Sans, sans-serif">Complete before time expires</text>
-    <circle cx="58" cy="164" r="3" fill="#e8b931" fillOpacity="0.3" />
-    <text x="68" y="168" fill="rgba(255,255,255,0.25)" fontSize="8" fontFamily="DM Sans, sans-serif">Claim → grace → active → done</text>
+  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {[
+      { l: 'T1', c: '#ef4444', s: 0, e: 144 },
+      { l: 'T2', c: '#3b82f6', s: 144, e: 252 },
+      { l: 'T3', c: '#a855f7', s: 252, e: 324 },
+      { l: 'BONUS', c: '#eab308', s: 324, e: 352.8 },
+      { l: 'JACKPOT', c: '#e8b931', s: 352.8, e: 360 },
+    ].map(seg => {
+      const mid = (seg.s + seg.e) / 2 * Math.PI / 180;
+      const lx = 140 + 44 * Math.cos(mid - Math.PI / 2);
+      const ly = 88 + 44 * Math.sin(mid - Math.PI / 2);
+      return (
+        <g key={seg.l}>
+          <path d={`M${140 + 62 * Math.cos((seg.e - 90) * Math.PI / 180)},${88 + 62 * Math.sin((seg.e - 90) * Math.PI / 180)} A62,62 0 ${seg.e - seg.s <= 180 ? '0' : '1'},0 ${140 + 62 * Math.cos((seg.s - 90) * Math.PI / 180)},${88 + 62 * Math.sin((seg.s - 90) * Math.PI / 180)} L${140 + 22 * Math.cos((seg.s - 90) * Math.PI / 180)},${88 + 22 * Math.sin((seg.s - 90) * Math.PI / 180)} A22,22 0 ${seg.e - seg.s <= 180 ? '0' : '1'},1 ${140 + 22 * Math.cos((seg.e - 90) * Math.PI / 180)},${88 + 22 * Math.sin((seg.e - 90) * Math.PI / 180)} Z`}
+            fill={seg.c} fillOpacity="0.6" stroke="rgba(0,0,0,0.5)" strokeWidth="1.5" />
+          <text x={lx} y={ly} textAnchor="middle" dominantBaseline="central" fill="white" fillOpacity="0.85" fontSize="6" fontWeight="700">{seg.l}</text>
+        </g>
+      );
+    })}
+    <circle cx="140" cy="88" r="62" fill="none" stroke="#e8b931" strokeWidth="2.5" strokeOpacity="0.5" />
+    <circle cx="140" cy="88" r="22" fill="#1a1a1f" fillOpacity="0.6" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.6" />
+    <path d="M140 16 L152 34 Q140 28 128 34 Z" fill="#e8b931" fillOpacity="0.7" />
+    <rect x="90" y="158" width="100" height="22" rx="6" fill="#e8b931" fillOpacity="0.12" stroke="#e8b931" strokeWidth="1" strokeOpacity="0.4" />
+    <text x="140" y="174" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontWeight="600" fontFamily="DM Sans, sans-serif">1 token normal · 5 tokens Mega</text>
+  </svg>
+);
+
+const STEP5 = (
+  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="12" width="120" height="56" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
+    <text x="68" y="34" textAnchor="middle" fill="rgba(255,255,255,0.55)" fontSize="10" fontWeight="600" fontFamily="DM Sans, sans-serif">Reward Bank</text>
+    <rect x="28" y="44" width="80" height="16" rx="6" fill="#e8b931" fillOpacity="0.2" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.5" />
+    <text x="68" y="56" textAnchor="middle" fill="#e8b931" fillOpacity="0.7" fontSize="9" fontWeight="700">Claim</text>
+    <path d="M132 44 L156 44" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.5" strokeDasharray="3 2" />
+    <rect x="160" y="16" width="60" height="36" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(34,197,94,0.3)" strokeWidth="1.5" />
+    <text x="190" y="32" textAnchor="middle" fill="#22c55e" fillOpacity="0.8" fontSize="9" fontWeight="700">GRACE</text>
+    <text x="190" y="46" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8">skip / cancel</text>
+    <rect x="30" y="88" width="220" height="54" rx="10" fill="rgba(255,255,255,0.03)" stroke="#a855f7" strokeWidth="1.5" strokeOpacity="0.3" />
+    <text x="140" y="108" textAnchor="middle" fill="rgba(255,255,255,0.55)" fontSize="10" fontWeight="600" fontFamily="DM Sans, sans-serif">Active Reward</text>
+    <rect x="44" y="118" width="192" height="6" rx="3" fill="rgba(255,255,255,0.06)" />
+    <rect x="44" y="118" width="130" height="6" rx="3" fill="#a855f7" fillOpacity="0.5" />
+    <text x="140" y="136" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontFamily="DM Sans, sans-serif">Complete before timer expires</text>
+    <circle cx="140" cy="170" r="4" fill="#e8b931" fillOpacity="0.4" />
+    <text x="152" y="173" fill="rgba(255,255,255,0.3)" fontSize="9" fontFamily="DM Sans, sans-serif">Claim → grace → active → done</text>
   </svg>
 );
 
 const STEPS = [
   {
     title: 'Complete Habits',
-    subtitle: 'Finish habits to earn randomly colored clips with different rarities',
+    subtitle: 'Each habit triggers the Token Wheel',
     icon: ListTodo,
-    color: '#e8b931',
+    color: '#ef4444',
     illustration: STEP1,
+    bullets: ['Complete any habit', 'Token Wheel appears (60% WIN)', 'Win = +1 spin token', 'Miss = try again on next habit'],
   },
   {
-    title: 'Cash In & Tiers',
-    subtitle: 'Collect matching clips to upgrade your tier for better wheel odds',
+    title: 'Earn Clips',
+    subtitle: 'Every habit drops a random colored clip',
     icon: Gem,
-    color: '#e8b931',
+    color: '#3b82f6',
     illustration: STEP2,
+    bullets: ['Each completion drops a random clip', '7 colors · different rarities', 'Gold clip = ultra rare (0.1%)', 'Collect matching clips to cash in'],
+  },
+  {
+    title: 'Cash In for Tiers',
+    subtitle: 'Matching clips unlock better wheel odds',
+    icon: Dices,
+    color: '#a855f7',
+    illustration: STEP3,
+    bullets: ['2+ matching clips → cash in', 'Upgrade tier: T1 → T2 → T3', 'Gold clip = instant Tier 3', 'Higher tier = better wheel rewards', 'Tier resets after each spin'],
   },
   {
     title: 'Spin the Wheel',
-    subtitle: 'Win tokens on the 60% mini-wheel, then spin for rewards',
+    subtitle: 'Tokens let you spin for prizes',
     icon: Dices,
     color: '#e8b931',
-    illustration: STEP3,
+    illustration: STEP4,
+    bullets: ['Normal spin = 1 token', 'Mega spin = 5 tokens (boosted odds)', '5 reward tiers: T1 → Jackpot', 'Bonus wheel on Bonus land', 'Near-miss keeps it exciting'],
   },
   {
-    title: 'Claim Rewards',
-    subtitle: 'Claim rewards from your bank — they enter an active timer',
+    title: 'Claim & Enjoy',
+    subtitle: 'Claim rewards before they expire',
     icon: Gift,
-    color: '#e8b931',
-    illustration: STEP4,
+    color: '#22c55e',
+    illustration: STEP5,
+    bullets: ['Win → reward goes to your bank', 'Claim → grace period starts', 'Skip grace → active timer begins', 'Complete before it expires', 'Dismiss expired rewards anytime'],
   },
 ];
 
@@ -159,12 +194,13 @@ export default function OnboardingModal({ onClose }) {
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="glass-modal p-8 text-center relative overflow-hidden max-w-md w-full"
+        className="modal-panel p-8 text-center relative overflow-hidden max-w-lg w-full"
+        style={{ background: 'linear-gradient(135deg, rgba(20,20,26,0.98) 0%, rgba(15,15,20,0.99) 100%)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full blur-3xl pointer-events-none"
-          style={{ backgroundColor: current.color, opacity: 0.12 }}
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-56 h-56 rounded-full blur-3xl pointer-events-none"
+          style={{ backgroundColor: current.color, opacity: 0.15 }}
         />
 
         <button
@@ -174,17 +210,15 @@ export default function OnboardingModal({ onClose }) {
           <X size={18} />
         </button>
 
-        {/* Step indicators */}
         <div className="flex items-center justify-center gap-2 mb-8">
           {STEPS.map((_, idx) => (
             <motion.div
               key={idx}
               animate={{
-                width: idx === step ? 24 : 8,
+                width: idx === step ? 28 : 8,
                 height: 8,
-                backgroundColor:
-                  idx <= step ? current.color : 'rgba(255,255,255,0.08)',
-                opacity: idx <= step ? 0.8 : 0.3,
+                backgroundColor: idx <= step ? current.color : 'rgba(255,255,255,0.1)',
+                opacity: idx <= step ? 1 : 0.35,
               }}
               transition={{ type: 'spring', stiffness: 500, damping: 25 }}
               className="rounded-full"
@@ -192,7 +226,6 @@ export default function OnboardingModal({ onClose }) {
           ))}
         </div>
 
-        {/* Illustration */}
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
@@ -200,13 +233,12 @@ export default function OnboardingModal({ onClose }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="mb-4"
+            className="mb-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-3"
           >
             {current.illustration}
           </motion.div>
         </AnimatePresence>
 
-        {/* Title + Subtitle */}
         <AnimatePresence mode="wait">
           <motion.div
             key={`title-${step}`}
@@ -215,23 +247,28 @@ export default function OnboardingModal({ onClose }) {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.25 }}
           >
-            <div
-              className="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center"
-              style={{ backgroundColor: `${current.color}12` }}
-            >
+            <div className="w-11 h-11 rounded-xl mx-auto mb-3 flex items-center justify-center"
+              style={{ backgroundColor: `${current.color}18` }}>
               <Icon size={20} style={{ color: current.color }} />
             </div>
-            <h2 className="font-heading text-base font-bold text-white mb-1">
+            <h2 className="font-heading text-lg font-bold text-white mb-1">
               {current.title}
             </h2>
-            <p className="text-xs text-casino-text-secondary mb-6">
+            <p className="text-sm text-casino-text-secondary mb-4">
               {current.subtitle}
             </p>
+            <div className="text-left space-y-1.5 pb-2">
+              {current.bullets.map((b, i) => (
+                <div key={i} className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full mt-[5px] shrink-0" style={{ backgroundColor: `${current.color}80` }} />
+                  <span className="text-[11px] text-casino-text-secondary leading-relaxed">{b}</span>
+                </div>
+              ))}
+            </div>
           </motion.div>
         </AnimatePresence>
 
-        {/* Navigation */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mt-1">
           {!isFirst && (
             <button
               onClick={() => setStep((s) => s - 1)}
@@ -244,24 +281,11 @@ export default function OnboardingModal({ onClose }) {
             onClick={() => (isLast ? onClose() : setStep((s) => s + 1))}
             className="btn-pill btn-gold flex-1 py-3 text-sm font-bold"
           >
-            {isLast ? (
-              <>
-                <Check size={16} />
-                Get Started
-              </>
-            ) : (
-              <>
-                Next
-                <ChevronRight size={16} />
-              </>
-            )}
+            {isLast ? <><Check size={16} /> Get Started</> : <><ChevronRight size={16} /> Next</>}
           </button>
         </div>
 
-        <button
-          onClick={onClose}
-          className="mt-4 text-xs text-casino-text-tertiary hover:text-casino-text-secondary transition-colors"
-        >
+        <button onClick={onClose} className="mt-4 text-xs text-casino-text-tertiary hover:text-casino-text-secondary transition-colors">
           Skip tour
         </button>
       </motion.div>
