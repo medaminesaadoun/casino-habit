@@ -11,6 +11,7 @@ const CLIP_LABELS = {
   purple: 'Purple', orange: 'Orange', gold: 'Gold',
 };
 const COLOR_SORT = { gold: 0, orange: 1, purple: 2, red: 3, blue: 4, green: 5, yellow: 6 };
+const COLOR_SORT_KEYS = Object.keys(COLOR_SORT).sort((a, b) => COLOR_SORT[a] - COLOR_SORT[b]);
 
 function SingleClip({ color, stackIndex = 0, isDimmed = false }) {
   const bg = CLIP_COLORS[color] || CLIP_COLORS.red;
@@ -75,7 +76,7 @@ function getHintMessage(clips, counts, activeTier) {
   return { text: 'Tier 3 maxed — no more upgrades', type: 'maxed' };
 }
 
-export default function ClipInventory({ clips, activeTier, onDeleteAll }) {
+export default function ClipInventory({ clips, activeTier, lifetimeClips, onDeleteAll }) {
   const counts = clips.reduce((acc, clip) => {
     acc[clip] = (acc[clip] || 0) + 1;
     return acc;
@@ -180,6 +181,26 @@ export default function ClipInventory({ clips, activeTier, onDeleteAll }) {
           {hint.type === 'ready' && <Gem size={12} />}
           {hint.type === 'progress' && <ArrowRightLeft size={12} />}
           {hint.text}
+        </div>
+      )}
+      {lifetimeClips && Object.keys(lifetimeClips).length > 0 && (
+        <div className="mt-4 pt-3 border-t border-white/5">
+          <p className="text-[10px] text-casino-text-tertiary font-medium mb-2 uppercase tracking-wider">Lifetime Collection</p>
+          <div className="space-y-1.5">
+            {COLOR_SORT_KEYS.map((color) => {
+              const count = lifetimeClips[color] || 0;
+              if (count === 0) return null;
+              return (
+                <div key={color} className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: CLIP_COLORS[color], boxShadow: `0 0 6px ${CLIP_COLORS[color]}60` }} />
+                  <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                    <div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (count / Math.max(...Object.values(lifetimeClips)) * 100))}%`, backgroundColor: CLIP_COLORS[color], opacity: 0.5 }} />
+                  </div>
+                  <span className="text-[10px] text-casino-text-tertiary tabular-nums w-5 text-right">{count}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
     </div>

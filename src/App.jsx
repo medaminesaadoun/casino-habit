@@ -21,7 +21,7 @@ import GlassSelect from './components/GlassSelect';
 import ActiveRewards from './components/ActiveRewards';
 import BottomNav from './components/BottomNav';
 import TopNav from './components/TopNav';
-import OnboardingModal from './components/OnboardingModal';
+import UndoToast from './components/UndoToast';
 
 const CLIP_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'gold'];
 const CLIP_WEIGHTS = [20, 20, 20, 20, 15, 4.9, 0.1];
@@ -68,6 +68,7 @@ function App() {
     rewardBank: [],
     activeRewards: [],
     rainmakerRemaining: 0,
+    lifetimeClips: {},
   });
   const [history, setHistory] = useState([]);
   const [rewardCatalog, setRewardCatalog] = useState({ tier1: [], tier2: [], tier3: [], jackpot: [] });
@@ -96,6 +97,8 @@ function App() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [unseenRewards, setUnseenRewards] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [undoState, setUndoState] = useState(null);
+  const [undoSeconds, setUndoSeconds] = useState(10);
   const [mobileView, setMobileView] = useState('wheel');
   const [loading, setLoading] = useState(true);
   const [useApi, setUseApi] = useState(true);
@@ -106,6 +109,19 @@ function App() {
   useEffect(() => {
     inventoryRef.current = inventory;
   }, [inventory]);
+
+  // Undo countdown timer
+  useEffect(() => {
+    if (!undoState) { setUndoSeconds(0); return; }
+    setUndoSeconds(10);
+    const interval = setInterval(() => {
+      setUndoSeconds((prev) => {
+        if (prev <= 1) { setUndoState(null); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [undoState]);
 
   // Clear unseen rewards badge when viewing the Rewards tab
   useEffect(() => {
@@ -182,6 +198,7 @@ function App() {
   }, [jars, habits, inventory, history, rewardCatalog, useApi, loading]);
 
   const handleCompleteHabit = async (habit) => {
+    setUndoState(null);
     playComplete();
     const now = new Date().toISOString();
     const updatedHabit = { ...habit, completedDates: [...habit.completedDates, now] };
@@ -189,7 +206,11 @@ function App() {
     setHabits(updatedHabits);
 
     const clip = getRandomClip();
-    const newInventory = { ...inventory, clips: [...inventory.clips, clip] };
+    const newInventory = {
+      ...inventory,
+      clips: [...inventory.clips, clip],
+      lifetimeClips: { ...(inventory.lifetimeClips || {}), [clip]: ((inventory.lifetimeClips || {})[clip] || 0) + 1 },
+    };
     setInventory(newInventory);
     setLastClip(clip);
     setTimeout(() => playClipDrop(), 300);
@@ -203,6 +224,14 @@ function App() {
     };
     setHistory((prev) => [...prev, habitEntry]);
 
+    // Save undo state
+    setUndoState({
+      habit,
+      clip,
+      historyId: habitEntry.id,
+      completedDate: now,
+    });
+
     if (useApi) {
       try {
         await api.updateHabit(habit.id, updatedHabit);
@@ -215,6 +244,31 @@ function App() {
 
     setPendingTokenHabit(habit);
     setShowTokenWheel(true);
+  };
+
+  const handleUndo = () => {
+    if (!undoState) return;
+    const { habit, clip, historyId, completedDate } = undoState;
+    setShowTokenWheel(false);
+    setPendingTokenHabit(null);
+    setUndoState(null);
+
+    setHabits((prev) =>
+      prev.map((h) =>
+        h.id === habit.id
+          ? { ...h, completedDates: h.completedDates.filter((d) => d !== completedDate) }
+          : h
+      )
+    );
+
+    setInventory((prev) => {
+      const clipsCopy = [...prev.clips];
+      const lastIdx = clipsCopy.lastIndexOf(clip);
+      if (lastIdx !== -1) clipsCopy.splice(lastIdx, 1);
+      return { ...prev, clips: clipsCopy };
+    });
+
+    setHistory((prev) => prev.filter((h) => h.id !== historyId));
   };
 
   const handleTokenWheelComplete = (won) => {
@@ -880,7 +934,7 @@ function App() {
               )}
             </AnimatePresence>
             <div className="mt-4">
-              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} onDeleteAll={handleDeleteAllClips} />
+              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} />
               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
                 <button
                   onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
@@ -1015,7 +1069,7 @@ function App() {
                   </motion.div>
                 )}
               </AnimatePresence>
-              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} onDeleteAll={handleDeleteAllClips} />
+              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} />
               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
                 <button
                   onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
@@ -1092,6 +1146,37 @@ function App() {
                   </p>
                   <p className="text-xs text-casino-text-tertiary mt-1">Last Result</p>
                 </div>
+              </div>
+
+              {/* Spin History Bar Chart */}
+              <div className="glass p-5">
+                <p className="font-heading text-sm text-white mb-4 tracking-tight">Spin History</p>
+                {(() => {
+                  const spinHistory = [...history]
+                    .filter((h) => h.type === 'main-wheel')
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                    .slice(0, 10);
+                  if (spinHistory.length === 0) return <p className="text-casino-text-tertiary text-center py-4 text-sm">No spins yet. Give it a go!</p>;
+                  const tierColor = (r) => r === 'Jackpot' ? '#e8b931' : r === 'Bonus' ? '#eab308' : r === 'Tier 3' ? '#a855f7' : r === 'Tier 2' ? '#3b82f6' : '#ef4444';
+                  const tierHeight = (r) => r === 'Jackpot' ? 48 : r === 'Bonus' ? 40 : r === 'Tier 3' ? 32 : r === 'Tier 2' ? 24 : 16;
+                  const tierInitial = (r) => r === 'Jackpot' ? 'J' : r === 'Bonus' ? 'B' : r === 'Tier 3' ? '3' : r === 'Tier 2' ? '2' : '1';
+                  return (
+                    <div className="flex items-end justify-around gap-1 h-[60px] px-1">
+                      {spinHistory.map((spin, i) => (
+                        <div key={spin.id} className="flex flex-col items-center gap-1 flex-1 max-w-[32px]">
+                          <div className="w-full rounded-t-md transition-all" style={{
+                            height: `${tierHeight(spin.result)}px`,
+                            backgroundColor: tierColor(spin.result),
+                            opacity: 0.75,
+                          }} />
+                          <span className="text-[9px] font-bold tabular-nums" style={{ color: tierColor(spin.result) }}>
+                            {tierInitial(spin.result)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Recent Spins */}
@@ -1488,6 +1573,7 @@ function App() {
       </AnimatePresence>
 
       {showConfetti && <JackpotConfetti />}
+      {undoState && <UndoToast habitName={undoState.habit.name} secondsLeft={undoSeconds} onUndo={handleUndo} />}
     </div>
   );
 }
