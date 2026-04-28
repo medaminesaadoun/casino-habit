@@ -100,6 +100,7 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [undoState, setUndoState] = useState(null);
   const [undoSeconds, setUndoSeconds] = useState(10);
+  const [clipToast, setClipToast] = useState(null);
   const [mobileView, setMobileView] = useState('wheel');
   const [loading, setLoading] = useState(true);
   const [useApi, setUseApi] = useState(true);
@@ -214,6 +215,8 @@ function App() {
     };
     setInventory(newInventory);
     setLastClip(clip);
+    setClipToast({ color: clip, visible: true, id: Date.now() });
+    setTimeout(() => setClipToast(null), 2500);
     setTimeout(() => playClipDrop(), 300);
 
     const habitEntry = {
@@ -907,6 +910,31 @@ function App() {
 
           {/* Mobile tabbed sections */}
           <div className={`mb-6 ${mobileView !== 'habits' ? 'hidden' : ''}`}>
+            {/* Daily Stats */}
+            {(() => {
+              const today = new Date().toISOString().slice(0, 10);
+              const completedToday = habits.filter((h) => h.completedDates.some((d) => d.startsWith(today))).length;
+              const earnedToday = history.filter((h) => h.type === 'habit' && h.timestamp.startsWith(today)).length;
+              const tokens = inventory.spinTokens || 0;
+              return (
+                <div className="glass p-3 mb-4 flex items-center justify-around text-center">
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-lg font-bold text-casino-accent tabular-nums">&#10003;{completedToday}</span>
+                    <span className="text-[10px] text-casino-text-tertiary">Completed</span>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-lg font-bold text-casino-accent tabular-nums">&#9830;{earnedToday}</span>
+                    <span className="text-[10px] text-casino-text-tertiary">Clips</span>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="flex flex-col items-center gap-0.5">
+                    <span className="text-lg font-bold text-casino-accent tabular-nums">{tokens}</span>
+                    <span className="text-[10px] text-casino-text-tertiary">Tokens</span>
+                  </div>
+                </div>
+              );
+            })()}
             <HabitList
               habits={habits}
               jars={jars}
@@ -917,23 +945,6 @@ function App() {
               onAdd={() => setShowCreateHabit(true)}
               onQuickTask={() => setShowQuickTask(true)}
             />
-            <AnimatePresence>
-              {lastClip && (
-                <motion.div
-                  key={lastClip}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="card-static rounded-2xl p-4 mt-4 flex flex-col items-center"
-                >
-                  <p className="text-xs text-casino-text-tertiary mb-2">You grabbed a clip!</p>
-                  <motion.div animate={{ rotate: [0, -10, 10, -10, 0] }} transition={{ duration: 0.5 }}>
-                    <SingleClip color={lastClip} />
-                  </motion.div>
-                  <p className="mt-2 font-medium text-sm capitalize text-casino-text">{lastClip}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
             <div className="mt-4">
               <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} />
               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
@@ -1043,6 +1054,35 @@ function App() {
           {/* Habits Tab */}
           {mobileView === 'habits' && (
             <div className="space-y-6 stagger-reveal">
+              {/* Daily Stats */}
+              {(() => {
+                const today = new Date().toISOString().slice(0, 10);
+                const completedToday = habits.filter((h) =>
+                  h.completedDates.some((d) => d.startsWith(today))
+                ).length;
+                const earnedToday = history.filter(
+                  (h) => h.type === 'habit' && h.timestamp.startsWith(today)
+                ).length;
+                const tokens = inventory.spinTokens || 0;
+                return (
+                  <div className="glass p-3 flex items-center justify-around text-center">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-lg font-bold text-casino-accent tabular-nums">&#10003;{completedToday}</span>
+                      <span className="text-[10px] text-casino-text-tertiary">Completed</span>
+                    </div>
+                    <div className="w-px h-8 bg-white/10" />
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-lg font-bold text-casino-accent tabular-nums">&#9830;{earnedToday}</span>
+                      <span className="text-[10px] text-casino-text-tertiary">Clips</span>
+                    </div>
+                    <div className="w-px h-8 bg-white/10" />
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="text-lg font-bold text-casino-accent tabular-nums">{tokens}</span>
+                      <span className="text-[10px] text-casino-text-tertiary">Tokens</span>
+                    </div>
+                  </div>
+                );
+              })()}
               <HabitList
                 habits={habits}
                 jars={jars}
@@ -1053,23 +1093,6 @@ function App() {
                 onAdd={() => setShowCreateHabit(true)}
                 onQuickTask={() => setShowQuickTask(true)}
               />
-              <AnimatePresence>
-                {lastClip && (
-                  <motion.div
-                    key={lastClip}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="card-static rounded-2xl p-4 flex flex-col items-center"
-                  >
-                    <p className="text-xs text-casino-text-tertiary mb-2">You grabbed a clip!</p>
-                    <motion.div animate={{ rotate: [0, -10, 10, -10, 0] }} transition={{ duration: 0.5 }}>
-                      <SingleClip color={lastClip} />
-                    </motion.div>
-                    <p className="mt-2 font-medium text-sm capitalize text-casino-text">{lastClip}</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
               <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} />
               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
                 <button
@@ -1319,7 +1342,7 @@ function App() {
 
       {/* Modals */}
       <AnimatePresence>
-        {showTokenWheel && <TokenWheel onComplete={handleTokenWheelComplete} />}
+        {showTokenWheel && <TokenWheel onComplete={handleTokenWheelComplete} clipColor={lastClip} />}
         {showCashing && (
           <CashingSystem
             clips={inventory.clips}
@@ -1575,6 +1598,19 @@ function App() {
 
       {showConfetti && <JackpotConfetti />}
       {undoState && <UndoToast habitName={undoState.habit.name} secondsLeft={undoSeconds} onUndo={handleUndo} />}
+      {clipToast && (
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 60 }}
+          className="fixed bottom-32 md:bottom-20 left-1/2 -translate-x-1/2 z-50"
+        >
+          <div className="glass px-4 py-2.5 rounded-2xl flex items-center gap-3 animate-in">
+            <SingleClip color={clipToast.color} />
+            <span className="text-sm font-medium text-white capitalize">{clipToast.color} clip!</span>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

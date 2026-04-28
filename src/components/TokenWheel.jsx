@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import { Sparkles, XCircle, Trophy } from 'lucide-react';
 import { playSpinStart, playTickIfPassed, resetTickTracking, playTokenWin, playTokenMiss } from '../sounds';
+
+const CLIP_COLORS = { red: '#ef4444', blue: '#3b82f6', green: '#22c55e', yellow: '#eab308', purple: '#a855f7', orange: '#f97316', gold: '#e8b931' };
 
 // WIN = 60% = 216°, MISS = 40% = 144°
 const TOKEN_SEGMENTS = [
@@ -35,12 +37,21 @@ function getTextRotation(midAngle) {
   return a;
 }
 
-export default function TokenWheel({ onComplete }) {
+export default function TokenWheel({ onComplete, clipColor }) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [ringRotation, setRingRotation] = useState(0);
+  const [glowColor, setGlowColor] = useState('#22c55e');
   const controls = useAnimation();
+
+  useEffect(() => {
+    if (clipColor && CLIP_COLORS[clipColor]) {
+      setGlowColor(CLIP_COLORS[clipColor]);
+      const t = setTimeout(() => setGlowColor('#22c55e'), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [clipColor]);
 
   const spin = async () => {
     if (isSpinning) return;
@@ -76,7 +87,7 @@ export default function TokenWheel({ onComplete }) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-backdrop">
-      <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="modal-panel flex flex-col items-center">
+      <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="modal-panel flex flex-col items-center" style={{ borderColor: `${glowColor}40`, boxShadow: `0 0 30px ${glowColor}15, 0 24px 64px rgba(0,0,0,0.5)` }}>
         <h2 className="text-lg font-bold text-white mb-1">Token Spin</h2>
         <p className="text-xs text-casino-text-tertiary mb-6">60% chance to win a spin token</p>
 
