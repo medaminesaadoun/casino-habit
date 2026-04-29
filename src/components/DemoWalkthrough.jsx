@@ -73,8 +73,6 @@ function Scene2() {
           <path d={donutPath(CX.token, CY.token, INNER.token, OUTER.token, 0, 216)} fill="#22c55e" opacity="0.7" />
           <path d={donutPath(CX.token, CY.token, INNER.token, OUTER.token, 216, 360)} fill="#374151" opacity="0.5" />
           <circle cx="60" cy="60" r={OUTER.token} fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
-          <text x="60" y="58" textAnchor="middle" fill="white" fontSize="9" fontWeight="700">WIN</text>
-          <text x="60" y="70" textAnchor="middle" fill="white" fontSize="8" opacity="0.6">60%</text>
         </motion.svg>
         <svg className="absolute -top-1 left-1/2 -translate-x-1/2 z-10" width="16" height="18" viewBox="0 0 16 18">
           <path d="M8 16 L14 4 Q8 0 2 4 Z" fill="#e8b931" />
@@ -84,8 +82,9 @@ function Scene2() {
         </div>
       </div>
       {!spinning && (
-        <motion.div initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ duration: 0.4 }} className="text-2xl font-bold liquid-gold">
-          +1 Token
+        <motion.div initial={{ scale: 0 }} animate={{ scale: [0, 1.3, 1] }} transition={{ duration: 0.4 }} className="text-center">
+          <div className="text-2xl font-bold text-green-400">WIN!</div>
+          <div className="text-2xl font-bold liquid-gold mt-1">+1 Token</div>
         </motion.div>
       )}
     </div>
