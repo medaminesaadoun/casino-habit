@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Plus, Trash2 } from 'lucide-react';
 
@@ -87,6 +87,11 @@ export default function RewardCatalog({ catalog, onSave, onClose }) {
   const [newCustoms, setNewCustoms] = useState({ tier1: '', tier2: '', tier3: '', jackpot: '' });
   const [newIcons, setNewIcons] = useState({ tier1: '🎁', tier2: '🎁', tier3: '🎁', jackpot: '🎁' });
   const [showEmojiPicker, setShowEmojiPicker] = useState(null);
+
+  // Auto-fill simple defaults on mount if catalog is empty
+  useEffect(() => {
+    if (isSimple) applySimpleDefaults();
+  }, []); // eslint-disable-line
 
   const switchToSimple = () => {
     setIsSimple(true);
