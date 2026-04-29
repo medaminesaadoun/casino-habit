@@ -32,7 +32,8 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
         <span className="glass px-2 py-0.5 rounded-full text-xs font-semibold text-casino-accent tabular-nums">{rewards.length}</span>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+      <div className="relative">
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory pr-8">
         {rewards.map((reward) => {
           const claimedAt = new Date(reward.claimedAt).getTime();
           const graceMs = (reward.gracePeriodMinutes || 0) * 60000;
@@ -66,7 +67,7 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
               animate={{ scale: 1, opacity: 1 }}
               whileHover={{ scale: 1.02 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className={`glass shape-card min-w-[280px] max-w-[300px] lg:min-w-[320px] lg:max-w-[340px] shrink-0 overflow-hidden snap-start ${isExpiringSoon ? 'reward-expiring' : ''}`}
+              className={`glass shape-card min-w-[260px] max-w-[280px] lg:min-w-[290px] lg:max-w-[310px] shrink-0 overflow-hidden snap-start ${isExpiringSoon ? 'reward-expiring' : ''}`}
               style={{ borderLeft: `3px solid ${tierColor}` }}
             >
               <div className="p-3">
@@ -122,7 +123,15 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
             </motion.div>
           );
         })}
+        </div>
+
+        {/* Right-edge fade indicator for scrollable overflow */}
+        {rewards.length > 3 && (
+          <div
+            className="absolute right-0 top-0 bottom-0 w-12 pointer-events-none z-10"
+            style={{ background: 'linear-gradient(to right, transparent, var(--color-casino-bg))' }}
+          />
+        )}
       </div>
-    </div>
   );
 }

@@ -92,6 +92,7 @@ function App() {
   const [showRewardWon, setShowRewardWon] = useState(false);
   const [wonReward, setWonReward] = useState(null);
   const [wonTier, setWonTier] = useState(1);
+  const [wonRewardBankId, setWonRewardBankId] = useState(null);
   const [showJackpotChoice, setShowJackpotChoice] = useState(false);
   const [freeJackpotSpin, setFreeJackpotSpin] = useState(false);
   const [showQuickTask, setShowQuickTask] = useState(false);
@@ -404,6 +405,8 @@ function App() {
       tier,
       name: reward.name,
       icon: reward.icon,
+      durationMinutes: reward.durationMinutes ?? 60,
+      gracePeriodMinutes: reward.gracePeriodMinutes ?? 0,
       wonAt: new Date().toISOString(),
     };
     setInventory((prev) => {
@@ -412,23 +415,24 @@ function App() {
       if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
       return updated;
     });
-    setWonReward(reward);
+    setWonReward(bankEntry);
     setWonTier(tier);
+    setWonRewardBankId(bankEntry.id);
     setShowRewardWon(true);
   };
 
   const handleClaimReward = (bankEntry) => {
-    const catalogReward = findCatalogReward(bankEntry.name);
+    const grace = bankEntry.gracePeriodMinutes ?? 0;
     const activeEntry = {
       id: `active-${Date.now()}`,
       rewardName: bankEntry.name,
       icon: bankEntry.icon,
       tier: bankEntry.tier,
       claimedAt: new Date().toISOString(),
-      startedAt: null,
-      status: 'grace',
-      gracePeriodMinutes: catalogReward?.gracePeriodMinutes || 5,
-      durationMinutes: catalogReward?.durationMinutes || 60,
+      startedAt: grace === 0 ? new Date().toISOString() : null,
+      status: grace === 0 ? 'active' : 'grace',
+      gracePeriodMinutes: grace,
+      durationMinutes: bankEntry.durationMinutes ?? 60,
     };
 
     setInventory((prev) => {
@@ -440,6 +444,40 @@ function App() {
       if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
       return updated;
     });
+  };
+
+  const handleUseRewardNow = () => {
+    if (!wonRewardBankId) return;
+    setInventory((prev) => {
+      const bankEntry = (prev.rewardBank || []).find((r) => r.id === wonRewardBankId);
+      if (!bankEntry) return prev;
+      const grace = bankEntry.gracePeriodMinutes ?? 0;
+      const activeEntry = {
+        id: `active-${Date.now()}`,
+        rewardName: bankEntry.name,
+        icon: bankEntry.icon,
+        tier: bankEntry.tier,
+        claimedAt: new Date().toISOString(),
+        startedAt: grace === 0 ? new Date().toISOString() : null,
+        status: grace === 0 ? 'active' : 'grace',
+        gracePeriodMinutes: grace,
+        durationMinutes: bankEntry.durationMinutes ?? 60,
+      };
+      const updated = {
+        ...prev,
+        rewardBank: (prev.rewardBank || []).filter((r) => r.id !== wonRewardBankId),
+        activeRewards: [...(prev.activeRewards || []), activeEntry],
+      };
+      if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
+      return updated;
+    });
+    setShowRewardWon(false);
+    setWonRewardBankId(null);
+  };
+
+  const handleClaimRewardLater = () => {
+    setShowRewardWon(false);
+    setWonRewardBankId(null);
   };
 
   const findCatalogReward = (name) => {
@@ -806,7 +844,7 @@ function App() {
           </div>
           <div className="flex items-center gap-2">
             <div className="glass rounded-xl p-1 flex items-center gap-1">
-              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-bold tabular-nums">
+              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-bold tabular-nums" title="Spin tokens">
                 <Sparkles size={14} className="text-casino-accent" />
                 <motion.span
                   key={inventory.spinTokens}
@@ -829,12 +867,12 @@ function App() {
                   <div className="w-px h-5 bg-white/10" />
                 </>
               )}
-              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold text-white tabular-nums">
+              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold text-white tabular-nums" title="Total clips">
                 <Paperclip size={14} className="text-casino-text-secondary" />
                 <span>{inventory.clips.length}</span>
               </div>
               <div className="w-px h-5 bg-white/10" />
-              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold tabular-nums" style={{ color: 'var(--color-casino-accent)' }}>
+              <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold tabular-nums" style={{ color: 'var(--color-casino-accent)' }} title="Current tier">
                 <Crown size={14} />
                 <span>T{inventory.activeTier}</span>
               </div>
@@ -1362,7 +1400,7 @@ function App() {
           />
         )}
         {showRewardWon && wonReward && (
-          <RewardWonModal reward={wonReward} tier={wonTier} onDismiss={() => setShowRewardWon(false)} />
+          <RewardWonModal reward={wonReward} tier={wonTier} onUseNow={handleUseRewardNow} onClaimLater={handleClaimRewardLater} />
         )}
         {showJackpotChoice && (
           <JackpotChoiceModal onSelect={handleJackpotChoice} onClose={() => setShowJackpotChoice(false)} />

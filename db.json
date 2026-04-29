@@ -115,183 +115,24 @@
   "rewardCatalog": {
     "id": "catalog-1",
     "tier1": [
-      {
-        "id": "r1-1",
-        "name": "15 min YouTube",
-        "icon": "📺",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 10
-      },
-      {
-        "id": "r1-2",
-        "name": "Coffee run",
-        "icon": "☕",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 10
-      },
-      {
-        "id": "r1-3",
-        "name": "Favorite snack",
-        "icon": "🍿",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 10
-      },
-      {
-        "id": "r1-4",
-        "name": "1 album / podcast",
-        "icon": "🎧",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 10
-      },
-      {
-        "id": "r1-5",
-        "name": "10 min meditation",
-        "icon": "🧘",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 10
-      },
-      {
-        "id": "r1-6",
-        "name": "Sit outside",
-        "icon": "🌿",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 10
-      }
+      { "id": "simple-t1-1", "name": "Quick pause", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 5 },
+      { "id": "simple-t1-2", "name": "Short break", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 10 },
+      { "id": "simple-t1-3", "name": "Extended break", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 15 }
     ],
     "tier2": [
-      {
-        "id": "r2-1",
-        "name": "1 hour gaming",
-        "icon": "🎮",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 30
-      },
-      {
-        "id": "r2-2",
-        "name": "1 episode / movie",
-        "icon": "📺",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 30
-      },
-      {
-        "id": "r2-3",
-        "name": "Order takeout",
-        "icon": "🍕",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 30
-      },
-      {
-        "id": "r2-4",
-        "name": "Call a friend",
-        "icon": "👥",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 30
-      },
-      {
-        "id": "r2-5",
-        "name": "$20–30 purchase",
-        "icon": "🛒",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 3,
-        "durationMinutes": 30
-      }
+      { "id": "simple-t2-1", "name": "Free time", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 20 },
+      { "id": "simple-t2-2", "name": "Half hour", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 30 },
+      { "id": "simple-t2-3", "name": "Long break", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 45 }
     ],
     "tier3": [
-      {
-        "id": "r3-1",
-        "name": "Day trip / beach",
-        "icon": "🏖️",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 5,
-        "durationMinutes": 60
-      },
-      {
-        "id": "r3-2",
-        "name": "Movie theater",
-        "icon": "🎬",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 5,
-        "durationMinutes": 60
-      },
-      {
-        "id": "r3-3",
-        "name": "Spa / massage",
-        "icon": "💆",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 5,
-        "durationMinutes": 60
-      },
-      {
-        "id": "r3-4",
-        "name": "$50–100 shopping",
-        "icon": "🛒",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 5,
-        "durationMinutes": 60
-      },
-      {
-        "id": "r3-5",
-        "name": "Host game night",
-        "icon": "🎉",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 5,
-        "durationMinutes": 60
-      }
+      { "id": "simple-t3-1", "name": "Free time", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 45 },
+      { "id": "simple-t3-2", "name": "Free hour", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 60 },
+      { "id": "simple-t3-3", "name": "Extended", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 90 }
     ],
     "jackpot": [
-      {
-        "id": "rj-1",
-        "name": "Weekend pass",
-        "icon": "🏝️",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 10,
-        "durationMinutes": 120
-      },
-      {
-        "id": "rj-2",
-        "name": "$100–200 splurge",
-        "icon": "💰",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 10,
-        "durationMinutes": 120
-      },
-      {
-        "id": "rj-3",
-        "name": "Mini vacation",
-        "icon": "✈️",
-        "enabled": true,
-        "custom": false,
-        "gracePeriodMinutes": 10,
-        "durationMinutes": 120
-      }
+      { "id": "simple-jp-1", "name": "Me time", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 120 },
+      { "id": "simple-jp-2", "name": "Half day", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 180 },
+      { "id": "simple-jp-3", "name": "Day off", "icon": "⏱️", "enabled": true, "custom": true, "gracePeriodMinutes": 0, "durationMinutes": 240 }
     ]
   },
   "inventory": {

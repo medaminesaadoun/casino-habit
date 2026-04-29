@@ -1,17 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Gift, X } from 'lucide-react';
+import { Sparkles, Gift, X, Zap, Clock } from 'lucide-react';
 
 const TIER_COLORS = { 1: '#ef4444', 2: '#3b82f6', 3: '#a855f7', 4: '#e8b931' };
 const TIER_LABELS = { 1: 'Tier 1', 2: 'Tier 2', 3: 'Tier 3', 4: 'Jackpot' };
 
 const BURST_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
-export default function RewardWonModal({ reward, tier, onDismiss }) {
+export default function RewardWonModal({ reward, tier, onUseNow, onClaimLater }) {
   const color = TIER_COLORS[tier];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-backdrop" onClick={onDismiss}>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-backdrop" onClick={onClaimLater}>
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -28,7 +28,7 @@ export default function RewardWonModal({ reward, tier, onDismiss }) {
           transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
         />
 
-        <button onClick={onDismiss} className="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center text-casino-text-tertiary hover:text-white hover:bg-white/5 transition-colors z-10">
+        <button onClick={onClaimLater} className="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center text-casino-text-tertiary hover:text-white hover:bg-white/5 transition-colors z-10">
           <X size={18} />
         </button>
 
@@ -44,7 +44,6 @@ export default function RewardWonModal({ reward, tier, onDismiss }) {
 
         {/* Icon with bounce-wiggle + particle burst */}
         <div className="relative inline-block mb-4">
-          {/* SVG particle burst */}
           <motion.svg
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{ width: 120, height: 120 }}
@@ -85,16 +84,22 @@ export default function RewardWonModal({ reward, tier, onDismiss }) {
         </motion.h2>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-xs font-body text-casino-text-tertiary mb-6">
-          Added to your Reward Bank
+          What would you like to do?
         </motion.p>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="space-y-3">
           <button
-            onClick={onDismiss}
-            className="btn-pill btn-gold w-full py-3"
+            onClick={onUseNow}
+            className="btn-pill btn-gold w-full py-3 text-sm font-bold"
             style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 24px ${color}50, 0 0 48px ${color}20` }}
           >
-            <Gift size={16} />Collect
+            <Zap size={16} /> Use Now
+          </button>
+          <button
+            onClick={onClaimLater}
+            className="text-xs text-casino-text-tertiary hover:text-casino-text-secondary transition-colors w-full py-1"
+          >
+            <Clock size={12} className="inline mr-1" />Claim for Later
           </button>
         </motion.div>
       </motion.div>

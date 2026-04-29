@@ -202,16 +202,9 @@ export default function HabitList({ habits, jars, tags, onComplete, onEdit, onDe
           <span className="glass px-2 py-0.5 rounded-full text-xs text-casino-text-tertiary tabular-nums">{habits.length} habits</span>
           <span className="glass px-2 py-0.5 rounded-full text-xs text-casino-text-tertiary tabular-nums">{weeklyTotal} this week</span>
         </div>
-        <div className="flex items-center gap-1.5">
-          {onQuickTask && (
-            <button onClick={onQuickTask} className="text-[10px] font-semibold text-casino-text-tertiary hover:text-casino-text-secondary transition-colors px-2 py-1.5 rounded-xl hover:bg-white/5">
-              <Zap size={12} className="inline mr-1" />Just Done
-            </button>
-          )}
-          <button onClick={onAdd} className="btn-pill btn-ghost text-xs font-semibold flex items-center gap-1.5">
-            <PlusIcon size={14} /> Add Habit
-          </button>
-        </div>
+        <button onClick={onAdd} className="btn-pill btn-ghost text-xs font-semibold flex items-center gap-1.5">
+          <PlusIcon size={14} /> Add Habit
+        </button>
       </div>
 
       {/* Tag filter bar */}
@@ -233,6 +226,29 @@ export default function HabitList({ habits, jars, tags, onComplete, onEdit, onDe
             </button>
           ))}
         </div>
+      )}
+
+      {/* Quick Log CTA — full-width gold strip */}
+      {onQuickTask && (
+        <motion.button
+          onClick={onQuickTask}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="glass-float gold-foil w-full py-3 px-4 mb-4 flex items-center gap-3 rounded-2xl text-left transition-all cursor-pointer"
+        >
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: 'rgba(232,185,49,0.15)' }}>
+            <Zap size={18} className="text-casino-accent" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-white">Quick Log</p>
+            <p className="text-xs text-casino-text-tertiary">Did something? Log it — no habit setup needed</p>
+          </div>
+          <div className="w-5 h-5 rounded-full bg-casino-accent/20 flex items-center justify-center shrink-0">
+            <Zap size={11} className="text-casino-accent" />
+          </div>
+        </motion.button>
       )}
 
       {habits.length === 0 ? (

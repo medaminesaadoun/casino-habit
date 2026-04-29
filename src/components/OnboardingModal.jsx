@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, X, Check, ListTodo, Gem, Dices, Gift } from 'lucide-react';
+import { ChevronRight, ChevronLeft, X, Check, ListTodo, Gem, Dices, Gift, Shield, Zap } from 'lucide-react';
 
 const STEP1 = (
   <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -131,6 +131,19 @@ const STEP5 = (
   </svg>
 );
 
+const STEP6 = (
+  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="140" cy="58" r="38" fill="rgba(255,255,255,0.02)" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.4" />
+    <path d="M132 58 L138 66 L150 48" stroke="#e8b931" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.8" />
+    <text x="140" y="115" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="10" fontWeight="600" fontFamily="DM Sans, sans-serif">Complete your habit before the reward</text>
+    <rect x="24" y="128" width="232" height="2" rx="1" fill="rgba(255,255,255,0.05)" />
+    <circle cx="80" cy="155" r="5" fill="#e8b931" fillOpacity="0.3" />
+    <text x="95" y="159" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="DM Sans, sans-serif">Timer starts when you begin</text>
+    <circle cx="80" cy="175" r="5" fill="#e8b931" fillOpacity="0.3" />
+    <text x="95" y="179" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="DM Sans, sans-serif">Honor system — the app trusts you</text>
+  </svg>
+);
+
 const STEPS = [
   {
     title: 'Complete Habits',
@@ -162,7 +175,7 @@ const STEPS = [
     icon: Dices,
     color: '#e8b931',
     illustration: STEP4,
-    bullets: ['Normal spin = 1 token', 'Mega spin = 5 tokens (boosted odds)', '5 reward tiers: T1 → Jackpot', 'Bonus wheel on Bonus land', 'Near-miss keeps it exciting'],
+    bullets: ['Normal spin = 1 token', 'Mega spin = 5 tokens (boosted odds)', 'Mega spin ignores tier — land = win', 'Use Quick Lock to log without a habit', 'Bonus wheel on Bonus land', 'Near-miss keeps it exciting'],
   },
   {
     title: 'Claim & Enjoy',
@@ -171,6 +184,14 @@ const STEPS = [
     color: '#22c55e',
     illustration: STEP5,
     bullets: ['Win → reward goes to your bank', 'Claim → grace period starts', 'Skip grace → active timer begins', 'Complete before it expires', 'Dismiss expired rewards anytime'],
+  },
+  {
+    title: 'Play Fair',
+    subtitle: 'Earn rewards by completing habits first',
+    icon: Shield,
+    color: '#e8b931',
+    illustration: STEP6,
+    bullets: ['Complete your habit before the reward', 'Timer starts when you begin the reward', 'No shortcuts — the app trusts you', 'Rewards only count after the timer starts'],
   },
 ];
 
