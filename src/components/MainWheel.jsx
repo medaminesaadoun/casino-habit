@@ -446,6 +446,7 @@ export default function MainWheel({
       {/* Spin button */}
       <button
         onClick={spinWheel}
+        data-tour="wheel-spin"
         disabled={isSpinning || isLocked}
         className={`btn-pill text-base font-bold tracking-wide px-12 py-4 ${
           isSpinning || isLocked

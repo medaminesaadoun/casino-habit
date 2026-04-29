@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Diamond, Plus, Trash2, Sparkles, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy, HelpCircle } from 'lucide-react';
+import { Diamond, Plus, Trash2, Sparkles, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy, HelpCircle, RotateCcw } from 'lucide-react';
 import { playComplete, playClipDrop, playCashIn, playRewardWon, playClick, toggleMute, getMuteState } from './sounds';
 import { api } from './api';
 import Jars from './components/Jars';
@@ -23,6 +23,10 @@ import BottomNav from './components/BottomNav';
 import TopNav from './components/TopNav';
 import UndoToast from './components/UndoToast';
 import OnboardingModal from './components/OnboardingModal';
+import DemoWalkthrough from './components/DemoWalkthrough';
+import TourTooltip from './components/TourTooltip';
+import DemoWalkthrough from './components/DemoWalkthrough';
+import TourTooltip from './components/TourTooltip';
 
 const CLIP_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'gold'];
 const CLIP_WEIGHTS = [20, 20, 20, 20, 15, 4.9, 0.1];
@@ -120,6 +124,10 @@ function App() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [unseenRewards, setUnseenRewards] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
+  const [tourStep, setTourStep] = useState(-1);
+  const [tourActive, setTourActive] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [undoState, setUndoState] = useState(null);
   const [undoSeconds, setUndoSeconds] = useState(10);
   const [clipToast, setClipToast] = useState(null);
@@ -160,11 +168,77 @@ function App() {
   useEffect(() => {
     const saved = localStorage.getItem('ch_theme');
     if (saved) setTheme(saved);
-    // Show onboarding on first visit
-    if (!localStorage.getItem('ch_onboarded')) {
-      setShowOnboarding(true);
+    // Demo walkthrough on first visit (replaces old onboarding)
+    if (!localStorage.getItem('ch_walkthrough_done')) {
+      setShowDemo(true);
+    } else if (!localStorage.getItem('ch_tour_done')) {
+      setTourActive(true);
     }
   }, []);
+
+  // ~~~~ Tour ~~~~
+  const TOUR_STEPS = [
+    { selector: 'add-habit', title: 'Create your first habit', desc: 'Tap + Add Habit to begin tracking' },
+    { selector: 'complete-btn', title: 'Complete your habit', desc: 'Tap the ✓ button after finishing' },
+    { selector: 'token-spin', title: 'Spin the Token Wheel', desc: '60% chance to win a spin token' },
+    { selector: 'wheel-spin', title: 'Spin the Main Wheel', desc: 'Use tokens to win time-based rewards' },
+  ];
+
+  const handleDemoComplete = () => {
+    localStorage.setItem('ch_walkthrough_done', '1');
+    setShowDemo(false);
+    setTourActive(true);
+    setTourStep(0);
+  };
+
+  const handleSkipTour = () => {
+    localStorage.setItem('ch_tour_done', '1');
+    setTourActive(false);
+    setTourStep(-1);
+  };
+
+  const tryAdvanceTour = (step) => {
+    if (!tourActive || tourStep !== step) return;
+    if (step < TOUR_STEPS.length - 1) setTourStep(step + 1);
+    else { localStorage.setItem('ch_tour_done', '1'); setTourActive(false); setTourStep(-1); }
+  };
+
+  const handleResetAll = () => {
+    localStorage.clear();
+    const defaults = {
+      tier1: [
+        { id: 'simple-t1-1', name: 'Quick pause', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 5 },
+        { id: 'simple-t1-2', name: 'Short break', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 10 },
+        { id: 'simple-t1-3', name: 'Extended break', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 15 },
+      ],
+      tier2: [
+        { id: 'simple-t2-1', name: 'Free time', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 20 },
+        { id: 'simple-t2-2', name: 'Half hour', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 30 },
+        { id: 'simple-t2-3', name: 'Long break', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 45 },
+      ],
+      tier3: [
+        { id: 'simple-t3-1', name: 'Free time', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 45 },
+        { id: 'simple-t3-2', name: 'Free hour', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 60 },
+        { id: 'simple-t3-3', name: 'Extended', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 90 },
+      ],
+      jackpot: [
+        { id: 'simple-jp-1', name: 'Me time', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 120 },
+        { id: 'simple-jp-2', name: 'Half day', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 180 },
+        { id: 'simple-jp-3', name: 'Day off', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 240 },
+      ],
+    };
+    setInventory({ clips: [], activeTier: 1, cashedColors: [], spinTokens: 0, rewardBank: [], activeRewards: [], rainmakerRemaining: 0, lifetimeClips: {} });
+    setJars([]);
+    setHabits([]);
+    setHistory([]);
+    setRewardCatalog(defaults);
+    setShowResetConfirm(false);
+    localStorage.removeItem('ch_walkthrough_done');
+    localStorage.removeItem('ch_tour_done');
+    setShowDemo(true);
+    setTourActive(false);
+    setTourStep(-1);
+  };
 
   useEffect(() => {
     if (showConfetti) {
@@ -291,6 +365,7 @@ function App() {
 
     setPendingTokenHabit(habit);
     setShowTokenWheel(true);
+    tryAdvanceTour(1);
   };
 
   const handleUndo = () => {
@@ -351,6 +426,7 @@ function App() {
       }
       setPendingTokenHabit(null);
     }
+    tryAdvanceTour(2);
   };
 
   const handleConsumeToken = () => {
@@ -647,9 +723,10 @@ function App() {
       }, 1500);
     } else if (spinResult.effective.startsWith('Tier') || spinResult.effective === 'Jackpot') {
       setTimeout(() => {
-        handleRewardFromTier(spinResult.effective);
+          handleRewardFromTier(spinResult.effective);
       }, 2000);
     }
+    tryAdvanceTour(3);
   };
 
   const handleJackpotChoice = (choice) => {
@@ -767,6 +844,7 @@ function App() {
     setNewHabitTags([]);
     setShowCreateHabit(false);
     if (useApi) api.createHabit(newHabit).catch(() => setUseApi(false));
+    tryAdvanceTour(0);
   };
 
   const handleEditHabit = (habit) => {
@@ -828,6 +906,7 @@ function App() {
     setShowQuickTask(false);
     setPendingTokenHabit(null);
     setShowTokenWheel(true);
+    tryAdvanceTour(1);
   };
 
   const [newJarName, setNewJarName] = useState('');
@@ -934,6 +1013,13 @@ function App() {
               title="How to play"
             >
               <HelpCircle size={16} />
+            </button>
+            <button
+              onClick={() => { playClick(); setShowResetConfirm(true); }}
+              className="w-9 h-9 rounded-xl flex items-center justify-center glass btn-ghost"
+              title="Reset all data"
+            >
+              <RotateCcw size={16} />
             </button>
 
           </div>
@@ -1676,9 +1762,32 @@ function App() {
         {showOnboarding && (
           <OnboardingModal onClose={() => { setShowOnboarding(false); localStorage.setItem('ch_onboarded', '1'); }} />
         )}
+        {showResetConfirm && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-backdrop" onClick={() => setShowResetConfirm(false)}>
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="modal-panel text-center max-w-sm" onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-lg font-bold text-casino-danger mb-3">Reset Everything?</h2>
+              <p className="text-xs text-casino-text-secondary mb-4">This will erase all your habits, jars, clips, tokens, rewards and history. This cannot be undone.</p>
+              <div className="space-y-2">
+                <button onClick={handleResetAll} className="btn-pill w-full py-2.5 text-sm font-bold" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', boxShadow: '0 2px 16px rgba(239,68,68,0.3)' }}>Yes, Reset Everything</button>
+                <button onClick={() => setShowResetConfirm(false)} className="text-xs text-casino-text-tertiary hover:text-casino-text-secondary transition-colors w-full py-2">Never Mind</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {showConfetti && <JackpotConfetti />}
+      {showDemo && <DemoWalkthrough onComplete={handleDemoComplete} />}
+      {tourActive && tourStep >= 0 && (
+        <TourTooltip
+          step={tourStep}
+          total={TOUR_STEPS.length}
+          title={TOUR_STEPS[tourStep].title}
+          description={TOUR_STEPS[tourStep].desc}
+          targetSelector={TOUR_STEPS[tourStep].selector}
+          onSkip={handleSkipTour}
+        />
+      )}
       {undoState && <UndoToast habitName={undoState.habit.name} secondsLeft={undoSeconds} onUndo={handleUndo} />}
       {clipToast && (
         <motion.div

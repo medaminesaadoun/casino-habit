@@ -172,6 +172,7 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete, index }) {
           {/* Complete button */}
           <motion.button
             onClick={() => onComplete(habit)}
+            data-tour="complete-btn"
             whileTap={{ scale: 0.93 }}
             className="btn-pill w-full py-2.5 text-sm font-semibold"
             style={{
@@ -202,7 +203,7 @@ export default function HabitList({ habits, jars, tags, onComplete, onEdit, onDe
           <span className="glass px-2 py-0.5 rounded-full text-xs text-casino-text-tertiary tabular-nums">{habits.length} habits</span>
           <span className="glass px-2 py-0.5 rounded-full text-xs text-casino-text-tertiary tabular-nums">{weeklyTotal} this week</span>
         </div>
-        <button onClick={onAdd} className="btn-pill btn-ghost text-xs font-semibold flex items-center gap-1.5">
+        <button onClick={onAdd} data-tour="add-habit" className="btn-pill btn-ghost text-xs font-semibold flex items-center gap-1.5">
           <PlusIcon size={14} /> Add Habit
         </button>
       </div>
@@ -256,7 +257,7 @@ export default function HabitList({ habits, jars, tags, onComplete, onEdit, onDe
           <motion.div className="empty-float text-4xl mb-4">🎯</motion.div>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="text-casino-text-secondary text-sm mb-1">No habits yet</motion.p>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }} className="text-casino-text-tertiary text-xs mb-5">Create one to start earning clips</motion.p>
-          <motion.button onClick={onAdd} className="btn-pill btn-gold text-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
+          <motion.button onClick={onAdd} data-tour="add-habit" className="btn-pill btn-gold text-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}>
             Create your first habit
           </motion.button>
         </motion.div>
