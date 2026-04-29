@@ -196,7 +196,8 @@ function App() {
   };
 
   const tryAdvanceTour = (step) => {
-    if (!tourActive || tourStep !== step) return;
+    if (!tourActive || tourStep > step) return;
+    if (tourStep < step) return; // allow later steps to catch up
     if (step < TOUR_STEPS.length - 1) setTourStep(step + 1);
     else { localStorage.setItem('ch_tour_done', '1'); setTourActive(false); setTourStep(-1); }
   };

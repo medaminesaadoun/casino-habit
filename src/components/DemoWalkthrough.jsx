@@ -66,7 +66,7 @@ function Scene2() {
       <div className="relative" style={{ width: 120, height: 120 }}>
         <motion.svg
           width="120" height="120" viewBox="0 0 120 120"
-          animate={{ rotate: spinning ? 360 * 4 + 108 : 360 * 4 + 108 }}
+          animate={{ rotate: spinning ? 360 * 4 + 252 : 360 * 4 + 252 }}
           transition={{ duration: spinning ? 3 : 0, ease: spinning ? [0.15, 0.85, 0.35, 1] : 'linear' }}
           style={{ transformOrigin: '60px 60px' }}
         >
@@ -151,10 +151,10 @@ function Scene3() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
             className="glass p-3 rounded-2xl text-center"
-            style={{ borderTop: '3px solid #a855f7', boxShadow: '0 0 24px #a855f720' }}
+            style={{ borderTop: '3px solid #e8b931', boxShadow: '0 0 24px #e8b93120' }}
           >
-            <p className="text-sm font-bold text-white">Free hour</p>
-            <p className="text-xs text-casino-text-secondary">60 min · Tier 3</p>
+            <p className="text-sm font-bold text-white">Short break</p>
+            <p className="text-xs text-casino-text-secondary">10 min · Spin & win time rewards</p>
           </motion.div>
         </>
       )}
@@ -165,7 +165,7 @@ function Scene3() {
 const SCENES = [
   { component: Scene1, caption: 'Complete habits → earn random clips', color: '#ef4444' },
   { component: Scene2, caption: 'Win tokens to spin the Main Wheel', color: '#22c55e' },
-  { component: Scene3, caption: 'Land rewards. Claim them. Enjoy.', color: '#a855f7' },
+  { component: Scene3, caption: 'Land rewards. Claim them. Enjoy.', color: '#e8b931' },
 ];
 
 export default function DemoWalkthrough({ onComplete, onSkip }) {
