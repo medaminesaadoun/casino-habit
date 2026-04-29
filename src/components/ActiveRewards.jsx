@@ -133,5 +133,6 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
           />
         )}
       </div>
+    </div>
   );
 }
