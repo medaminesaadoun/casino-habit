@@ -16,7 +16,7 @@ function formatTime(ms) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, onDismissExpired, onCancelGrace }) {
+export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, onDismissExpired, onCancelGrace, onRequestConfirm }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -105,7 +105,13 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
                   )}
                   {status === 'active' && (
                     <button
-                      onClick={() => { if (window.confirm(`Complete "${reward.rewardName}" early?`)) onCompleteEarly(reward); }}
+                      onClick={() => {
+                        onRequestConfirm({
+                          title: 'Complete Early?',
+                          message: `Mark "${reward.rewardName}" as done before the timer ends?`,
+                          onConfirm: () => onCompleteEarly(reward),
+                        });
+                      }}
                       className="px-2 py-0.5 rounded-lg text-[10px] font-semibold transition-colors"
                       style={{
                         backgroundColor: 'color-mix(in srgb, var(--color-casino-success) 12%, transparent)',

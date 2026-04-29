@@ -76,7 +76,7 @@ function getHintMessage(clips, counts, activeTier) {
   return { text: 'Tier 3 maxed — no more upgrades', type: 'maxed' };
 }
 
-export default function ClipInventory({ clips, activeTier, lifetimeClips, onDeleteAll }) {
+export default function ClipInventory({ clips, activeTier, lifetimeClips, onDeleteAll, onRequestConfirm }) {
   const counts = clips.reduce((acc, clip) => {
     acc[clip] = (acc[clip] || 0) + 1;
     return acc;
@@ -101,7 +101,14 @@ export default function ClipInventory({ clips, activeTier, lifetimeClips, onDele
         </div>
         {clips.length > 0 && (
           <button
-            onClick={() => { if (window.confirm(`Delete all ${clips.length} clips?`)) onDeleteAll(); }}
+            onClick={() => {
+              onRequestConfirm({
+                title: 'Delete All Clips?',
+                message: `Remove all ${clips.length} clips from your collection? This cannot be undone.`,
+                danger: true,
+                onConfirm: onDeleteAll,
+              });
+            }}
             className="btn-pill btn-ghost text-xs flex items-center gap-1 text-casino-danger"
           >
             <Trash2 size={12} /> Clear

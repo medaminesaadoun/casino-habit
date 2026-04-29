@@ -30,7 +30,7 @@ function getDaysOld(wonAt) {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
-export default function RewardBank({ rewards, onClaim, onDeleteAll }) {
+export default function RewardBank({ rewards, onClaim, onDeleteAll, onRequestConfirm }) {
   const [filter, setFilter] = useState('All');
   const sorted = [...rewards].sort((a, b) => new Date(b.wonAt) - new Date(a.wonAt));
   const filtered = filter === 'All'
@@ -46,7 +46,14 @@ export default function RewardBank({ rewards, onClaim, onDeleteAll }) {
           {rewards.length > 0 && <span className="glass px-2 py-0.5 rounded-full text-xs font-semibold text-casino-text-secondary tabular-nums">{rewards.length}</span>}
         </div>
         {rewards.length > 0 && (
-          <button onClick={() => { if (window.confirm('Delete all unclaimed rewards?')) onDeleteAll(); }}
+          <button onClick={() => {
+            onRequestConfirm({
+              title: 'Delete All Rewards?',
+              message: 'Remove all unclaimed rewards from your bank? This cannot be undone.',
+              danger: true,
+              onConfirm: onDeleteAll,
+            });
+          }}
             className="btn-pill btn-ghost text-xs flex items-center gap-1 text-casino-danger">
             <Trash2 size={12} /> Clear
           </button>

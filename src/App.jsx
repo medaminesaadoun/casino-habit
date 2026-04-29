@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Diamond, Plus, Trash2, Sparkles, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy, HelpCircle, RotateCcw } from 'lucide-react';
+import { Diamond, Plus, Trash2, Sparkles, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy, HelpCircle, RotateCcw, Settings as SettingsIcon } from 'lucide-react';
 import { playComplete, playClipDrop, playCashIn, playRewardWon, playClick, toggleMute, getMuteState } from './sounds';
 import { api } from './api';
 import Jars from './components/Jars';
@@ -25,6 +25,10 @@ import UndoToast from './components/UndoToast';
 import OnboardingModal from './components/OnboardingModal';
 import DemoWalkthrough from './components/DemoWalkthrough';
 import TourTooltip from './components/TourTooltip';
+import ConfirmModal from './components/ConfirmModal';
+import ToastContainer from './components/ToastContainer';
+import SessionSummaryModal from './components/SessionSummaryModal';
+import SettingsModal from './components/SettingsModal';
 
 const CLIP_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'gold'];
 const CLIP_WEIGHTS = [20, 20, 20, 20, 15, 4.9, 0.1];
@@ -125,7 +129,6 @@ function App() {
   const [showDemo, setShowDemo] = useState(false);
   const [tourStep, setTourStep] = useState(-1);
   const [tourActive, setTourActive] = useState(false);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [undoState, setUndoState] = useState(null);
   const [undoSeconds, setUndoSeconds] = useState(10);
   const [clipToast, setClipToast] = useState(null);
@@ -133,6 +136,10 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [useApi, setUseApi] = useState(true);
   const [isMuted, setIsMuted] = useState(() => getMuteState());
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null, danger: false });
+  const [toasts, setToasts] = useState([]);
+  const [sessionSummary, setSessionSummary] = useState({ isOpen: false, habit: null, clip: null, tokenWon: false });
+  const [showSettings, setShowSettings] = useState(false);
   const inventoryRef = useRef(inventory);
 
   // Keep inventoryRef in sync for stale-closure-safe access
@@ -202,6 +209,14 @@ function App() {
     else { localStorage.setItem('ch_tour_done', '1'); setTourActive(false); setTourStep(-1); }
   };
 
+  const openConfirm = (config) => setConfirmModal({ ...config, isOpen: true });
+  const closeConfirm = () => setConfirmModal(prev => ({ ...prev, isOpen: false }));
+  const addToast = (message, type = 'info', duration = 3000) => {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, message, type, duration }]);
+  };
+  const removeToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
+
   const handleResetAll = () => {
     localStorage.clear();
     const defaults = {
@@ -231,7 +246,8 @@ function App() {
     setHabits([]);
     setHistory([]);
     setRewardCatalog(defaults);
-    setShowResetConfirm(false);
+    addToast('All data reset', 'warning');
+    closeConfirm();
     localStorage.removeItem('ch_walkthrough_done');
     localStorage.removeItem('ch_tour_done');
     setShowDemo(true);
@@ -418,6 +434,14 @@ function App() {
       }
       return prev;
     });
+    // Show session summary
+    setSessionSummary({
+      isOpen: true,
+      habit: pendingTokenHabit,
+      clip: lastClip,
+      tokenWon: won,
+    });
+
     if (pendingTokenHabit) {
       if (isCashingEligible(inventoryRef.current.clips, inventoryRef.current.activeTier)) {
         setCashingDefaultJarId(pendingTokenHabit.jarId);
@@ -483,6 +507,7 @@ function App() {
 
     setShowCashing(false);
     setCashingDefaultJarId(null);
+    addToast('Clips cashed in! Tier upgraded', 'success');
   };
 
   const handleRewardFromTier = (tierLabel) => {
@@ -561,6 +586,7 @@ function App() {
       if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
       return updated;
     });
+    addToast('Reward activated', 'success');
   };
 
   const handleUseRewardNow = () => {
@@ -637,6 +663,7 @@ function App() {
     };
     setHistory((prev) => [...prev, claimEntry]);
     if (useApi) api.addHistory(claimEntry).catch(() => setUseApi(false));
+    addToast('Reward completed', 'success');
   };
 
   const handleDismissExpired = (activeReward) => {
@@ -658,6 +685,7 @@ function App() {
     setRewardCatalog(newCatalog);
     setShowRewardCatalog(false);
     if (useApi) api.updateRewardCatalog(newCatalog).catch(() => setUseApi(false));
+    addToast('Reward catalog updated', 'success');
   };
 
   const handleSpinComplete = (spinResult, options = {}) => {
@@ -795,6 +823,7 @@ function App() {
     // Reopen habit form if it was closed to create this jar
     setShowCreateHabit(true);
     if (useApi) api.createJar(newJar).catch(() => setUseApi(false));
+    addToast('Jar created', 'success');
   };
 
   const handleEditJar = (jar) => {
@@ -808,12 +837,21 @@ function App() {
     setShowEditJar(false);
     setEditingJar(null);
     if (useApi) api.updateJar(editingJar.id, editingJar).catch(() => setUseApi(false));
+    addToast('Jar updated', 'success');
   };
 
-  const handleDeleteJar = async (id) => {
-    if (!window.confirm('Delete this jar?')) return;
-    setJars((prev) => prev.filter((j) => j.id !== id));
-    if (useApi) api.deleteJar(id).catch(() => setUseApi(false));
+  const handleDeleteJar = (id) => {
+    openConfirm({
+      title: 'Delete Jar?',
+      message: 'This jar and its associated data will be removed. This cannot be undone.',
+      danger: true,
+      onConfirm: () => {
+        setJars((prev) => prev.filter((j) => j.id !== id));
+        if (useApi) api.deleteJar(id).catch(() => setUseApi(false));
+        addToast('Jar deleted', 'success');
+        closeConfirm();
+      },
+    });
   };
 
   const updateEditingMilestone = (idx, field, value) => {
@@ -843,6 +881,7 @@ function App() {
     setNewHabitTags([]);
     setShowCreateHabit(false);
     if (useApi) api.createHabit(newHabit).catch(() => setUseApi(false));
+    addToast('Habit saved', 'success');
     tryAdvanceTour(0);
   };
 
@@ -857,12 +896,21 @@ function App() {
     setShowEditHabit(false);
     setEditingHabit(null);
     if (useApi) api.updateHabit(editingHabit.id, editingHabit).catch(() => setUseApi(false));
+    addToast('Habit updated', 'success');
   };
 
-  const handleDeleteHabit = async (id) => {
-    if (!window.confirm('Delete this habit?')) return;
-    setHabits((prev) => prev.filter((h) => h.id !== id));
-    if (useApi) api.deleteHabit(id).catch(() => setUseApi(false));
+  const handleDeleteHabit = (id) => {
+    openConfirm({
+      title: 'Delete Habit?',
+      message: 'This habit and its history will be removed. This cannot be undone.',
+      danger: true,
+      onConfirm: () => {
+        setHabits((prev) => prev.filter((h) => h.id !== id));
+        if (useApi) api.deleteHabit(id).catch(() => setUseApi(false));
+        addToast('Habit deleted', 'success');
+        closeConfirm();
+      },
+    });
   };
 
   const handleDeleteAllClips = async () => {
@@ -874,8 +922,16 @@ function App() {
   };
 
   const handleClearHistory = () => {
-    if (!window.confirm('Clear all history?')) return;
-    setHistory([]);
+    openConfirm({
+      title: 'Clear History?',
+      message: 'All activity history will be permanently deleted. This cannot be undone.',
+      danger: true,
+      onConfirm: () => {
+        setHistory([]);
+        addToast('History cleared', 'success');
+        closeConfirm();
+      },
+    });
   };
 
   const handleQuickTaskComplete = (name, jarId) => {
@@ -1000,11 +1056,11 @@ function App() {
               </div>
             </div>
             <button
-              onClick={() => { playClick(); const newState = toggleMute(); setIsMuted(newState); }}
-              className="w-9 h-9 rounded-xl flex items-center justify-center glass btn-ghost"
-              title={isMuted ? 'Unmute' : 'Mute'}
+              onClick={() => { playClick(); setShowSettings(true); }}
+              className="w-9 h-9 rounded-xl glass flex items-center justify-center text-casino-text-tertiary hover:text-white transition-colors"
+              title="Settings"
             >
-              {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              <SettingsIcon size={16} />
             </button>
             <button
               onClick={() => { playClick(); setShowOnboarding(true); }}
@@ -1031,6 +1087,7 @@ function App() {
           onCompleteEarly={handleCompleteEarly}
           onDismissExpired={handleDismissExpired}
           onCancelGrace={handleCancelGrace}
+          onRequestConfirm={openConfirm}
         />
 
         {/* Desktop Top Nav */}
@@ -1113,7 +1170,7 @@ function App() {
               onQuickTask={() => setShowQuickTask(true)}
             />
             <div className="mt-4">
-              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} />
+              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} onRequestConfirm={openConfirm} />
               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
                 <button
                   onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
@@ -1157,6 +1214,7 @@ function App() {
               rewards={unclaimedRewards}
               onClaim={handleClaimReward}
               onDeleteAll={handleDeleteAllRewards}
+              onRequestConfirm={openConfirm}
             />
           </div>
 
@@ -1422,6 +1480,7 @@ function App() {
                 rewards={unclaimedRewards}
                 onClaim={handleClaimReward}
                 onDeleteAll={handleDeleteAllRewards}
+                onRequestConfirm={openConfirm}
               />
             </div>
           )}
@@ -1761,18 +1820,7 @@ function App() {
         {showOnboarding && (
           <OnboardingModal onClose={() => { setShowOnboarding(false); localStorage.setItem('ch_onboarded', '1'); }} />
         )}
-        {showResetConfirm && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="modal-backdrop" onClick={() => setShowResetConfirm(false)}>
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }} className="modal-panel text-center max-w-sm" onClick={(e) => e.stopPropagation()}>
-              <h2 className="text-lg font-bold text-casino-danger mb-3">Reset Everything?</h2>
-              <p className="text-xs text-casino-text-secondary mb-4">This will erase all your habits, jars, clips, tokens, rewards and history. This cannot be undone.</p>
-              <div className="space-y-2">
-                <button onClick={handleResetAll} className="btn-pill w-full py-2.5 text-sm font-bold" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', boxShadow: '0 2px 16px rgba(239,68,68,0.3)' }}>Yes, Reset Everything</button>
-                <button onClick={() => setShowResetConfirm(false)} className="text-xs text-casino-text-tertiary hover:text-casino-text-secondary transition-colors w-full py-2">Never Mind</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
+
       </AnimatePresence>
 
       {showConfetti && <JackpotConfetti />}
@@ -1801,6 +1849,47 @@ function App() {
           </div>
         </motion.div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        danger={confirmModal.danger}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={closeConfirm}
+      />
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <SessionSummaryModal
+        isOpen={sessionSummary.isOpen}
+        habit={sessionSummary.habit}
+        clip={sessionSummary.clip}
+        tokenWon={sessionSummary.tokenWon}
+        onDismiss={() => setSessionSummary(prev => ({ ...prev, isOpen: false }))}
+      />
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        isMuted={isMuted}
+        onToggleMute={() => { const newState = toggleMute(); setIsMuted(newState); }}
+        onShowHelp={() => { setShowOnboarding(true); setShowSettings(false); }}
+        onExportData={() => {
+          const data = { jars, habits, inventory, history, rewardCatalog };
+          navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+          addToast('Data copied to clipboard', 'success');
+        }}
+        onResetData={() => {
+          setShowSettings(false);
+          openConfirm({
+            title: 'Reset Everything?',
+            message: 'This will erase all your habits, jars, clips, tokens, rewards and history. This cannot be undone.',
+            danger: true,
+            onConfirm: () => {
+              handleResetAll();
+              closeConfirm();
+            },
+          });
+        }}
+      />
     </div>
   );
 }
