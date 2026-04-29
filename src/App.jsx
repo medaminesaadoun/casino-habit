@@ -25,8 +25,6 @@ import UndoToast from './components/UndoToast';
 import OnboardingModal from './components/OnboardingModal';
 import DemoWalkthrough from './components/DemoWalkthrough';
 import TourTooltip from './components/TourTooltip';
-import DemoWalkthrough from './components/DemoWalkthrough';
-import TourTooltip from './components/TourTooltip';
 
 const CLIP_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'gold'];
 const CLIP_WEIGHTS = [20, 20, 20, 20, 15, 4.9, 0.1];
