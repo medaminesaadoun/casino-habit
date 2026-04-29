@@ -88,9 +88,19 @@ export default function RewardCatalog({ catalog, onSave, onClose }) {
   const [newIcons, setNewIcons] = useState({ tier1: '🎁', tier2: '🎁', tier3: '🎁', jackpot: '🎁' });
   const [showEmojiPicker, setShowEmojiPicker] = useState(null);
 
-  // Auto-fill simple defaults on mount if catalog is empty
+  // Auto-fill simple defaults on mount + auto-save so rewards work immediately
   useEffect(() => {
-    if (isSimple) applySimpleDefaults();
+    if (!isSimple) return;
+    const needsFill = !catalog.tier1 || catalog.tier1.length === 0;
+    if (!needsFill) return;
+    const filled = {
+      tier1: SIMPLE_REWARDS.tier1.map((r) => ({ ...r, enabled: true, custom: true, gracePeriodMinutes: 0 })),
+      tier2: SIMPLE_REWARDS.tier2.map((r) => ({ ...r, enabled: true, custom: true, gracePeriodMinutes: 0 })),
+      tier3: SIMPLE_REWARDS.tier3.map((r) => ({ ...r, enabled: true, custom: true, gracePeriodMinutes: 0 })),
+      jackpot: SIMPLE_REWARDS.jackpot.map((r) => ({ ...r, enabled: true, custom: true, gracePeriodMinutes: 0 })),
+    };
+    setLocalCatalog(filled);
+    onSave(filled);
   }, []); // eslint-disable-line
 
   const switchToSimple = () => {

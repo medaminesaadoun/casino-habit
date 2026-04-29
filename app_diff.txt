@@ -1,0 +1,498 @@
+diff --git a/src/App.jsx b/src/App.jsx
+index c7eab83..d37c102 100644
+--- a/src/App.jsx
++++ b/src/App.jsx
+@@ -16,6 +16,8 @@ import RewardCatalog from './components/RewardCatalog';
+ import RewardWonModal from './components/RewardWonModal';
+ import JackpotChoiceModal from './components/JackpotChoiceModal';
+ import JackpotConfetti from './components/JackpotConfetti';
++import QuickTaskModal from './components/QuickTaskModal';
++import GlassSelect from './components/GlassSelect';
+ import ActiveRewards from './components/ActiveRewards';
+ import ThemeSelector from './components/ThemeSelector';
+ import BottomNav from './components/BottomNav';
+@@ -90,6 +92,7 @@ function App() {
+   const [wonTier, setWonTier] = useState(1);
+   const [showJackpotChoice, setShowJackpotChoice] = useState(false);
+   const [freeJackpotSpin, setFreeJackpotSpin] = useState(false);
++  const [showQuickTask, setShowQuickTask] = useState(false);
+   const [showConfetti, setShowConfetti] = useState(false);
+   const [showThemeSelector, setShowThemeSelector] = useState(false);
+   const [unseenRewards, setUnseenRewards] = useState(0);
+@@ -488,14 +491,14 @@ function App() {
+     });
+ 
+     setInventory((prev) => {
+-      const updated = { ...prev, activeTier: 1 };
++      // Mega spin preserves your active tier
++      const updated = isMegaSpin ? prev : { ...prev, activeTier: 1 };
+       if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
+       return updated;
+     });
+-
+-    if (spinResult.isBonus) {
+-      setShowBonusWheel(true);
+-    } else if (spinResult.effective === 'Jackpot' && isMegaSpin) {
++      if (spinResult.isBonus) {
++        setShowBonusWheel(true);
++      } else if (spinResult.effective === 'Jackpot' && isMegaSpin) {
+       // Mega spin jackpot: show choice modal
+       setTimeout(() => {
+         setShowJackpotChoice(true);
+@@ -612,12 +615,14 @@ function App() {
+       jarId,
+       color: newHabitColor,
+       completedDates: [],
++      tags: newHabitTags,
+       createdAt: new Date().toISOString(),
+     };
+     setHabits((prev) => [...prev, newHabit]);
+     setNewHabitName('');
+     setNewHabitDesc('');
+     setNewHabitJarId(jars[0]?.id || '');
++    setNewHabitTags([]);
+     setShowCreateHabit(false);
+     if (useApi) api.createHabit(newHabit).catch(() => setUseApi(false));
+   };
+@@ -654,12 +659,42 @@ function App() {
+     setHistory([]);
+   };
+ 
++  const handleQuickTaskComplete = (name, jarId) => {
++    playComplete();
++    const now = new Date().toISOString();
++    const clip = getRandomClip();
++    setInventory((prev) => {
++      const updated = { ...prev, clips: [...prev.clips, clip] };
++      if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
++      return updated;
++    });
++    setLastClip(clip);
++    setTimeout(() => playClipDrop(), 300);
++
++    const entry = {
++      id: `hist-${Date.now()}`,
++      type: 'quick-task',
++      habitName: name,
++      jarId: jarId || null,
++      timestamp: now,
++    };
++    setHistory((prev) => [...prev, entry]);
++    if (useApi) api.addHistory(entry).catch(() => setUseApi(false));
++
++    setShowQuickTask(false);
++    setPendingTokenHabit(null);
++    setShowTokenWheel(true);
++  };
++
+   const [newJarName, setNewJarName] = useState('');
+   const [newJarColor, setNewJarColor] = useState('#ef4444');
+   const [newHabitName, setNewHabitName] = useState('');
+   const [newHabitDesc, setNewHabitDesc] = useState('');
+   const [newHabitJarId, setNewHabitJarId] = useState('');
+   const [newHabitColor, setNewHabitColor] = useState('#ef4444');
++  const [newHabitTags, setNewHabitTags] = useState([]);
++
++  const [editingHabitTags, setEditingHabitTags] = useState([]);
+ 
+   if (loading) {
+     return (
+@@ -671,6 +706,7 @@ function App() {
+ 
+   const unclaimedRewards = inventory.rewardBank || [];
+   const activeRewardList = inventory.activeRewards || [];
++  const allTags = [...new Set(habits.flatMap((h) => h.tags || []))];
+ 
+   return (
+     <div className="min-h-screen pb-24 md:pb-0" style={{ backgroundColor: 'var(--color-casino-bg)' }}>
+@@ -729,12 +765,16 @@ function App() {
+               )}
+               <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold text-white tabular-nums">
+                 <Paperclip size={14} className="text-casino-text-secondary" />
+-                <span>{inventory.clips.length}</span>
++                <motion.span key={inventory.clips.length} initial={{ scale: 1.3 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 20 }}>
++                  {inventory.clips.length}
++                </motion.span>
+               </div>
+               <div className="w-px h-5 bg-white/10" />
+               <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold tabular-nums" style={{ color: 'var(--color-casino-accent)' }}>
+                 <Crown size={14} />
+-                <span>T{inventory.activeTier}</span>
++                <motion.span key={inventory.activeTier} initial={{ scale: 1.3 }} animate={{ scale: 1 }} transition={{ type: 'spring', stiffness: 500, damping: 20 }}>
++                  T{inventory.activeTier}
++                </motion.span>
+               </div>
+             </div>
+             <button
+@@ -800,39 +840,11 @@ function App() {
+                     setShowBonusWheel(false);
+                   }}
+                 />
+-              </div>
+-            )}
+-          </div>
+-
+-          {/* Mobile tabbed sections */}
+-          <div className={`mb-6 ${mobileView !== 'habits' ? 'hidden' : ''}`}>
+-            <HabitList
+-              habits={habits}
+-              jars={jars}
+-              onComplete={handleCompleteHabit}
+-              onEdit={handleEditHabit}
+-              onDelete={handleDeleteHabit}
+-              onAdd={() => setShowCreateHabit(true)}
+-            />
+-            <AnimatePresence>
+-              {lastClip && (
+-                <motion.div
+-                  key={lastClip}
+-                  initial={{ opacity: 0, y: 12 }}
+-                  animate={{ opacity: 1, y: 0 }}
+-                  exit={{ opacity: 0, scale: 0.95 }}
+-                  className="card-static rounded-2xl p-4 mt-4 flex flex-col items-center"
+-                >
+-                  <p className="text-xs text-casino-text-tertiary mb-2">You grabbed a clip!</p>
+-                  <motion.div animate={{ rotate: [0, -10, 10, -10, 0] }} transition={{ duration: 0.5 }}>
+-                    <SingleClip color={lastClip} />
+-                  </motion.div>
+-                  <p className="mt-2 font-medium text-sm capitalize text-casino-text">{lastClip}</p>
+-                </motion.div>
++                </div>
+               )}
+-            </AnimatePresence>
++            </div>
+             <div className="mt-4">
+-              <ClipInventory clips={inventory.clips} onDeleteAll={handleDeleteAllClips} />
++              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} onDeleteAll={handleDeleteAllClips} />
+               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
+                 <button
+                   onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
+@@ -893,7 +905,10 @@ function App() {
+                 )}
+               </div>
+               {history.length === 0 ? (
+-                <p className="text-casino-text-tertiary text-center py-8 text-sm">No activity yet. Complete a habit!</p>
++                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8">
++                  <motion.span className="empty-float text-3xl block mb-3">📋</motion.span>
++                  <p className="text-casino-text-tertiary text-sm">No activity yet. Complete a habit!</p>
++                </motion.div>
+               ) : (
+                 <div className="space-y-1.5 max-h-64 overflow-y-auto scrollbar-hide">
+                   {[...history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 50).map((item) => (
+@@ -901,7 +916,12 @@ function App() {
+                       <span className="text-casino-text-tertiary text-xs tabular-nums shrink-0">
+                         {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                       </span>
+-                      {item.type === 'habit' ? (
++                      {item.type === 'quick-task' ? (
++                        <span className="flex-1 mx-3 text-casino-text text-xs">
++                          <span className="font-semibold text-casino-accent">{item.habitName}</span>
++                          <span className="text-[9px] text-casino-text-tertiary ml-1 uppercase font-medium">(Quick)</span>
++                        </span>
++                      ) : item.type === 'habit' ? (
+                         <span className="flex-1 mx-3 text-casino-text text-xs">
+                           Completed <span className="font-semibold text-casino-text">{item.habitName}</span>
+                         </span>
+@@ -925,7 +945,7 @@ function App() {
+                         </span>
+                       )}
+                       <span className="text-[10px] text-casino-text-tertiary uppercase tracking-wider shrink-0">
+-                        {item.type === 'habit' ? 'Habit' : item.type === 'reward-claimed' ? 'Claimed' : item.type === 'reward-completed' ? 'Done' : 'Spin'}
++                        {item.type === 'quick-task' ? 'Quick' : item.type === 'habit' ? 'Habit' : item.type === 'reward-claimed' ? 'Claimed' : item.type === 'reward-completed' ? 'Done' : 'Spin'}
+                       </span>
+                     </div>
+                   ))}
+@@ -937,16 +957,18 @@ function App() {
+ 
+         {/* Desktop: Tabbed layout */}
+         <div className="hidden lg:block">
+-          {/* Habits Tab */}
+-          {mobileView === 'habits' && (
+-            <div className="space-y-6">
++          <AnimatePresence mode="wait">
++            {mobileView === 'habits' && (
++              <motion.div key="habits" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }} className="space-y-6">
+               <HabitList
+                 habits={habits}
+                 jars={jars}
++                tags={allTags}
+                 onComplete={handleCompleteHabit}
+                 onEdit={handleEditHabit}
+                 onDelete={handleDeleteHabit}
+                 onAdd={() => setShowCreateHabit(true)}
++                onQuickTask={() => setShowQuickTask(true)}
+               />
+               <AnimatePresence>
+                 {lastClip && (
+@@ -965,7 +987,7 @@ function App() {
+                   </motion.div>
+                 )}
+               </AnimatePresence>
+-              <ClipInventory clips={inventory.clips} onDeleteAll={handleDeleteAllClips} />
++              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} onDeleteAll={handleDeleteAllClips} />
+               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
+                 <button
+                   onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
+@@ -979,12 +1001,11 @@ function App() {
+                   Collect 2+ matching clips to cash in
+                 </div>
+               )}
+-            </div>
++            </motion.div>
+           )}
+ 
+-          {/* Wheel Tab */}
+           {mobileView === 'wheel' && (
+-            <div className="space-y-6">
++            <motion.div key="wheel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }} className="space-y-6">
+               {!showBonusWheel ? (
+                 <div className="glass-strong glow-gold p-8 flex flex-col items-center">
+                 <p className="font-heading text-sm text-white mb-6 tracking-tight">Spin the Wheel</p>
+@@ -1004,7 +1025,6 @@ function App() {
+                   <p className="text-sm font-semibold text-casino-success mb-6">Bonus Spin</p>
+                   <BonusWheel
+                     onBonusComplete={handleBonusComplete}
+-                    onShowConfetti={() => setShowConfetti(true)}
+                     onExtraSpin={() => {
+                       setInventory((prev) => {
+                         const updated = { ...prev, spinTokens: (prev.spinTokens || 0) + 1 };
+@@ -1013,11 +1033,10 @@ function App() {
+                       });
+                       setShowBonusWheel(false);
+                     }}
++                    onShowConfetti={() => setShowConfetti(true)}
+                   />
+                 </div>
+               )}
+-
+-              {/* Quick Stats */}
+               <div className="grid grid-cols-3 gap-4">
+                 <div className="glass p-4 text-center">
+                   <p className="text-2xl font-bold text-casino-accent tabular-nums">
+@@ -1043,8 +1062,6 @@ function App() {
+                   <p className="text-xs text-casino-text-tertiary mt-1">Last Result</p>
+                 </div>
+               </div>
+-
+-              {/* Recent Spins */}
+               <div className="glass p-5">
+                 <p className="font-heading text-sm text-white mb-4 tracking-tight">Recent Spins</p>
+                 {history.filter((h) => h.type === 'main-wheel').length === 0 ? (
+@@ -1076,13 +1093,12 @@ function App() {
+                       ))}
+                   </div>
+                 )}
+-              </div>
+-            </div>
++                </div>
++            </motion.div>
+           )}
+ 
+-          {/* Rewards Tab */}
+           {mobileView === 'rewards' && (
+-            <div>
++            <motion.div key="rewards" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }}>
+               <div className="flex items-center justify-between mb-3">
+                 <p className="font-heading text-sm text-white tracking-tight">Unclaimed Rewards</p>
+                 <button
+@@ -1097,12 +1113,11 @@ function App() {
+                 onClaim={handleClaimReward}
+                 onDeleteAll={handleDeleteAllRewards}
+               />
+-            </div>
++            </motion.div>
+           )}
+ 
+-          {/* Jars Tab */}
+           {mobileView === 'jars' && (
+-            <div>
++            <motion.div key="jars" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }}>
+               <div className="flex items-center justify-between mb-3">
+                 <p className="font-heading text-sm text-white tracking-tight">Jars</p>
+                 <button
+@@ -1113,12 +1128,11 @@ function App() {
+                 </button>
+               </div>
+               <Jars jars={jars} onAddJar={() => setShowCreateJar(true)} onEditJar={handleEditJar} onDeleteJar={handleDeleteJar} />
+-            </div>
++            </motion.div>
+           )}
+ 
+-          {/* History Tab */}
+           {mobileView === 'history' && (
+-            <div className="glass p-5">
++            <motion.div key="history" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} transition={{ duration: 0.2 }} className="glass p-5">
+               <div className="flex items-center justify-between mb-4">
+                 <p className="font-heading text-sm text-white tracking-tight">History</p>
+                 {history.length > 0 && (
+@@ -1131,7 +1145,10 @@ function App() {
+                 )}
+               </div>
+               {history.length === 0 ? (
+-                <p className="text-casino-text-tertiary text-center py-8 text-sm">No activity yet. Complete a habit!</p>
++                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8">
++                  <motion.span className="empty-float text-3xl block mb-3">📋</motion.span>
++                  <p className="text-casino-text-tertiary text-sm">No activity yet. Complete a habit!</p>
++                </motion.div>
+               ) : (
+                 <div className="space-y-1.5 max-h-96 overflow-y-auto scrollbar-hide">
+                   {[...history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 50).map((item) => (
+@@ -1151,6 +1168,10 @@ function App() {
+                         <span className="flex-1 mx-3 text-casino-text text-xs">
+                           Finished <span className="font-semibold text-casino-accent">{item.rewardName}</span>
+                         </span>
++                      ) : item.type === 'quick-task' ? (
++                        <span className="flex-1 mx-3 text-casino-text text-xs">
++                          Quick <span className="font-semibold text-casino-text">{item.habitName}</span>
++                        </span>
+                       ) : (
+                         <span className="flex-1 mx-3 text-casino-text text-xs">
+                           {item.isMegaSpin ? 'Mega ' : ''}Wheel → <span className="font-semibold" style={{
+@@ -1163,21 +1184,19 @@ function App() {
+                         </span>
+                       )}
+                       <span className="text-[10px] text-casino-text-tertiary uppercase tracking-wider shrink-0">
+-                        {item.type === 'habit' ? 'Habit' : item.type === 'reward-claimed' ? 'Claimed' : item.type === 'reward-completed' ? 'Done' : 'Spin'}
++                        {item.type === 'quick-task' ? 'Quick' : item.type === 'habit' ? 'Habit' : item.type === 'reward-claimed' ? 'Claimed' : item.type === 'reward-completed' ? 'Done' : 'Spin'}
+                       </span>
+                     </div>
+                   ))}
+                 </div>
+               )}
+-            </div>
++            </motion.div>
+           )}
++          </AnimatePresence>
+         </div>
+       </div>
+-
+-      {/* Bottom Nav */}
+       <BottomNav active={mobileView} onChange={setMobileView} unseenRewards={unseenRewards} />
+ 
+-      {/* Modals */}
+       <AnimatePresence>
+         {showTokenWheel && <TokenWheel onComplete={handleTokenWheelComplete} />}
+         {showCashing && (
+@@ -1297,18 +1316,24 @@ function App() {
+               <div className="space-y-4">
+                 <div>
+                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Name</label>
+-                  <input type="text" value={newHabitName} onChange={(e) => setNewHabitName(e.target.value)} placeholder="e.g., Morning Run" className="input" />
++                  <input type="text" value={newHabitName} onChange={(e) => setNewHabitName(e.target.value)} placeholder="e.g., Morning Run" className="input" maxLength={60} />
++                  <p className="text-[10px] text-casino-text-tertiary mt-1 text-right">{newHabitName.length}/60</p>
+                 </div>
+                 <div>
+                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Description</label>
+-                  <input type="text" value={newHabitDesc} onChange={(e) => setNewHabitDesc(e.target.value)} placeholder="e.g., Run at least 2km" className="input" />
++                  <input type="text" value={newHabitDesc} onChange={(e) => setNewHabitDesc(e.target.value)} placeholder="e.g., Run at least 2km" className="input" maxLength={120} />
++                  <p className="text-[10px] text-casino-text-tertiary mt-1 text-right">{newHabitDesc.length}/120</p>
+                 </div>
+                 <div>
+                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Linked Jar</label>
+                   <div className="flex gap-2">
+-                    <select value={newHabitJarId} onChange={(e) => setNewHabitJarId(e.target.value)} className="input flex-1">
+-                      {jars.map((jar) => <option key={jar.id} value={jar.id}>{jar.name}</option>)}
+-                    </select>
++                    <GlassSelect
++                      value={newHabitJarId}
++                      onChange={setNewHabitJarId}
++                      options={jars.map((jar) => ({ value: jar.id, label: jar.name }))}
++                      placeholder="Select a jar"
++                      className="flex-1"
++                    />
+                     <button
+                       onClick={() => { setShowCreateHabit(false); setShowCreateJar(true); }}
+                       className="w-10 h-10 rounded-xl flex items-center justify-center glass btn-ghost shrink-0"
+@@ -1328,6 +1353,30 @@ function App() {
+                     ))}
+                   </div>
+                 </div>
++                <div>
++                  <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Tags</label>
++                  <div className="flex flex-wrap gap-1.5 mb-2">
++                    {newHabitTags.map((tag, i) => (
++                      <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/5 text-casino-text-secondary flex items-center gap-1">
++                        {tag}
++                        <button onClick={() => setNewHabitTags(newHabitTags.filter((_, j) => j !== i))} className="hover:text-white leading-none text-xs">×</button>
++                      </span>
++                    ))}
++                  </div>
++                  <input
++                    type="text"
++                    placeholder="Type a tag + Enter"
++                    maxLength={20}
++                    onKeyDown={(e) => {
++                      if (e.key === 'Enter' && e.target.value.trim()) {
++                        const val = e.target.value.trim();
++                        if (!newHabitTags.includes(val)) setNewHabitTags([...newHabitTags, val]);
++                        e.target.value = '';
++                      }
++                    }}
++                    className="input"
++                  />
++                </div>
+                 <div className="flex gap-3 pt-2">
+                   <button onClick={() => setShowCreateHabit(false)} className="btn btn-secondary flex-1">Cancel</button>
+                   <button onClick={handleCreateHabit} className="btn btn-primary flex-1">Create</button>
+@@ -1354,9 +1403,12 @@ function App() {
+                 </div>
+                 <div>
+                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Linked Jar</label>
+-                  <select value={editingHabit.jarId} onChange={(e) => setEditingHabit({ ...editingHabit, jarId: e.target.value })} className="input">
+-                    {jars.map((jar) => <option key={jar.id} value={jar.id}>{jar.name}</option>)}
+-                  </select>
++                  <GlassSelect
++                    value={editingHabit.jarId}
++                    onChange={(v) => setEditingHabit({ ...editingHabit, jarId: v })}
++                    options={jars.map((jar) => ({ value: jar.id, label: jar.name }))}
++                    placeholder="Select a jar"
++                  />
+                 </div>
+                 <div>
+                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Color</label>
+@@ -1368,6 +1420,31 @@ function App() {
+                     ))}
+                   </div>
+                 </div>
++                <div>
++                  <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Tags</label>
++                  <div className="flex flex-wrap gap-1.5 mb-2">
++                    {(editingHabit.tags || []).map((tag, i) => (
++                      <span key={i} className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/5 text-casino-text-secondary flex items-center gap-1">
++                        {tag}
++                        <button onClick={() => setEditingHabit({ ...editingHabit, tags: editingHabit.tags.filter((_, j) => j !== i) })} className="hover:text-white leading-none text-xs">×</button>
++                      </span>
++                    ))}
++                  </div>
++                  <input
++                    type="text"
++                    placeholder="Type a tag + Enter"
++                    maxLength={20}
++                    onKeyDown={(e) => {
++                      if (e.key === 'Enter' && e.target.value.trim()) {
++                        const val = e.target.value.trim();
++                        const current = editingHabit.tags || [];
++                        if (!current.includes(val)) setEditingHabit({ ...editingHabit, tags: [...current, val] });
++                        e.target.value = '';
++                      }
++                    }}
++                    className="input"
++                  />
++                </div>
+                 <div className="flex gap-3 pt-2">
+                   <button onClick={() => { setShowEditHabit(false); setEditingHabit(null); }} className="btn btn-secondary flex-1">Cancel</button>
+                   <button onClick={handleSaveEditHabit} className="btn btn-primary flex-1">Save</button>
+@@ -1378,6 +1455,13 @@ function App() {
+         )}
+       </AnimatePresence>
+ 
++      {/* Quick Task Modal */}
++      <AnimatePresence>
++        {showQuickTask && (
++          <QuickTaskModal jars={jars} onComplete={handleQuickTaskComplete} onClose={() => setShowQuickTask(false)} />
++        )}
++      </AnimatePresence>
++
+       {/* Confetti — rendered outside any transforms so fixed positioning works */}
+       {showConfetti && <JackpotConfetti />}
+     </div>
