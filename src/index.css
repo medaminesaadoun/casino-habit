@@ -518,6 +518,27 @@ body {
 .jar-fill { position: absolute; bottom: 0; left: 0; right: 0; border-radius: 0 0 11px 11px; transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0.75; }
 .jar-fill::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%); }
 .jar-count { position: absolute; bottom: 4px; left: 0; right: 0; text-align: center; font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.8); z-index: 2; }
+.jar-tick {
+  position: absolute;
+  right: 2px;
+  width: 5px;
+  height: 1.5px;
+  border-radius: 1px;
+  z-index: 3;
+}
+.jar-tick-achieved {
+  box-shadow: 0 0 3px currentColor;
+}
+
+/* ===== JAR SPARKLE ===== */
+@keyframes jarSparkle {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+  100% { transform: scale(0) rotate(360deg); opacity: 0; }
+}
+.jar-sparkle {
+  animation: jarSparkle 1.2s ease-out forwards;
+}
 
 /* ===== EXPIRING REWARD ===== */
 @keyframes expiringPulse {

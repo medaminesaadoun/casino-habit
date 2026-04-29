@@ -1,11 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Flame, X } from 'lucide-react';
-
-const CLIP_COLORS = {
-  red: '#ef4444', blue: '#3b82f6', green: '#22c55e', yellow: '#eab308',
-  purple: '#a855f7', orange: '#f97316', gold: '#e8b931',
-};
+import { Check, Flame, X, Sparkles } from 'lucide-react';
+import { SingleClip } from './ClipInventory';
 
 function getStreak(dates) {
   if (!dates || dates.length === 0) return 0;
@@ -36,7 +32,6 @@ export default function SessionSummaryModal({
   if (!isOpen || !habit) return null;
 
   const streak = getStreak(habit.completedDates);
-  const clipColor = CLIP_COLORS[clip] || CLIP_COLORS.red;
 
   return (
     <motion.div
@@ -54,12 +49,6 @@ export default function SessionSummaryModal({
         className="modal-panel text-center relative overflow-hidden max-w-sm w-full mx-4"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Subtle glow */}
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full blur-3xl opacity-10 pointer-events-none"
-          style={{ backgroundColor: clipColor }}
-        />
-
         <button
           onClick={onDismiss}
           className="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center text-casino-text-tertiary hover:text-white hover:bg-white/5 transition-colors z-10"
@@ -80,13 +69,22 @@ export default function SessionSummaryModal({
 
         {/* Clip earned */}
         <div className="flex flex-col items-center mb-5">
-          <div className="relative mb-2">
-            <svg width="56" height="56" viewBox="0 0 44 40">
-              <rect x="2" y="4" width="6" height="12" rx="2" fill="#8b8680" opacity="0.6" />
-              <rect x="20" y="4" width="6" height="12" rx="2" fill="#8b8680" opacity="0.6" />
-              <rect x="-4" y="11" width="42" height="24" rx="5" fill={clipColor} opacity="0.7" stroke={clipColor} strokeWidth="1.5" strokeOpacity="0.7" />
-            </svg>
-          </div>
+          <motion.div
+            initial={{ scale: 0.5, rotate: -10 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.1, type: 'spring', stiffness: 260, damping: 20 }}
+            className="relative mb-3"
+          >
+            <SingleClip color={clip} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.4, type: 'spring' }}
+              className="absolute -top-1 -right-2"
+            >
+              <Sparkles size={14} className="text-casino-accent" />
+            </motion.div>
+          </motion.div>
           <span className="text-sm font-bold text-white capitalize">{clip} clip earned!</span>
         </div>
 
