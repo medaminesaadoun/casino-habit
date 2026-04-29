@@ -7,6 +7,16 @@ const TIER_LABELS = { 1: 'Tier 1', 2: 'Tier 2', 3: 'Tier 3', 4: 'Jackpot' };
 
 const BURST_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];
 
+function formatDuration(min) {
+  if (!min) return '';
+  if (min >= 60) {
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  }
+  return `${min}m`;
+}
+
 export default function RewardWonModal({ reward, tier, onUseNow, onClaimLater }) {
   const color = TIER_COLORS[tier];
 
@@ -82,6 +92,12 @@ export default function RewardWonModal({ reward, tier, onUseNow, onClaimLater })
         <motion.h2 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-xl font-heading text-white mb-1">
           {reward.name}
         </motion.h2>
+
+        {reward.durationMinutes > 0 && (
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="text-sm font-semibold mb-3" style={{ color }}>
+            {formatDuration(reward.durationMinutes)}
+          </motion.p>
+        )}
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="text-xs font-body text-casino-text-tertiary mb-6">
           What would you like to do?

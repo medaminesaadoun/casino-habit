@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Debug artifacts
+app_diff.txt
+check_*.mjs
+check_*.cjs
+check_*.js

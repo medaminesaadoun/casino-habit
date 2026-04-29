@@ -72,7 +72,28 @@ function App() {
     lifetimeClips: {},
   });
   const [history, setHistory] = useState([]);
-  const [rewardCatalog, setRewardCatalog] = useState({ tier1: [], tier2: [], tier3: [], jackpot: [] });
+  const [rewardCatalog, setRewardCatalog] = useState({
+    tier1: [
+      { id: 'simple-t1-1', name: 'Quick pause', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 5 },
+      { id: 'simple-t1-2', name: 'Short break', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 10 },
+      { id: 'simple-t1-3', name: 'Extended break', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 15 },
+    ],
+    tier2: [
+      { id: 'simple-t2-1', name: 'Free time', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 20 },
+      { id: 'simple-t2-2', name: 'Half hour', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 30 },
+      { id: 'simple-t2-3', name: 'Long break', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 45 },
+    ],
+    tier3: [
+      { id: 'simple-t3-1', name: 'Free time', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 45 },
+      { id: 'simple-t3-2', name: 'Free hour', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 60 },
+      { id: 'simple-t3-3', name: 'Extended', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 90 },
+    ],
+    jackpot: [
+      { id: 'simple-jp-1', name: 'Me time', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 120 },
+      { id: 'simple-jp-2', name: 'Half day', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 180 },
+      { id: 'simple-jp-3', name: 'Day off', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 240 },
+    ],
+  });
   const [showCashing, setShowCashing] = useState(false);
   const [cashingDefaultJarId, setCashingDefaultJarId] = useState(null);
   const [showBonusWheel, setShowBonusWheel] = useState(false);
@@ -183,7 +204,28 @@ function App() {
         if (savedHist) setHistory(JSON.parse(savedHist));
         else setHistory([]);
         if (savedCatalog) setRewardCatalog(JSON.parse(savedCatalog));
-        else setRewardCatalog({ tier1: [], tier2: [], tier3: [], jackpot: [] });
+        else setRewardCatalog({
+    tier1: [
+      { id: 'simple-t1-1', name: 'Quick pause', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 5 },
+      { id: 'simple-t1-2', name: 'Short break', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 10 },
+      { id: 'simple-t1-3', name: 'Extended break', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 15 },
+    ],
+    tier2: [
+      { id: 'simple-t2-1', name: 'Free time', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 20 },
+      { id: 'simple-t2-2', name: 'Half hour', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 30 },
+      { id: 'simple-t2-3', name: 'Long break', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 45 },
+    ],
+    tier3: [
+      { id: 'simple-t3-1', name: 'Free time', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 45 },
+      { id: 'simple-t3-2', name: 'Free hour', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 60 },
+      { id: 'simple-t3-3', name: 'Extended', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 90 },
+    ],
+    jackpot: [
+      { id: 'simple-jp-1', name: 'Me time', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 120 },
+      { id: 'simple-jp-2', name: 'Half day', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 180 },
+      { id: 'simple-jp-3', name: 'Day off', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 240 },
+    ],
+  });
       }
       setLoading(false);
     }
@@ -769,6 +811,8 @@ function App() {
       return updated;
     });
     setLastClip(clip);
+    setClipToast({ color: clip, visible: true, id: Date.now() });
+    setTimeout(() => setClipToast(null), 2500);
     setTimeout(() => playClipDrop(), 300);
 
     const entry = {
