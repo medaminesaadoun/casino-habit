@@ -7,7 +7,12 @@ export default function TourTooltip({ step, total, title, description, targetSel
 
   useEffect(() => {
     const update = () => {
-      const el = document.querySelector(`[data-tour="${targetSelector}"]`);
+      const els = document.querySelectorAll(`[data-tour="${targetSelector}"]`);
+      // Find the first visible element (desktop vs mobile both have the attr)
+      const el = Array.from(els).find((e) => {
+        const r = e.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      });
       if (el) {
         const rect = el.getBoundingClientRect();
         setBounds({ x: rect.x, y: rect.y, w: rect.width, h: rect.height });

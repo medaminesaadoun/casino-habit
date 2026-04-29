@@ -66,7 +66,7 @@ function Scene2() {
       <div className="relative" style={{ width: 120, height: 120 }}>
         <motion.svg
           width="120" height="120" viewBox="0 0 120 120"
-          animate={{ rotate: spinning ? 360 * 4 + 60 : 360 * 4 + 60 }}
+          animate={{ rotate: spinning ? 360 * 4 + 108 : 360 * 4 + 108 }}
           transition={{ duration: spinning ? 3 : 0, ease: spinning ? [0.15, 0.85, 0.35, 1] : 'linear' }}
           style={{ transformOrigin: '60px 60px' }}
         >
@@ -104,7 +104,7 @@ function Scene3() {
       <div className="relative" style={{ width: 150, height: 150 }}>
         <motion.svg
           width="150" height="150" viewBox="0 0 150 150"
-          animate={{ rotate: spinning ? 360 * 4 + 252 : 360 * 4 + 252 }}
+          animate={{ rotate: spinning ? 360 * 4 + 288 : 360 * 4 + 288 }}
           transition={{ duration: spinning ? 3 : 0, ease: spinning ? [0.15, 0.85, 0.35, 1] : 'linear' }}
           style={{ transformOrigin: '75px 75px' }}
         >
