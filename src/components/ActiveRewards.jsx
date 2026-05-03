@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { Timer, SkipForward, CheckCircle2, XCircle } from 'lucide-react';
 
 const TIER_COLORS = {
-  1: 'var(--color-tier-1)',
-  2: 'var(--color-tier-2)',
-  3: 'var(--color-tier-3)',
-  4: 'var(--color-tier-jackpot)',
+  1: '#e63946',
+  2: '#4cc9f0',
+  3: '#f72585',
+  4: '#ffd60a',
 };
 
 function formatTime(ms) {

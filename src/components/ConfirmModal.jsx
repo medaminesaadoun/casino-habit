@@ -69,11 +69,11 @@ export default function ConfirmModal({
                   className="flex-1 btn-pill py-2.5 text-sm font-bold text-white"
                   style={{
                     background: danger
-                      ? 'linear-gradient(135deg, #ef4444, #dc2626)'
-                      : 'linear-gradient(135deg, var(--color-casino-accent), #c49a2a)',
+                      ? 'linear-gradient(135deg, #e63946, #b91c1c)'
+                      : 'linear-gradient(135deg, var(--color-casino-accent), #ffb703)',
                     boxShadow: danger
-                      ? '0 2px 12px rgba(239,68,68,0.3)'
-                      : '0 2px 12px rgba(232,185,49,0.25)',
+                      ? '0 2px 12px rgba(230,57,70,0.3)'
+                      : '0 2px 12px rgba(255,214,10,0.25)',
                   }}
                 >
                   {confirmText}

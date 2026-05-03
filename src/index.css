@@ -7,9 +7,9 @@
   --color-casino-card-hover: rgba(255, 255, 255, 0.06);
   --color-casino-border: rgba(255, 255, 255, 0.06);
   --color-casino-border-hover: rgba(255, 255, 255, 0.12);
-  --color-casino-accent: #e8b931;
-  --color-casino-accent-dim: #c49a2a;
-  --color-casino-gold: #e8b931;
+  --color-casino-accent: #ffd60a;
+  --color-casino-accent-dim: #ffb703;
+  --color-casino-gold: #ffd60a;
   --color-casino-text: #fafaf9;
   --color-casino-text-secondary: rgba(255, 255, 255, 0.55);
   --color-casino-text-tertiary: rgba(255, 255, 255, 0.3);
@@ -22,11 +22,11 @@
   --color-clip-yellow: #eab308;
   --color-clip-purple: #a855f7;
   --color-clip-orange: #f97316;
-  --color-clip-gold: #e8b931;
-  --color-tier-1: #ef4444;
-  --color-tier-2: #3b82f6;
-  --color-tier-3: #a855f7;
-  --color-tier-jackpot: #e8b931;
+  --color-clip-gold: #ffd60a;
+  --color-tier-1: #e63946;
+  --color-tier-2: #4cc9f0;
+  --color-tier-3: #f72585;
+  --color-tier-jackpot: #ffd60a;
 }
 
 /* ===== FOUNDATION ===== */
@@ -63,13 +63,13 @@ body {
 
 /* Gold gradient text */
 .gold-text {
-  background: linear-gradient(135deg, #f0d060 0%, var(--color-casino-accent) 35%, #d4942a 100%);
+  background: linear-gradient(135deg, #ffe066 0%, var(--color-casino-accent) 35%, #ffb703 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 .gold-text-static {
-  background: linear-gradient(to bottom, #f5d78c 0%, var(--color-casino-accent) 50%, #c49a2a 100%);
+  background: linear-gradient(to bottom, #ffe066 0%, var(--color-casino-accent) 50%, #ffb703 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -173,8 +173,20 @@ body {
               0 8px 32px rgba(0,0,0,0.35);
 }
 
-/* ===== SHAPES ===== */
+/* ===== SHAPES - Differentiated by component type ===== */
 .shape-card { border-radius: 14px; }
+.shape-card-sharp { border-radius: 6px; position: relative; }
+.shape-card-sharp::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 8px; bottom: 8px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: var(--color-casino-accent);
+  opacity: 0.6;
+}
+.shape-card-soft { border-radius: 20px; }
+.shape-card-round { border-radius: 16px; }
 .shape-card-alt { border-radius: 14px; }
 .shape-squircle { border-radius: 12px; }
 .shape-pill { border-radius: 9999px; }
@@ -194,7 +206,7 @@ body {
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: conic-gradient(from 0deg, var(--color-casino-accent), #f0d060, var(--color-casino-accent-dim), #d4942a, var(--color-casino-accent));
+  background: conic-gradient(from 0deg, var(--color-casino-accent), #ffe066, var(--color-casino-accent-dim), #ffb703, var(--color-casino-accent));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -221,7 +233,7 @@ body {
 .btn-pill:focus-visible { outline: 2px solid var(--color-casino-accent); outline-offset: 2px; }
 
 .btn-gold {
-  background: linear-gradient(135deg, var(--color-casino-accent) 0%, var(--color-casino-accent-dim) 100%);
+  background: linear-gradient(135deg, #ffd60a 0%, #ffb703 100%);
   color: #0a0a0c;
   box-shadow: 0 2px 12px color-mix(in srgb, var(--color-casino-accent) 30%, transparent),
               0 0 20px color-mix(in srgb, var(--color-casino-accent) 12%, transparent);
@@ -258,6 +270,56 @@ body {
 }
 .btn-ghost:hover { color: var(--color-casino-text); background: rgba(255,255,255,0.04); }
 
+/* Tier-based button shapes */
+.btn-tier-1 {
+  border-radius: 4px;
+  border: 1px solid var(--color-tier-1);
+  background: color-mix(in srgb, var(--color-tier-1) 12%, transparent);
+  color: var(--color-tier-1);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-tier-1) 15%, transparent);
+}
+.btn-tier-1:hover {
+  background: color-mix(in srgb, var(--color-tier-1) 20%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-tier-1) 25%, transparent);
+}
+
+.btn-tier-2 {
+  border-radius: 8px;
+  border: 1px solid var(--color-tier-2);
+  background: color-mix(in srgb, var(--color-tier-2) 12%, transparent);
+  color: var(--color-tier-2);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-tier-2) 15%, transparent);
+}
+.btn-tier-2:hover {
+  background: color-mix(in srgb, var(--color-tier-2) 20%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-tier-2) 25%, transparent);
+}
+
+.btn-tier-3 {
+  border-radius: 12px;
+  border: 1px solid var(--color-tier-3);
+  background: color-mix(in srgb, var(--color-tier-3) 12%, transparent);
+  color: var(--color-tier-3);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--color-tier-3) 15%, transparent);
+}
+.btn-tier-3:hover {
+  background: color-mix(in srgb, var(--color-tier-3) 20%, transparent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-tier-3) 25%, transparent);
+}
+
+.btn-jackpot {
+  border-radius: 4px;
+  clip-path: polygon(8% 0%, 92% 0%, 100% 50%, 92% 100%, 8% 100%, 0% 50%);
+  border: 1px solid var(--color-tier-jackpot);
+  background: color-mix(in srgb, var(--color-tier-jackpot) 15%, transparent);
+  color: var(--color-tier-jackpot);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-tier-jackpot) 20%, transparent);
+}
+.btn-jackpot:hover {
+  background: color-mix(in srgb, var(--color-tier-jackpot) 25%, transparent);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--color-tier-jackpot) 35%, transparent);
+}
+
 /* ===== GLASS RIPPLE CLICK ===== */
 @keyframes ripple {
   0% { transform: scale(0); opacity: 0.5; }
@@ -282,7 +344,7 @@ body {
   100% { background-position: 0% 50%; }
 }
 .liquid-gold {
-  background: linear-gradient(135deg, #f0d060, var(--color-casino-accent), #d4942a, var(--color-casino-accent), #f0d060);
+  background: linear-gradient(135deg, #ffe066, var(--color-casino-accent), #ffb703, var(--color-casino-accent), #ffe066);
   background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

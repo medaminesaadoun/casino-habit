@@ -10,10 +10,10 @@ const TIER_BORDERS = {
 };
 
 const TIER_COLORS = {
-  1: '#ef4444',
-  2: '#3b82f6',
-  3: '#a855f7',
-  4: '#e8b931',
+  1: '#e63946',
+  2: '#4cc9f0',
+  3: '#f72585',
+  4: '#ffd60a',
 };
 
 const TIER_LABELS = {
@@ -38,7 +38,7 @@ export default function RewardBank({ rewards, onClaim, onDeleteAll, onRequestCon
     : sorted.filter((r) => TIER_LABELS[r.tier] === filter);
 
   return (
-    <div className="glass shape-card p-5">
+    <div className="glass shape-card-soft p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Gift size={16} className="text-casino-accent" />

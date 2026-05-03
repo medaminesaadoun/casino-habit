@@ -8,7 +8,7 @@ const CHOICES = [
     title: 'Double-Up',
     description: 'Claim two Tier 3 rewards immediately',
     icon: Gift,
-    color: '#a855f7',
+    color: '#f72585',
   },
   {
     key: 'chain-reaction',
@@ -22,14 +22,14 @@ const CHOICES = [
     title: 'The Lock',
     description: 'Tier 3 now, plus your next spin is a guaranteed Jackpot',
     icon: Lock,
-    color: '#e8b931',
+    color: '#ffd60a',
   },
   {
     key: 'rainmaker',
     title: 'The Rainmaker',
     description: 'Tier 3 now, plus your next 6 habits pay double tokens',
     icon: CloudRain,
-    color: '#3b82f6',
+    color: '#4cc9f0',
   },
 ];
 

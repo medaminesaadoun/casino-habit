@@ -71,10 +71,10 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete, index }) {
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20, scale: 0.95 }}
-      whileHover={{ y: -3, boxShadow: `0 16px 48px rgba(0,0,0,0.45), 0 0 0 1px ${habit.color}30` }}
+      whileHover={{ scale: 1.02, boxShadow: `0 12px 40px rgba(0,0,0,0.45), 0 0 0 1px ${habit.color}25` }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25, delay: index * 0.04 }}
-      className="glass shape-card overflow-hidden relative"
+      className="glass shape-card-sharp overflow-hidden relative"
     >
       {/* Stale alert dot */}
       {recency === 'very-stale' && (

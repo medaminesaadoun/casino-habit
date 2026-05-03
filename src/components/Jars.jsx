@@ -28,8 +28,8 @@ function JarCard({ jar, onEdit, onDelete, onSelect, index }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, type: 'spring', stiffness: 400, damping: 28 }}
-      className="glass shape-card-alt p-4 relative overflow-hidden cursor-pointer group"
-      whileHover={{ y: -2, boxShadow: `0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px ${jar.color}30, 0 0 24px ${jar.color}15` }}
+      className="glass shape-card-round p-4 relative overflow-hidden cursor-pointer group"
+      whileHover={{ y: -4, boxShadow: `0 20px 56px rgba(0,0,0,0.5), 0 0 0 1px ${jar.color}30, 0 0 32px ${jar.color}15` }}
       style={{ boxShadow: `0 8px 32px rgba(0,0,0,0.3), 0 0 0 1px ${jar.color}15` }}
       onClick={() => onSelect(jar)}
     >

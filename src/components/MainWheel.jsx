@@ -5,26 +5,26 @@ import { playSpinStart, playTickIfPassed, resetTickTracking, playSpinLand } from
 import JackpotConfetti from './JackpotConfetti';
 
 const NORMAL_SEGMENTS = [
-  { label: 'Tier 1', color: '#ef4444', start: 0, end: 144, weight: 40 },
-  { label: 'Tier 2', color: '#3b82f6', start: 144, end: 252, weight: 30 },
-  { label: 'Tier 3', color: '#a855f7', start: 252, end: 324, weight: 20 },
+  { label: 'Tier 1', color: '#e63946', start: 0, end: 144, weight: 40 },
+  { label: 'Tier 2', color: '#4cc9f0', start: 144, end: 252, weight: 30 },
+  { label: 'Tier 3', color: '#f72585', start: 252, end: 324, weight: 20 },
   { label: 'Bonus', color: '#eab308', start: 324, end: 352.8, weight: 8 },
-  { label: 'Jackpot', color: '#e8b931', start: 352.8, end: 360, weight: 2 },
+  { label: 'Jackpot', color: '#ffd60a', start: 352.8, end: 360, weight: 2 },
 ];
 
 const MEGA_SEGMENTS = [
-  { label: 'Tier 1', color: '#ef4444', start: 0, end: 43.2, weight: 12 },
-  { label: 'Tier 2', color: '#3b82f6', start: 43.2, end: 108, weight: 18 },
-  { label: 'Tier 3', color: '#a855f7', start: 108, end: 198, weight: 25 },
+  { label: 'Tier 1', color: '#e63946', start: 0, end: 43.2, weight: 12 },
+  { label: 'Tier 2', color: '#4cc9f0', start: 43.2, end: 108, weight: 18 },
+  { label: 'Tier 3', color: '#f72585', start: 108, end: 198, weight: 25 },
   { label: 'Bonus', color: '#eab308', start: 198, end: 288, weight: 25 },
-  { label: 'Jackpot', color: '#e8b931', start: 288, end: 360, weight: 20 },
+  { label: 'Jackpot', color: '#ffd60a', start: 288, end: 360, weight: 20 },
 ];
 
 const CX = 170;
 const CY = 170;
 const OUTER_R = 160;
 const INNER_R = 62;
-const TIER_COLORS = { 1: '#ef4444', 2: '#3b82f6', 3: '#a855f7' };
+const TIER_COLORS = { 1: '#e63946', 2: '#4cc9f0', 3: '#f72585' };
 
 function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
   const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;

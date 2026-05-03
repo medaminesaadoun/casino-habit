@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 
-const COLORS = ['#e8b931', '#eab308', '#a855f7', '#ffffff', '#f472b6', '#facc15'];
+const COLORS = ['#ffd60a', '#eab308', '#f72585', '#ffffff', '#f472b6', '#facc15'];
 const COUNT = 50;
 
 export default function JackpotConfetti() {
