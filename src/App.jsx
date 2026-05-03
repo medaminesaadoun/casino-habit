@@ -951,22 +951,7 @@ function App() {
 
   return (
     <div className="min-h-screen pb-24 md:pb-0 relative overflow-hidden" style={{ backgroundColor: 'var(--color-casino-bg)' }}>
-      {Array.from({ length: 15 }).map((_, i) => (
-        <div
-          key={`p-${i}`}
-          className="particle"
-          style={{
-            left: `${10 + (i * 37) % 80}%`,
-            animationDelay: `${i * 0.7}s`,
-            animationDuration: `${8 + (i % 5)}s`,
-            opacity: 0.3 + (i % 3) * 0.25,
-            width: `${2 + (i % 3)}px`,
-            height: `${2 + (i % 3)}px`,
-          }}
-        />
-      ))}
-      <div className="light-pool light-pool-1" />
-      <div className="light-pool light-pool-2" />
+
       <div className="max-w-4xl mx-auto px-4 md:px-6 pt-6 md:pt-8 relative z-10">
 
         {/* Header */}
