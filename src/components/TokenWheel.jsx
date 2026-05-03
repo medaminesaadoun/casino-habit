@@ -268,7 +268,6 @@ export default function TokenWheel({ onComplete, clipColor }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={spin}
-              data-tour="token-spin"
               disabled={isSpinning}
               className={`btn-pill ${isSpinning ? 'opacity-40 cursor-not-allowed bg-white/5 text-casino-text-tertiary' : 'btn-gold'}`}
             >

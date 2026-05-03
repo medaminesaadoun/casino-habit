@@ -12,7 +12,7 @@ const NAV_ITEMS = [
 
 export default function BottomNav({ active, onChange, unseenRewards }) {
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 md:hidden">
+    <nav className="fixed left-1/2 -translate-x-1/2 z-40 md:hidden" style={{ bottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
       <div className="flex items-center gap-1 px-2 py-2 rounded-2xl glass" style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
         {NAV_ITEMS.map((item) => {
           const isActive = active === item.id;

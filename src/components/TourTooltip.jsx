@@ -1,103 +1,297 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, X, ArrowRightLeft, Sparkles } from 'lucide-react';
+import { SingleClip } from './ClipInventory';
 
-export default function TourTooltip({ step, total, title, description, targetSelector, onSkip }) {
+const CLIP_COLORS = {
+  red: '#ef4444', blue: '#3b82f6', green: '#22c55e', yellow: '#eab308',
+  purple: '#a855f7', orange: '#f97316', gold: '#e8b931',
+};
+
+const STEPS = [
+  {
+    selector: 'header-stats',
+    title: 'Your Resources',
+    desc: 'Spin tokens let you play the wheel. Clips upgrade your tier. Higher tier = better rewards.',
+    position: 'bottom',
+  },
+  {
+    selector: 'add-habit',
+    title: 'Create Habits',
+    desc: 'Add habits you want to track. Complete them to earn clips and spin tokens.',
+    position: 'bottom',
+  },
+  {
+    selector: 'habit-list',
+    title: 'Complete & Earn',
+    desc: 'Tap the checkmark when you finish a habit. Each completion drops a random colored clip.',
+    position: 'top',
+  },
+  {
+    selector: 'wheel-area',
+    title: 'Spin for Rewards',
+    desc: 'Use tokens to spin the wheel. Land on tiers, bonus, or jackpot to win time-based rewards.',
+    position: 'top',
+  },
+  {
+    selector: 'cash-in-area',
+    title: 'Upgrade Your Tier',
+    desc: 'Collect 2+ matching clips to cash in. This boosts your wheel tier for better odds.',
+    position: 'bottom',
+    demo: 'cashin',
+  },
+  {
+    selector: 'reward-bank',
+    title: 'Claim & Enjoy',
+    desc: 'Won rewards go to your bank. Claim them to start the timer, then complete your habit before it expires.',
+    position: 'top',
+  },
+];
+
+/* ===== DEMO CASH-IN BUTTON ===== */
+
+function DemoCashIn() {
+  return (
+    <motion.button
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      className="btn-pill btn-gold w-full mt-2 flex items-center justify-center gap-2"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="flex items-center gap-0.5">
+        <div style={{ width: 14, height: 10 }}>
+          <SingleClip color="red" />
+        </div>
+        <div style={{ width: 14, height: 10, marginLeft: -6 }}>
+          <SingleClip color="red" />
+        </div>
+        <div style={{ width: 14, height: 10, marginLeft: -6 }}>
+          <SingleClip color="red" />
+        </div>
+      </div>
+      <ArrowRightLeft size={14} />
+      <span className="px-2 py-0.5 rounded-lg text-xs font-bold" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+        T2
+      </span>
+    </motion.button>
+  );
+}
+
+/* ===== SPOTLIGHT OVERLAY ===== */
+
+function SpotlightOverlay({ bounds, onClick }) {
+  if (!bounds) return null;
+  const pad = 10;
+  const x = bounds.x - pad;
+  const y = bounds.y - pad;
+  const w = bounds.w + pad * 2;
+  const h = bounds.h + pad * 2;
+
+  return (
+    <div className="fixed inset-0 z-40 pointer-events-none">
+      {/* Top */}
+      <div className="absolute left-0 right-0 pointer-events-auto" style={{ top: 0, height: Math.max(0, y), background: 'rgba(0,0,0,0.55)' }} onClick={onClick} />
+      {/* Bottom */}
+      <div className="absolute left-0 right-0 pointer-events-auto" style={{ top: y + h, bottom: 0, background: 'rgba(0,0,0,0.55)' }} onClick={onClick} />
+      {/* Left */}
+      <div className="absolute pointer-events-auto" style={{ top: y, left: 0, width: Math.max(0, x), height: h, background: 'rgba(0,0,0,0.55)' }} onClick={onClick} />
+      {/* Right */}
+      <div className="absolute pointer-events-auto" style={{ top: y, left: x + w, right: 0, height: h, background: 'rgba(0,0,0,0.55)' }} onClick={onClick} />
+      {/* Highlight border */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          left: x, top: y, width: w, height: h,
+          borderRadius: 12,
+          boxShadow: '0 0 0 2px rgba(232,185,49,0.5), 0 0 20px rgba(232,185,49,0.15), inset 0 0 20px rgba(232,185,49,0.05)',
+        }}
+      />
+    </div>
+  );
+}
+
+/* ===== TOOLTIP ===== */
+
+function TourTooltipContent({ step, total, title, description, hasDemo, position, onNext, onBack, onSkip, isFirst, isLast }) {
+  const tooltipRef = useRef(null);
+  const [style, setStyle] = useState({ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' });
+
+  useEffect(() => {
+    if (!tooltipRef.current || !step.bounds) return;
+    const rect = tooltipRef.current.getBoundingClientRect();
+    const pad = 16;
+    const targetCx = step.bounds.x + step.bounds.w / 2;
+    const targetCy = step.bounds.y + step.bounds.h / 2;
+
+    let left = targetCx - rect.width / 2;
+    let top;
+    let transform = 'translate(0, 0)';
+
+    if (position === 'bottom') {
+      top = step.bounds.y + step.bounds.h + pad;
+    } else {
+      top = step.bounds.y - rect.height - pad;
+    }
+
+    // Clamp to viewport
+    left = Math.max(pad, Math.min(left, window.innerWidth - rect.width - pad));
+    if (top < pad) top = step.bounds.y + step.bounds.h + pad;
+    if (top + rect.height > window.innerHeight - pad) {
+      top = step.bounds.y - rect.height - pad;
+    }
+
+    setStyle({ left, top, transform });
+  }, [step.bounds, position]);
+
+  return (
+    <motion.div
+      ref={tooltipRef}
+      initial={{ opacity: 0, y: position === 'bottom' ? -8 : 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.25 }}
+      className="fixed z-50 pointer-events-auto glass-modal p-5 rounded-2xl max-w-xs w-[300px]"
+      style={style}
+    >
+      {/* Step indicator */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold text-casino-accent tabular-nums">
+            {step.index + 1}/{total}
+          </span>
+          <div className="flex gap-1">
+            {Array.from({ length: total }).map((_, i) => (
+              <div
+                key={i}
+                className="w-1.5 h-1.5 rounded-full transition-colors"
+                style={{ backgroundColor: i <= step.index ? 'var(--color-casino-accent)' : 'rgba(255,255,255,0.15)' }}
+              />
+            ))}
+          </div>
+        </div>
+        <button onClick={onSkip} className="text-casino-text-tertiary hover:text-white transition-colors" aria-label="Skip tour">
+          <X size={14} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <h3 className="text-sm font-bold text-white mb-1.5">{title}</h3>
+      <p className="text-xs text-casino-text-secondary leading-relaxed mb-3">{description}</p>
+
+      {/* Demo element */}
+      {hasDemo && <DemoCashIn />}
+
+      {/* Navigation */}
+      <div className="flex items-center gap-2 mt-4">
+        <button
+          onClick={onBack}
+          disabled={isFirst}
+          className="w-9 h-9 rounded-xl glass flex items-center justify-center text-casino-text-secondary hover:text-white disabled:opacity-20 transition-colors shrink-0"
+          aria-label="Previous step"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <button
+          onClick={onNext}
+          className="btn-pill btn-gold flex-1 py-2 text-xs font-bold flex items-center justify-center gap-1"
+        >
+          {isLast ? 'Finish' : <>Next <ChevronRight size={14} /></>}
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ===== MAIN COMPONENT ===== */
+
+export default function TourTooltip({ onComplete, onSkip }) {
+  const [currentStep, setCurrentStep] = useState(0);
   const [bounds, setBounds] = useState(null);
   const rafRef = useRef(null);
 
+  const step = STEPS[currentStep];
+
+  const updateBounds = useCallback(() => {
+    const els = document.querySelectorAll(`[data-tour="${step.selector}"]`);
+    const el = Array.from(els).find((e) => {
+      const r = e.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    });
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      setBounds({ x: rect.x, y: rect.y, w: rect.width, h: rect.height });
+    } else {
+      setBounds(null);
+    }
+  }, [step.selector]);
+
   useEffect(() => {
-    const update = () => {
-      const els = document.querySelectorAll(`[data-tour="${targetSelector}"]`);
-      // Find the first visible element (desktop vs mobile both have the attr)
-      const el = Array.from(els).find((e) => {
-        const r = e.getBoundingClientRect();
-        return r.width > 0 && r.height > 0;
-      });
-      if (el) {
-        const rect = el.getBoundingClientRect();
-        setBounds({ x: rect.x, y: rect.y, w: rect.width, h: rect.height });
-      }
+    updateBounds();
+    const handleResize = () => {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(updateBounds);
     };
-    update();
-    const onResize = () => { cancelAnimationFrame(rafRef.current); rafRef.current = requestAnimationFrame(update); };
-    window.addEventListener('resize', onResize);
-    window.addEventListener('scroll', onResize, true);
-    const interval = setInterval(update, 500);
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleResize, true);
+    const interval = setInterval(updateBounds, 500);
     return () => {
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('scroll', onResize, true);
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleResize, true);
       clearInterval(interval);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [targetSelector]);
+  }, [updateBounds]);
 
-  if (!bounds) return null;
-
-  const pad = 8;
-  const cutoutStyle = {
-    position: 'fixed',
-    left: bounds.x - pad,
-    top: bounds.y - pad,
-    width: bounds.w + pad * 2,
-    height: bounds.h + pad * 2,
-    borderRadius: 12,
-    boxShadow: `0 0 0 9999px rgba(0,0,0,0.6), 0 0 0 ${pad}px rgba(232,185,49,0.3)`,
-    zIndex: 51,
-    pointerEvents: 'none',
+  const handleNext = () => {
+    if (currentStep < STEPS.length - 1) {
+      setCurrentStep((s) => s + 1);
+      setBounds(null);
+    } else {
+      localStorage.setItem('ch_onboarded', 'complete');
+      onComplete();
+    }
   };
 
-  const tooltipBelow = bounds.y < window.innerHeight * 0.4;
-  const tooltipX = Math.min(Math.max(bounds.x + bounds.w / 2, 180), window.innerWidth - 180);
-  const tooltipY = tooltipBelow ? bounds.y + bounds.h + 16 : bounds.y - 16;
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep((s) => s - 1);
+      setBounds(null);
+    }
+  };
+
+  const handleSkip = () => {
+    localStorage.setItem('ch_onboarded', 'complete');
+    onSkip();
+  };
+
+  const handleOverlayClick = () => {
+    // Clicking outside advances to next step
+    handleNext();
+  };
 
   return (
     <AnimatePresence>
       <motion.div
+        key="tour-overlay"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 pointer-events-none"
+        className="fixed inset-0 z-40"
       >
-        <div style={cutoutStyle} />
-        <motion.div
-          initial={{ opacity: 0, y: tooltipBelow ? -8 : 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute pointer-events-auto glass-modal p-5 rounded-2xl max-w-xs w-[280px]"
-          style={{
-            left: tooltipX,
-            top: tooltipY,
-            transform: `translate(-50%, ${tooltipBelow ? '0' : '-100%'})`,
-            zIndex: 52,
-          }}
-        >
-          {/* Caret */}
-          <div
-            className="absolute left-1/2 -translate-x-1/2 w-3 h-3 rotate-45"
-            style={{
-              [tooltipBelow ? 'top' : 'bottom']: -6,
-              background: 'linear-gradient(135deg, rgba(20,20,26,0.98), rgba(15,15,20,0.99))',
-              borderLeft: '1px solid rgba(255,255,255,0.08)',
-              borderTop: '1px solid rgba(255,255,255,0.08)',
-            }}
-          />
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] font-bold text-casino-accent">{step + 1}/{total}</span>
-            <div className="flex gap-1">
-              {Array.from({ length: total }).map((_, i) => (
-                <div
-                  key={i}
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ backgroundColor: i <= step ? 'var(--color-casino-accent)' : 'rgba(255,255,255,0.15)' }}
-                />
-              ))}
-            </div>
-          </div>
-          <h3 className="text-sm font-bold text-white mb-1">{title}</h3>
-          <p className="text-xs text-casino-text-secondary mb-4">{description}</p>
-          <button onClick={onSkip} className="text-[10px] text-casino-text-tertiary hover:text-casino-text-secondary transition-colors">
-            Skip tutorial
-          </button>
-        </motion.div>
+        <SpotlightOverlay bounds={bounds} onClick={handleOverlayClick} />
+        <TourTooltipContent
+          step={{ index: currentStep, bounds }}
+          total={STEPS.length}
+          title={step.title}
+          description={step.desc}
+          hasDemo={step.demo === 'cashin'}
+          position={step.position}
+          onNext={handleNext}
+          onBack={handleBack}
+          onSkip={handleSkip}
+          isFirst={currentStep === 0}
+          isLast={currentStep === STEPS.length - 1}
+        />
       </motion.div>
     </AnimatePresence>
   );

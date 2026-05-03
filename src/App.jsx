@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Diamond, Plus, Trash2, Sparkles, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy, HelpCircle, RotateCcw, Settings as SettingsIcon } from 'lucide-react';
+import { Diamond, Plus, Trash2, Sparkles, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import { playComplete, playClipDrop, playCashIn, playRewardWon, playClick, toggleMute, getMuteState } from './sounds';
 import { api } from './api';
 import Jars from './components/Jars';
@@ -23,7 +23,6 @@ import BottomNav from './components/BottomNav';
 import TopNav from './components/TopNav';
 import UndoToast from './components/UndoToast';
 import OnboardingModal from './components/OnboardingModal';
-import DemoWalkthrough from './components/DemoWalkthrough';
 import TourTooltip from './components/TourTooltip';
 import ConfirmModal from './components/ConfirmModal';
 import ToastContainer from './components/ToastContainer';
@@ -125,10 +124,7 @@ function App() {
   const [showQuickTask, setShowQuickTask] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [unseenRewards, setUnseenRewards] = useState(0);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showDemo, setShowDemo] = useState(false);
-  const [tourStep, setTourStep] = useState(-1);
-  const [tourActive, setTourActive] = useState(false);
+  const [onboardingPhase, setOnboardingPhase] = useState('complete'); // 'modal' | 'tour' | 'complete'
   const [undoState, setUndoState] = useState(null);
   const [undoSeconds, setUndoSeconds] = useState(10);
   const [clipToast, setClipToast] = useState(null);
@@ -173,41 +169,16 @@ function App() {
   useEffect(() => {
     const saved = localStorage.getItem('ch_theme');
     if (saved) setTheme(saved);
-    // Demo walkthrough on first visit (replaces old onboarding)
-    if (!localStorage.getItem('ch_walkthrough_done')) {
-      setShowDemo(true);
-    } else if (!localStorage.getItem('ch_tour_done')) {
-      setTourActive(true);
+    // Unified onboarding: modal -> tour -> complete
+    const onboarded = localStorage.getItem('ch_onboarded');
+    if (!onboarded || onboarded === 'modal') {
+      setOnboardingPhase('modal');
+    } else if (onboarded === 'tour') {
+      setOnboardingPhase('tour');
+    } else {
+      setOnboardingPhase('complete');
     }
   }, []);
-
-  // ~~~~ Tour ~~~~
-  const TOUR_STEPS = [
-    { selector: 'add-habit', title: 'Create your first habit', desc: 'Tap + Add Habit to begin tracking' },
-    { selector: 'complete-btn', title: 'Complete your habit', desc: 'Tap the ✓ button after finishing' },
-    { selector: 'token-spin', title: 'Spin the Token Wheel', desc: '60% chance to win a spin token' },
-    { selector: 'wheel-spin', title: 'Spin the Main Wheel', desc: 'Use tokens to win time-based rewards' },
-  ];
-
-  const handleDemoComplete = () => {
-    localStorage.setItem('ch_walkthrough_done', '1');
-    setShowDemo(false);
-    setTourActive(true);
-    setTourStep(0);
-  };
-
-  const handleSkipTour = () => {
-    localStorage.setItem('ch_tour_done', '1');
-    setTourActive(false);
-    setTourStep(-1);
-  };
-
-  const tryAdvanceTour = (step) => {
-    if (!tourActive || tourStep > step) return;
-    if (tourStep < step) return; // allow later steps to catch up
-    if (step < TOUR_STEPS.length - 1) setTourStep(step + 1);
-    else { localStorage.setItem('ch_tour_done', '1'); setTourActive(false); setTourStep(-1); }
-  };
 
   const openConfirm = (config) => setConfirmModal({ ...config, isOpen: true });
   const closeConfirm = () => setConfirmModal(prev => ({ ...prev, isOpen: false }));
@@ -248,11 +219,8 @@ function App() {
     setRewardCatalog(defaults);
     addToast('All data reset', 'warning');
     closeConfirm();
-    localStorage.removeItem('ch_walkthrough_done');
-    localStorage.removeItem('ch_tour_done');
-    setShowDemo(true);
-    setTourActive(false);
-    setTourStep(-1);
+    localStorage.removeItem('ch_onboarded');
+    setOnboardingPhase('modal');
   };
 
   useEffect(() => {
@@ -272,7 +240,7 @@ function App() {
           api.getHistory(),
           api.getRewardCatalog(),
         ]);
-        setJars(jarsData);
+        setJars(jarsData.map((j) => ({ ...j, cashedClips: j.cashedClips || [] })));
         setHabits(habitsData);
         setInventory(invData);
         setHistory(histData);
@@ -286,7 +254,7 @@ function App() {
         const savedInv = localStorage.getItem('ch_inventory');
         const savedHist = localStorage.getItem('ch_history');
         const savedCatalog = localStorage.getItem('ch_catalog');
-        if (savedJars) setJars(JSON.parse(savedJars));
+        if (savedJars) setJars(JSON.parse(savedJars).map((j) => ({ ...j, cashedClips: j.cashedClips || [] })));
         if (savedHabits) setHabits(JSON.parse(savedHabits));
         if (savedInv) setInventory(JSON.parse(savedInv));
         else setInventory({ clips: [], activeTier: 1, cashedColors: [], spinTokens: 0, rewardBank: [], activeRewards: [], rainmakerRemaining: 0 });
@@ -380,7 +348,6 @@ function App() {
 
     setPendingTokenHabit(habit);
     setShowTokenWheel(true);
-    tryAdvanceTour(1);
   };
 
   const handleUndo = () => {
@@ -449,7 +416,6 @@ function App() {
       }
       setPendingTokenHabit(null);
     }
-    tryAdvanceTour(2);
   };
 
   const handleConsumeToken = () => {
@@ -491,7 +457,7 @@ function App() {
     setInventory(newInventory);
 
     const updatedJars = jars.map((jar) => {
-      if (jar.id === jarId) return { ...jar, totalClips: jar.totalClips + clipsToRemove.length };
+      if (jar.id === jarId) return { ...jar, totalClips: jar.totalClips + clipsToRemove.length, cashedClips: [...(jar.cashedClips || []), ...clipsToRemove] };
       return jar;
     });
     setJars(updatedJars);
@@ -753,7 +719,6 @@ function App() {
           handleRewardFromTier(spinResult.effective);
       }, 2000);
     }
-    tryAdvanceTour(3);
   };
 
   const handleJackpotChoice = (choice) => {
@@ -811,6 +776,7 @@ function App() {
       name: newJarName,
       color: newJarColor,
       totalClips: 0,
+      cashedClips: [],
       milestones: [
         { target: 1000, reward: 'Small Reward' },
         { target: 5000, reward: 'Medium Reward' },
@@ -882,7 +848,6 @@ function App() {
     setShowCreateHabit(false);
     if (useApi) api.createHabit(newHabit).catch(() => setUseApi(false));
     addToast('Habit saved', 'success');
-    tryAdvanceTour(0);
   };
 
   const handleEditHabit = (habit) => {
@@ -961,7 +926,6 @@ function App() {
     setShowQuickTask(false);
     setPendingTokenHabit(null);
     setShowTokenWheel(true);
-    tryAdvanceTour(1);
   };
 
   const [newJarName, setNewJarName] = useState('');
@@ -1021,7 +985,7 @@ function App() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="glass rounded-xl p-1 flex items-center gap-1">
+            <div className="glass rounded-xl p-1 flex items-center gap-1" data-tour="header-stats">
               <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-bold tabular-nums" title="Spin tokens">
                 <Sparkles size={14} className="text-casino-accent" />
                 <motion.span
@@ -1059,24 +1023,18 @@ function App() {
               onClick={() => { playClick(); setShowSettings(true); }}
               className="w-9 h-9 rounded-xl glass flex items-center justify-center text-casino-text-tertiary hover:text-white transition-colors"
               title="Settings"
+              aria-label="Settings"
             >
               <SettingsIcon size={16} />
             </button>
             <button
-              onClick={() => { playClick(); setShowOnboarding(true); }}
+              onClick={() => { playClick(); setOnboardingPhase('modal'); }}
               className="w-9 h-9 rounded-xl flex items-center justify-center glass btn-ghost"
               title="How to play"
+              aria-label="How to play"
             >
               <HelpCircle size={16} />
             </button>
-            <button
-              onClick={() => { playClick(); setShowResetConfirm(true); }}
-              className="w-9 h-9 rounded-xl flex items-center justify-center glass btn-ghost"
-              title="Reset all data"
-            >
-              <RotateCcw size={16} />
-            </button>
-
           </div>
         </header>
 
@@ -1169,7 +1127,7 @@ function App() {
               onAdd={() => setShowCreateHabit(true)}
               onQuickTask={() => setShowQuickTask(true)}
             />
-            <div className="mt-4">
+            <div className="mt-4" data-tour="cash-in-area">
               <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} onRequestConfirm={openConfirm} />
               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
                 <button
@@ -1197,10 +1155,10 @@ function App() {
                 <Plus size={14} /> New
               </button>
             </div>
-            <Jars jars={jars} onAddJar={() => setShowCreateJar(true)} onEditJar={handleEditJar} onDeleteJar={handleDeleteJar} />
+            <Jars jars={jars} habits={habits} history={history} onAddJar={() => setShowCreateJar(true)} onEditJar={handleEditJar} onDeleteJar={handleDeleteJar} />
           </div>
 
-          <div className={`mb-6 ${mobileView !== 'rewards' ? 'hidden' : ''}`}>
+          <div className={`mb-6 ${mobileView !== 'rewards' ? 'hidden' : ''}`} data-tour="reward-bank">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-semibold text-white">Unclaimed Rewards</p>
               <button
@@ -1319,19 +1277,21 @@ function App() {
                 onQuickTask={() => setShowQuickTask(true)}
               />
               <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} />
-              {isCashingEligible(inventory.clips, inventory.activeTier) ? (
-                <button
-                  onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
-                  className="btn-pill btn-gold w-full"
-                >
-                  <ArrowRightLeft size={16} />
-                  Cash In Clips
-                </button>
-              ) : (
-                <div className="glass py-3 px-4 text-center text-casino-text-tertiary text-xs">
-                  Collect 2+ matching clips to cash in
-                </div>
-              )}
+              <div data-tour="cash-in-area">
+                {isCashingEligible(inventory.clips, inventory.activeTier) ? (
+                  <button
+                    onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
+                    className="btn-pill btn-gold w-full"
+                  >
+                    <ArrowRightLeft size={16} />
+                    Cash In Clips
+                  </button>
+                ) : (
+                  <div className="glass py-3 px-4 text-center text-casino-text-tertiary text-xs">
+                    Collect 2+ matching clips to cash in
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -1466,7 +1426,7 @@ function App() {
 
           {/* Rewards Tab */}
           {mobileView === 'rewards' && (
-            <div className="stagger-reveal">
+            <div className="stagger-reveal" data-tour="reward-bank">
               <div className="flex items-center justify-between mb-3">
                 <p className="font-heading text-sm text-white tracking-tight">Unclaimed Rewards</p>
                 <button
@@ -1497,7 +1457,7 @@ function App() {
                   <Plus size={14} /> New
                 </button>
               </div>
-              <Jars jars={jars} onAddJar={() => setShowCreateJar(true)} onEditJar={handleEditJar} onDeleteJar={handleDeleteJar} />
+              <Jars jars={jars} habits={habits} history={history} onAddJar={() => setShowCreateJar(true)} onEditJar={handleEditJar} onDeleteJar={handleDeleteJar} />
             </div>
           )}
 
@@ -1817,22 +1777,19 @@ function App() {
         {showQuickTask && (
           <QuickTaskModal jars={jars} onComplete={handleQuickTaskComplete} onClose={() => setShowQuickTask(false)} />
         )}
-        {showOnboarding && (
-          <OnboardingModal onClose={() => { setShowOnboarding(false); localStorage.setItem('ch_onboarded', '1'); }} />
+        {onboardingPhase === 'modal' && (
+          <OnboardingModal
+            onStartTour={() => setOnboardingPhase('tour')}
+            onSkip={() => setOnboardingPhase('complete')}
+          />
         )}
-
       </AnimatePresence>
 
       {showConfetti && <JackpotConfetti />}
-      {showDemo && <DemoWalkthrough onComplete={handleDemoComplete} />}
-      {tourActive && tourStep >= 0 && (
+      {onboardingPhase === 'tour' && (
         <TourTooltip
-          step={tourStep}
-          total={TOUR_STEPS.length}
-          title={TOUR_STEPS[tourStep].title}
-          description={TOUR_STEPS[tourStep].desc}
-          targetSelector={TOUR_STEPS[tourStep].selector}
-          onSkip={handleSkipTour}
+          onComplete={() => setOnboardingPhase('complete')}
+          onSkip={() => setOnboardingPhase('complete')}
         />
       )}
       {undoState && <UndoToast habitName={undoState.habit.name} secondsLeft={undoSeconds} onUndo={handleUndo} />}
@@ -1871,7 +1828,7 @@ function App() {
         onClose={() => setShowSettings(false)}
         isMuted={isMuted}
         onToggleMute={() => { const newState = toggleMute(); setIsMuted(newState); }}
-        onShowHelp={() => { setShowOnboarding(true); setShowSettings(false); }}
+        onShowHelp={() => { setOnboardingPhase('modal'); setShowSettings(false); }}
         onExportData={() => {
           const data = { jars, habits, inventory, history, rewardCatalog };
           navigator.clipboard.writeText(JSON.stringify(data, null, 2));

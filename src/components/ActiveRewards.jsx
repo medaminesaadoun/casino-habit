@@ -99,8 +99,8 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
                   </div>
                   {status === 'grace' && (
                     <div className="flex gap-1">
-                      <button onClick={() => onSkipGrace(reward)} className="p-1 rounded-lg hover:bg-white/5 text-casino-accent transition-colors"><SkipForward size={13} /></button>
-                      <button onClick={() => onCancelGrace(reward)} className="p-1 rounded-lg hover:bg-white/5 text-casino-danger transition-colors"><XCircle size={13} /></button>
+                      <button onClick={() => onSkipGrace(reward)} className="p-1 rounded-lg hover:bg-white/5 text-casino-accent transition-colors" aria-label={`Skip grace period for ${reward.rewardName}`}><SkipForward size={13} /></button>
+                      <button onClick={() => onCancelGrace(reward)} className="p-1 rounded-lg hover:bg-white/5 text-casino-danger transition-colors" aria-label={`Cancel grace period for ${reward.rewardName}`}><XCircle size={13} /></button>
                     </div>
                   )}
                   {status === 'active' && (

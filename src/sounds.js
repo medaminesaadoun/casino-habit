@@ -425,6 +425,35 @@ export function playSpinLand(tier) {
   }
 }
 
+// 5.5. Clink — sharp metallic clip landing in jar
+export function playClink() {
+  if (isMuted) return;
+  const { ctx, master } = getAudioContext();
+  const t = now();
+
+  // Short metallic ping
+  const osc1 = makeOsc('triangle', 3500, 0);
+  const g1 = makeGain(0);
+  g1.gain.setValueAtTime(0, t);
+  g1.gain.linearRampToValueAtTime(0.25, t + 0.001);
+  g1.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+  osc1.connect(g1);
+  g1.connect(master);
+  osc1.start(t);
+  osc1.stop(t + 0.1);
+
+  // Higher shimmer overtone
+  const osc2 = makeOsc('sine', 5200, 2);
+  const g2 = makeGain(0);
+  g2.gain.setValueAtTime(0, t + 0.005);
+  g2.gain.linearRampToValueAtTime(0.12, t + 0.008);
+  g2.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+  osc2.connect(g2);
+  g2.connect(master);
+  osc2.start(t + 0.005);
+  osc2.stop(t + 0.08);
+}
+
 // 6. Cash In — weighty coin cascade with metallic ring
 export function playCashIn() {
   if (isMuted) return;

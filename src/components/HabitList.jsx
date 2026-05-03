@@ -122,12 +122,14 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete, index }) {
               <button
                 onClick={() => onEdit(habit)}
                 className="p-1.5 rounded-lg text-casino-text-tertiary hover:text-white hover:bg-white/5 transition-colors"
+                aria-label={`Edit ${habit.name}`}
               >
                 <Pencil size={13} />
               </button>
               <button
                 onClick={() => onDelete(habit.id)}
                 className="p-1.5 rounded-lg text-casino-text-tertiary hover:text-casino-danger hover:bg-white/5 transition-colors"
+                aria-label={`Delete ${habit.name}`}
               >
                 <Trash2 size={13} />
               </button>
@@ -172,7 +174,7 @@ function HabitCard({ habit, jar, onComplete, onEdit, onDelete, index }) {
           {/* Complete button */}
           <motion.button
             onClick={() => onComplete(habit)}
-            data-tour="complete-btn"
+            data-tour="habit-list"
             whileTap={{ scale: 0.93 }}
             className="btn-pill w-full py-2.5 text-sm font-semibold"
             style={{

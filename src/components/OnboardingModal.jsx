@@ -1,244 +1,328 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, X, Check, ListTodo, Gem, Dices, Gift, Shield, Zap } from 'lucide-react';
+import { ChevronRight, ChevronLeft, X, Check, Play, Sparkles } from 'lucide-react';
+import { SingleClip } from './ClipInventory';
 
-const STEP1 = (
-  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="10" y="10" width="156" height="58" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
-    <rect x="10" y="10" width="3" height="58" rx="1.5" fill="#ef4444" fillOpacity="0.7" />
-    <rect x="24" y="20" width="80" height="6" rx="3" fill="rgba(255,255,255,0.4)" />
-    <rect x="24" y="32" width="50" height="4" rx="2" fill="rgba(255,255,255,0.2)" />
-    <rect x="24" y="42" width="60" height="4" rx="2" fill="rgba(255,255,255,0.2)" />
-    <rect x="120" y="24" width="34" height="28" rx="8" fill="#e8b931" fillOpacity="0.35" stroke="#e8b931" strokeWidth="1.5" />
-    <path d="M130 38 L133 42 L147 30" stroke="#e8b931" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M168 85 L196 85" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.6" strokeDasharray="4 3" />
-    <circle cx="220" cy="85" r="38" fill="rgba(0,0,0,0.4)" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.6" />
-    <circle cx="220" cy="85" r="32" stroke="#22c55e" strokeWidth="2" strokeOpacity="0.5" />
-    <path d="M220 47 L220 63" stroke="#e8b931" strokeWidth="3" strokeLinecap="round" strokeOpacity="0.7" />
-    <text x="220" y="93" textAnchor="middle" fill="#22c55e" fillOpacity="0.8" fontSize="11" fontWeight="700">WIN</text>
-    <text x="220" y="107" textAnchor="middle" fill="#22c55e" fillOpacity="0.5" fontSize="9" fontWeight="600">60%</text>
-    <text x="140" y="170" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="11" fontWeight="600" fontFamily="DM Sans, sans-serif">Complete habit → spin Token Wheel</text>
-  </svg>
-);
+/* ===== STEP 1: Habit → Clip → Jar ===== */
 
-const STEP2 = (
-  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <text x="140" y="18" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="12" fontWeight="700" fontFamily="DM Sans, sans-serif">Every habit drops a clip</text>
-    {[
-      { c: '#ef4444', l: '20%', x: 22 },
-      { c: '#3b82f6', l: '20%', x: 76 },
-      { c: '#22c55e', l: '20%', x: 130 },
-      { c: '#eab308', l: '20%', x: 184 },
-      { c: '#a855f7', l: '15%', x: 238 },
-    ].map(({ c, l, x }) => (
-      <g key={c}>
-        <rect x={x - 2} y="35" width="6" height="12" rx="2" fill="#8b8680" fillOpacity="0.6" />
-        <rect x={x + 18} y="35" width="6" height="12" rx="2" fill="#8b8680" fillOpacity="0.6" />
-        <rect x={x - 8} y="42" width="42" height="30" rx="5" fill={c} fillOpacity="0.55" stroke={c} strokeWidth="1.5" strokeOpacity="0.7" />
-        <text x={x + 13} y="62" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="8" fontWeight="700">{l}</text>
-      </g>
-    ))}
-    {[
-      { c: '#f97316', l: '4.9%', x: 60 },
-      { c: '#e8b931', l: '0.1%', x: 180 },
-    ].map(({ c, l, x }) => (
-      <g key={c}>
-        <rect x={x - 2} y="105" width="6" height="12" rx="2" fill="#8b8680" fillOpacity="0.6" />
-        <rect x={x + 18} y="105" width="6" height="12" rx="2" fill="#8b8680" fillOpacity="0.6" />
-        <rect x={x - 8} y="112" width={c === '#e8b931' ? '46' : '42'} height="30" rx="5" fill={c} fillOpacity="0.6" stroke={c} strokeWidth={c === '#e8b931' ? '2' : '1.5'} strokeOpacity="0.8" />
-        <text x={x + 13} y="132" textAnchor="middle" fill="rgba(255,255,255,0.7)" fontSize="8" fontWeight="700">{l}</text>
-      </g>
-    ))}
-    <text x="140" y="172" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="10" fontWeight="500" fontFamily="DM Sans, sans-serif">7 clip colors · collect matching ones to cash in</text>
-  </svg>
-);
+function Step1HabitToJar() {
+  const [phase, setPhase] = useState(0);
 
-const STEP3 = (
-  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <g>
-      <rect x="24" y="20" width="22" height="32" rx="4" fill="#ef4444" fillOpacity="0.5" stroke="#ef4444" strokeWidth="1.5" strokeOpacity="0.7" />
-      <rect x="26" y="22" width="22" height="32" rx="4" fill="#ef4444" fillOpacity="0.4" stroke="#ef4444" strokeWidth="1.5" strokeOpacity="0.7" />
-      <rect x="28" y="24" width="22" height="32" rx="4" fill="#ef4444" fillOpacity="0.55" stroke="#ef4444" strokeWidth="1.5" strokeOpacity="0.8" />
-    </g>
-    <text x="35" y="72" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="9" fontWeight="600" fontFamily="DM Sans, sans-serif">2+ matching</text>
-    <path d="M70 52 L102 52" stroke="#e8b931" strokeWidth="2.5" strokeOpacity="0.7" strokeLinecap="round" markerEnd="url(#arrGold2)" />
-    <defs>
-      <marker id="arrGold2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-        <polygon points="0 0, 8 3, 0 6" fill="#e8b931" fillOpacity="0.7" />
-      </marker>
-    </defs>
-    <g transform="translate(110, 20)">
-      <rect x="0" y="0" width="36" height="24" rx="8" fill="#e8b931" fillOpacity="0.2" stroke="#e8b931" strokeWidth="2.5" strokeOpacity="0.6" />
-      <text x="18" y="17" textAnchor="middle" fill="#e8b931" fillOpacity="0.85" fontSize="11" fontWeight="800">T1</text>
-      <path d="M40 12 L52 12" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.4" />
-      <rect x="56" y="0" width="36" height="24" rx="8" fill="#3b82f6" fillOpacity="0.2" stroke="#3b82f6" strokeWidth="2.5" strokeOpacity="0.6" />
-      <text x="74" y="17" textAnchor="middle" fill="#3b82f6" fillOpacity="0.85" fontSize="11" fontWeight="800">T2</text>
-      <path d="M96 12 L108 12" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.4" />
-      <rect x="112" y="0" width="36" height="24" rx="8" fill="#a855f7" fillOpacity="0.2" stroke="#a855f7" strokeWidth="2.5" strokeOpacity="0.6" />
-      <text x="130" y="17" textAnchor="middle" fill="#a855f7" fillOpacity="0.85" fontSize="11" fontWeight="800">T3</text>
-    </g>
-    <rect x="20" y="120" width="240" height="28" rx="8" fill="#e8b931" fillOpacity="0.08" stroke="#e8b931" strokeWidth="1" strokeOpacity="0.3" />
-    <text x="140" y="139" textAnchor="middle" fill="rgba(255,255,255,0.5)" fontSize="10" fontWeight="600" fontFamily="DM Sans, sans-serif">Gold clip = instant Tier 3</text>
-    <text x="140" y="168" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="9" fontWeight="500" fontFamily="DM Sans, sans-serif">Tier resets after each spin</text>
-  </svg>
-);
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setPhase(1), 600),   // show check
+      setTimeout(() => setPhase(2), 1400),  // show clip
+      setTimeout(() => setPhase(3), 2400),  // clip drops
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
 
-const STEP4 = (
-  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {[
-      { l: 'T1', c: '#ef4444', s: 0, e: 144 },
-      { l: 'T2', c: '#3b82f6', s: 144, e: 252 },
-      { l: 'T3', c: '#a855f7', s: 252, e: 324 },
-      { l: 'BONUS', c: '#eab308', s: 324, e: 352.8 },
-      { l: 'JACKPOT', c: '#e8b931', s: 352.8, e: 360 },
-    ].map(seg => {
-      const mid = (seg.s + seg.e) / 2 * Math.PI / 180;
-      const lx = 140 + 44 * Math.cos(mid - Math.PI / 2);
-      const ly = 88 + 44 * Math.sin(mid - Math.PI / 2);
-      return (
-        <g key={seg.l}>
-          <path d={`M${140 + 62 * Math.cos((seg.e - 90) * Math.PI / 180)},${88 + 62 * Math.sin((seg.e - 90) * Math.PI / 180)} A62,62 0 ${seg.e - seg.s <= 180 ? '0' : '1'},0 ${140 + 62 * Math.cos((seg.s - 90) * Math.PI / 180)},${88 + 62 * Math.sin((seg.s - 90) * Math.PI / 180)} L${140 + 22 * Math.cos((seg.s - 90) * Math.PI / 180)},${88 + 22 * Math.sin((seg.s - 90) * Math.PI / 180)} A22,22 0 ${seg.e - seg.s <= 180 ? '0' : '1'},1 ${140 + 22 * Math.cos((seg.e - 90) * Math.PI / 180)},${88 + 22 * Math.sin((seg.e - 90) * Math.PI / 180)} Z`}
-            fill={seg.c} fillOpacity="0.6" stroke="rgba(0,0,0,0.5)" strokeWidth="1.5" />
-          <text x={lx} y={ly} textAnchor="middle" dominantBaseline="central" fill="white" fillOpacity="0.85" fontSize="6" fontWeight="700">{seg.l}</text>
-        </g>
-      );
-    })}
-    <circle cx="140" cy="88" r="62" fill="none" stroke="#e8b931" strokeWidth="2.5" strokeOpacity="0.5" />
-    <circle cx="140" cy="88" r="22" fill="#1a1a1f" fillOpacity="0.6" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.6" />
-    <path d="M140 16 L152 34 Q140 28 128 34 Z" fill="#e8b931" fillOpacity="0.7" />
-    <rect x="90" y="158" width="100" height="22" rx="6" fill="#e8b931" fillOpacity="0.12" stroke="#e8b931" strokeWidth="1" strokeOpacity="0.4" />
-    <text x="140" y="174" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontWeight="600" fontFamily="DM Sans, sans-serif">1 token normal · 5 tokens Mega</text>
-  </svg>
-);
+  return (
+    <div className="flex flex-col items-center justify-center h-64 relative">
+      {/* Habit card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="glass shape-card p-4 w-56 relative"
+        style={{ borderLeft: '3px solid #ef4444' }}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#ef4444', boxShadow: '0 0 8px #ef444480' }} />
+          <span className="text-sm font-semibold text-white">Morning Workout</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <motion.button
+            animate={phase >= 1 ? { scale: [1, 0.9, 1], backgroundColor: '#22c55e' } : {}}
+            transition={{ duration: 0.3 }}
+            className="btn-pill w-full py-2 text-xs font-bold text-white"
+            style={{ background: phase >= 1 ? '#22c55e' : 'linear-gradient(135deg, #ef4444, #ef4444cc)' }}
+          >
+            {phase >= 1 ? <><Check size={14} className="inline mr-1" />Done!</> : 'Complete Habit'}
+          </motion.button>
+        </div>
+      </motion.div>
 
-const STEP5 = (
-  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="8" y="12" width="120" height="56" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" strokeWidth="1.5" />
-    <text x="68" y="34" textAnchor="middle" fill="rgba(255,255,255,0.55)" fontSize="10" fontWeight="600" fontFamily="DM Sans, sans-serif">Reward Bank</text>
-    <rect x="28" y="44" width="80" height="16" rx="6" fill="#e8b931" fillOpacity="0.2" stroke="#e8b931" strokeWidth="1.5" strokeOpacity="0.5" />
-    <text x="68" y="56" textAnchor="middle" fill="#e8b931" fillOpacity="0.7" fontSize="9" fontWeight="700">Claim</text>
-    <path d="M132 44 L156 44" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.5" strokeDasharray="3 2" />
-    <rect x="160" y="16" width="60" height="36" rx="10" fill="rgba(255,255,255,0.04)" stroke="rgba(34,197,94,0.3)" strokeWidth="1.5" />
-    <text x="190" y="32" textAnchor="middle" fill="#22c55e" fillOpacity="0.8" fontSize="9" fontWeight="700">GRACE</text>
-    <text x="190" y="46" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8">skip / cancel</text>
-    <rect x="30" y="88" width="220" height="54" rx="10" fill="rgba(255,255,255,0.03)" stroke="#a855f7" strokeWidth="1.5" strokeOpacity="0.3" />
-    <text x="140" y="108" textAnchor="middle" fill="rgba(255,255,255,0.55)" fontSize="10" fontWeight="600" fontFamily="DM Sans, sans-serif">Active Reward</text>
-    <rect x="44" y="118" width="192" height="6" rx="3" fill="rgba(255,255,255,0.06)" />
-    <rect x="44" y="118" width="130" height="6" rx="3" fill="#a855f7" fillOpacity="0.5" />
-    <text x="140" y="136" textAnchor="middle" fill="rgba(255,255,255,0.3)" fontSize="8" fontFamily="DM Sans, sans-serif">Complete before timer expires</text>
-    <circle cx="140" cy="170" r="4" fill="#e8b931" fillOpacity="0.4" />
-    <text x="152" y="173" fill="rgba(255,255,255,0.3)" fontSize="9" fontFamily="DM Sans, sans-serif">Claim → grace → active → done</text>
-  </svg>
-);
+      {/* Arrow */}
+      <AnimatePresence>
+        {phase >= 2 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="my-3 text-casino-accent"
+          >
+            <ChevronRight size={20} className="rotate-90" />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-const STEP6 = (
-  <svg viewBox="0 0 280 190" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="140" cy="58" r="38" fill="rgba(255,255,255,0.02)" stroke="#e8b931" strokeWidth="2" strokeOpacity="0.4" />
-    <path d="M132 58 L138 66 L150 48" stroke="#e8b931" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.8" />
-    <text x="140" y="115" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="10" fontWeight="600" fontFamily="DM Sans, sans-serif">Complete your habit before the reward</text>
-    <rect x="24" y="128" width="232" height="2" rx="1" fill="rgba(255,255,255,0.05)" />
-    <circle cx="80" cy="155" r="5" fill="#e8b931" fillOpacity="0.3" />
-    <text x="95" y="159" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="DM Sans, sans-serif">Timer starts when you begin</text>
-    <circle cx="80" cy="175" r="5" fill="#e8b931" fillOpacity="0.3" />
-    <text x="95" y="179" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="DM Sans, sans-serif">Honor system — the app trusts you</text>
-  </svg>
-);
+      {/* Clip dropping */}
+      <AnimatePresence>
+        {phase >= 2 && (
+          <motion.div
+            initial={{ y: -40, opacity: 0, scale: 0.5 }}
+            animate={phase >= 3 ? { y: 60, opacity: 1, scale: 1 } : { y: 0, opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15, delay: phase >= 3 ? 0 : 0 }}
+            className="absolute"
+            style={{ top: phase >= 3 ? 'auto' : '140px', bottom: phase >= 3 ? '20px' : 'auto' }}
+          >
+            <SingleClip color="blue" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Jar (appears when clip drops) */}
+      <AnimatePresence>
+        {phase >= 3 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+            className="jar-visual"
+            style={{ marginTop: '20px' }}
+          >
+            <div className="jar-lid" />
+            <div className="jar-neck" />
+            <div className="jar-body">
+              <div className="jar-count">1</div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ===== STEP 2: Clips → Tier Upgrade ===== */
+
+function Step2TierUpgrade() {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setPhase(1), 500),   // clips gather
+      setTimeout(() => setPhase(2), 1500),  // glow
+      setTimeout(() => setPhase(3), 2200),  // transform to tier
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center justify-center h-64 relative">
+      {/* 2 Clips */}
+      <div className="flex items-end gap-1 mb-6">
+        {[0, 1].map((i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20, x: (i - 0.5) * 60 }}
+            animate={phase >= 1 ? { opacity: 1, y: 0, x: 0 } : {}}
+            transition={{ delay: i * 0.15, type: 'spring', stiffness: 300 }}
+          >
+            <motion.div
+              animate={phase >= 2 ? { scale: [1, 1.1, 1] } : {}}
+              transition={{ repeat: phase >= 2 ? Infinity : 0, duration: 0.6 }}
+            >
+              <SingleClip color="red" />
+            </motion.div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Arrow */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={phase >= 2 ? { opacity: 1 } : {}}
+        className="text-casino-accent mb-6"
+      >
+        <ChevronRight size={24} className="rotate-90" />
+      </motion.div>
+
+      {/* Tier Badge */}
+      <AnimatePresence>
+        {phase >= 3 && (
+          <motion.div
+            initial={{ scale: 0, rotate: -10 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+            className="px-6 py-3 rounded-2xl font-bold text-white text-lg"
+            style={{
+              background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+              boxShadow: '0 4px 20px rgba(239,68,68,0.4), 0 0 0 1px rgba(239,68,68,0.3)',
+            }}
+          >
+            Tier 2
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Text */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={phase >= 3 ? { opacity: 1 } : {}}
+        transition={{ delay: 0.3 }}
+        className="mt-4 text-sm text-casino-text-secondary"
+      >
+        Collect matching clips to upgrade your spin tier
+      </motion.p>
+    </div>
+  );
+}
+
+/* ===== STEP 3: Spin & Win ===== */
+
+function Step3SpinWin() {
+  const [spinning, setSpinning] = useState(true);
+  const [landed, setLanded] = useState(false);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setSpinning(false), 2500);
+    const t2 = setTimeout(() => setLanded(true), 3000);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center justify-center h-64">
+      {/* Mini wheel */}
+      <div className="relative mb-4" style={{ width: 140, height: 140 }}>
+        <motion.svg
+          width="140" height="140" viewBox="0 0 140 140"
+          animate={{ rotate: spinning ? 360 * 5 + 288 : 360 * 5 + 288 }}
+          transition={{ duration: spinning ? 2.5 : 0, ease: spinning ? [0.15, 0.85, 0.35, 1] : 'linear' }}
+          style={{ transformOrigin: '70px 70px' }}
+        >
+          {/* Simplified 5-segment wheel */}
+          <path d="M70,70 L70,10 A60,60 0 0,1 127.43,42.43 Z" fill="#ef4444" opacity="0.7" />
+          <path d="M70,70 L127.43,42.43 A60,60 0 0,1 127.43,97.57 Z" fill="#3b82f6" opacity="0.7" />
+          <path d="M70,70 L127.43,97.57 A60,60 0 0,1 70,130 Z" fill="#a855f7" opacity="0.7" />
+          <path d="M70,70 L70,130 A60,60 0 0,1 12.57,97.57 Z" fill="#eab308" opacity="0.7" />
+          <path d="M70,70 L12.57,97.57 A60,60 0 0,1 12.57,42.43 Z" fill="#e8b931" opacity="0.7" />
+          <path d="M70,70 L12.57,42.43 A60,60 0 0,1 70,10 Z" fill="#22c55e" opacity="0.7" />
+          <circle cx="70" cy="70" r="60" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="1" />
+        </motion.svg>
+        {/* Pointer */}
+        <svg className="absolute -top-1 left-1/2 -translate-x-1/2 z-10" width="16" height="18" viewBox="0 0 16 18">
+          <path d="M8 16 L14 4 Q8 0 2 4 Z" fill="#e8b931" />
+        </svg>
+        {/* Center */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass flex items-center justify-center z-10">
+          <Sparkles size={16} className="text-casino-accent" />
+        </div>
+      </div>
+
+      {/* Result */}
+      <AnimatePresence>
+        {landed && (
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [0, 1.3, 1], opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="glass shape-card p-3 text-center"
+            style={{ borderTop: '3px solid #eab308', boxShadow: '0 0 24px #eab30830' }}
+          >
+            <p className="text-sm font-bold text-white">Bonus Wheel!</p>
+            <p className="text-xs text-casino-text-secondary">Extra spin with boosted odds</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ===== STEP 4: Ready ===== */
+
+function Step4Ready({ onStartTour, onSkip }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-64 text-center">
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+        style={{ background: 'linear-gradient(135deg, var(--color-casino-accent), #c49a2a)' }}
+      >
+        <Play size={28} className="text-white ml-1" />
+      </motion.div>
+      <h3 className="font-heading text-xl text-white mb-2">You're Ready!</h3>
+      <p className="text-sm text-casino-text-secondary mb-6 max-w-xs">
+        Add your first habit to start earning clips and spinning for rewards.
+      </p>
+      <div className="flex gap-3">
+        <button
+          onClick={onStartTour}
+          className="btn-pill btn-gold px-6 py-2.5 text-sm font-bold"
+        >
+          Start Tour
+        </button>
+        <button
+          onClick={onSkip}
+          className="btn-pill btn-ghost px-6 py-2.5 text-sm font-semibold"
+        >
+          Skip
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ===== MAIN COMPONENT ===== */
 
 const STEPS = [
-  {
-    title: 'Complete Habits',
-    subtitle: 'Each habit triggers the Token Wheel',
-    icon: ListTodo,
-    color: '#ef4444',
-    illustration: STEP1,
-    bullets: ['Complete any habit', 'Token Wheel appears (60% WIN)', 'Win = +1 spin token', 'Miss = try again on next habit'],
-  },
-  {
-    title: 'Earn Clips',
-    subtitle: 'Every habit drops a random colored clip',
-    icon: Gem,
-    color: '#3b82f6',
-    illustration: STEP2,
-    bullets: ['Each completion drops a random clip', '7 colors · different rarities', 'Gold clip = ultra rare (0.1%)', 'Collect matching clips to cash in'],
-  },
-  {
-    title: 'Cash In for Tiers',
-    subtitle: 'Matching clips unlock better wheel odds',
-    icon: Dices,
-    color: '#a855f7',
-    illustration: STEP3,
-    bullets: ['2+ matching clips → cash in', 'Upgrade tier: T1 → T2 → T3', 'Gold clip = instant Tier 3', 'Higher tier = better wheel rewards', 'Tier resets after each spin'],
-  },
-  {
-    title: 'Spin the Wheel',
-    subtitle: 'Tokens let you spin for prizes',
-    icon: Dices,
-    color: '#e8b931',
-    illustration: STEP4,
-    bullets: ['Normal spin = 1 token', 'Mega spin = 5 tokens (boosted odds)', 'Mega spin ignores tier — land = win', 'Use Quick Lock to log without a habit', 'Bonus wheel on Bonus land', 'Near-miss keeps it exciting'],
-  },
-  {
-    title: 'Claim & Enjoy',
-    subtitle: 'Claim rewards before they expire',
-    icon: Gift,
-    color: '#22c55e',
-    illustration: STEP5,
-    bullets: ['Win → reward goes to your bank', 'Claim → grace period starts', 'Skip grace → active timer begins', 'Complete before it expires', 'Dismiss expired rewards anytime'],
-  },
-  {
-    title: 'Play Fair',
-    subtitle: 'Earn rewards by completing habits first',
-    icon: Shield,
-    color: '#e8b931',
-    illustration: STEP6,
-    bullets: ['Complete your habit before the reward', 'Timer starts when you begin the reward', 'No shortcuts — the app trusts you', 'Rewards only count after the timer starts'],
-  },
+  { title: 'Complete Habits', subtitle: 'Finish a habit to earn a random colored clip' },
+  { title: 'Collect & Upgrade', subtitle: '2 matching clips → Tier 2, 3 clips → Tier 3, gold clip → instant Tier 3' },
+  { title: 'Spin & Win', subtitle: 'Use tokens to spin for time-based rewards' },
+  { title: 'Get Started', subtitle: 'Your first habit is waiting' },
 ];
 
-export default function OnboardingModal({ onClose }) {
+export default function OnboardingModal({ onStartTour, onSkip }) {
   const [step, setStep] = useState(0);
-  const current = STEPS[step];
-  const Icon = current.icon;
   const isLast = step === STEPS.length - 1;
   const isFirst = step === 0;
+
+  const handleSkip = () => {
+    localStorage.setItem('ch_onboarded', 'skipped');
+    onSkip();
+  };
+
+  const handleStartTour = () => {
+    localStorage.setItem('ch_onboarded', 'tour');
+    onStartTour();
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="modal-backdrop"
-      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}
     >
       <motion.div
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 20 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="modal-panel p-8 text-center relative overflow-hidden max-w-lg w-full"
+        className="modal-panel relative overflow-hidden max-w-md w-full mx-4"
         style={{ background: 'linear-gradient(135deg, rgba(20,20,26,0.98) 0%, rgba(15,15,20,0.99) 100%)' }}
-        onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-56 h-56 rounded-full blur-3xl pointer-events-none"
-          style={{ backgroundColor: current.color, opacity: 0.15 }}
-        />
-
+        {/* Close button (skip everything) */}
         <button
-          onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 rounded-xl flex items-center justify-center text-casino-text-tertiary hover:text-white hover:bg-white/5 transition-colors z-10"
+          onClick={handleSkip}
+          className="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center text-casino-text-tertiary hover:text-white hover:bg-white/5 transition-colors z-10"
+          aria-label="Skip onboarding"
         >
           <X size={18} />
         </button>
 
-        <div className="flex items-center justify-center gap-2 mb-8">
+        {/* Progress dots */}
+        <div className="flex items-center justify-center gap-2 mb-6 pt-2">
           {STEPS.map((_, idx) => (
             <motion.div
               key={idx}
               animate={{
                 width: idx === step ? 28 : 8,
                 height: 8,
-                backgroundColor: idx <= step ? current.color : 'rgba(255,255,255,0.1)',
+                backgroundColor: idx <= step ? 'var(--color-casino-accent)' : 'rgba(255,255,255,0.1)',
                 opacity: idx <= step ? 1 : 0.35,
               }}
               transition={{ type: 'spring', stiffness: 500, damping: 25 }}
@@ -247,68 +331,56 @@ export default function OnboardingModal({ onClose }) {
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={step}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
-            className="mb-5 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-3"
-          >
-            {current.illustration}
-          </motion.div>
-        </AnimatePresence>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`title-${step}`}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
-          >
-            <div className="w-11 h-11 rounded-xl mx-auto mb-3 flex items-center justify-center"
-              style={{ backgroundColor: `${current.color}18` }}>
-              <Icon size={20} style={{ color: current.color }} />
-            </div>
-            <h2 className="font-heading text-lg font-bold text-white mb-1">
-              {current.title}
-            </h2>
-            <p className="text-sm text-casino-text-secondary mb-4">
-              {current.subtitle}
-            </p>
-            <div className="text-left space-y-1.5 pb-2">
-              {current.bullets.map((b, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full mt-[5px] shrink-0" style={{ backgroundColor: `${current.color}80` }} />
-                  <span className="text-[11px] text-casino-text-secondary leading-relaxed">{b}</span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </AnimatePresence>
-
-        <div className="flex items-center gap-3 mt-1">
-          {!isFirst && (
-            <button
-              onClick={() => setStep((s) => s - 1)}
-              className="w-10 h-10 rounded-xl glass flex items-center justify-center text-casino-text-secondary hover:text-white transition-colors shrink-0"
+        {/* Step content */}
+        <div className="px-6 pb-6">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
             >
-              <ChevronLeft size={20} />
-            </button>
-          )}
-          <button
-            onClick={() => (isLast ? onClose() : setStep((s) => s + 1))}
-            className="btn-pill btn-gold flex-1 py-3 text-sm font-bold"
-          >
-            {isLast ? <><Check size={16} /> Get Started</> : <><ChevronRight size={16} /> Next</>}
-          </button>
-        </div>
+              {/* Title */}
+              <div className="text-center mb-2">
+                <h2 className="font-heading text-lg font-bold text-white">
+                  {STEPS[step].title}
+                </h2>
+                <p className="text-sm text-casino-text-secondary mt-1">
+                  {STEPS[step].subtitle}
+                </p>
+              </div>
 
-        <button onClick={onClose} className="mt-4 text-xs text-casino-text-tertiary hover:text-casino-text-secondary transition-colors">
-          Skip tour
-        </button>
+              {/* Animation area */}
+              <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl mb-5 overflow-hidden">
+                {step === 0 && <Step1HabitToJar />}
+                {step === 1 && <Step2TierUpgrade />}
+                {step === 2 && <Step3SpinWin />}
+                {step === 3 && <Step4Ready onStartTour={handleStartTour} onSkip={handleSkip} />}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Navigation (only for steps 0-2) */}
+          {!isLast && (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setStep((s) => s - 1)}
+                disabled={isFirst}
+                className="w-10 h-10 rounded-xl glass flex items-center justify-center text-casino-text-secondary hover:text-white disabled:opacity-20 transition-colors shrink-0"
+                aria-label="Previous step"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                onClick={() => setStep((s) => s + 1)}
+                className="btn-pill btn-gold flex-1 py-2.5 text-sm font-bold flex items-center justify-center gap-1"
+              >
+                Next <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+        </div>
       </motion.div>
     </motion.div>
   );

@@ -62,7 +62,10 @@ export default function ConfirmModal({
                   {cancelText}
                 </button>
                 <button
-                  onClick={onConfirm}
+                  onClick={() => {
+                    onConfirm?.();
+                    onCancel();
+                  }}
                   className="flex-1 btn-pill py-2.5 text-sm font-bold text-white"
                   style={{
                     background: danger
