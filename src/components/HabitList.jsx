@@ -212,7 +212,7 @@ export default function HabitList({ habits, jars, tags, onComplete, onEdit, onDe
 
       {/* Tag filter bar */}
       {tags && tags.length > 0 && (
-        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 scrollbar-hide">
+        <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1 custom-scrollbar">
           <button
             onClick={() => setActiveTag(null)}
             className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all whitespace-nowrap ${!activeTag ? 'bg-casino-accent text-black' : 'glass text-casino-text-tertiary hover:text-casino-text-secondary'}`}

@@ -33,7 +33,7 @@ export default function ActiveRewards({ rewards, onSkipGrace, onCompleteEarly, o
       </div>
 
       <div className="relative">
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory pr-8">
+        <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar snap-x snap-mandatory pr-8">
         {rewards.map((reward) => {
           const claimedAt = new Date(reward.claimedAt).getTime();
           const graceMs = (reward.gracePeriodMinutes || 0) * 60000;

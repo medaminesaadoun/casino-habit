@@ -499,7 +499,7 @@ export default function JarDetail({ jar, habits, history, onBack, onEdit, onDele
             {jarHistory.length === 0 ? (
               <p className="text-xs text-casino-text-tertiary py-2">No activity for this jar yet.</p>
             ) : (
-              <div className="space-y-1.5 max-h-48 overflow-y-auto scrollbar-hide">
+              <div className="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar">
                 {jarHistory.map((item) => (
                   <div
                     key={item.id}

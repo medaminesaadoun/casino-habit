@@ -939,8 +939,41 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-casino-bg)' }}>
-        <div className="text-casino-text-secondary text-lg font-medium animate-pulse">Loading...</div>
+      <div className="min-h-screen p-4 pb-24" style={{ backgroundColor: 'var(--color-casino-bg)' }}>
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="skeleton w-32 h-8" />
+          <div className="skeleton w-8 h-8 rounded-full" />
+        </div>
+        {/* Stats skeleton */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="glass p-4 rounded-xl">
+            <div className="skeleton w-12 h-4 mb-2" />
+            <div className="skeleton w-20 h-6" />
+          </div>
+          <div className="glass p-4 rounded-xl">
+            <div className="skeleton w-12 h-4 mb-2" />
+            <div className="skeleton w-20 h-6" />
+          </div>
+        </div>
+        {/* Wheel skeleton */}
+        <div className="glass p-6 rounded-xl mb-6 flex flex-col items-center">
+          <div className="skeleton w-48 h-48 rounded-full mb-4" />
+          <div className="skeleton w-24 h-10 rounded-xl" />
+        </div>
+        {/* Habits skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="glass p-4 rounded-xl">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="skeleton w-8 h-8 rounded-lg" />
+                <div className="skeleton w-24 h-4" />
+              </div>
+              <div className="skeleton w-full h-2 rounded-full mb-2" />
+              <div className="skeleton w-16 h-3" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -1177,7 +1210,7 @@ function App() {
               {history.length === 0 ? (
                 <p className="text-casino-text-tertiary text-center py-8 text-sm">No activity yet. Complete a habit!</p>
               ) : (
-                <div className="space-y-1.5 max-h-64 overflow-y-auto scrollbar-hide">
+                <div className="space-y-1.5 max-h-64 overflow-y-auto custom-scrollbar">
                   {[...history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 50).map((item) => (
                     <div key={item.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-casino-card text-sm">
                       <span className="text-casino-text-tertiary text-xs tabular-nums shrink-0">
@@ -1379,7 +1412,7 @@ function App() {
                 {history.filter((h) => h.type === 'main-wheel').length === 0 ? (
                   <p className="text-casino-text-tertiary text-center py-4 text-sm">No spins yet. Give it a go!</p>
                 ) : (
-                  <div className="space-y-2 max-h-48 overflow-y-auto scrollbar-hide">
+                  <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
                     {[...history]
                       .filter((h) => h.type === 'main-wheel')
                       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
@@ -1463,7 +1496,7 @@ function App() {
               {history.length === 0 ? (
                 <p className="text-casino-text-tertiary text-center py-8 text-sm">No activity yet. Complete a habit!</p>
               ) : (
-                <div className="space-y-1.5 max-h-96 overflow-y-auto scrollbar-hide">
+                <div className="space-y-1.5 max-h-96 overflow-y-auto custom-scrollbar">
                   {[...history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).slice(0, 50).map((item) => (
                     <div key={item.id} className="flex items-center justify-between py-2 px-3 rounded-xl bg-casino-card text-sm">
                       <span className="text-casino-text-tertiary text-xs tabular-nums shrink-0">

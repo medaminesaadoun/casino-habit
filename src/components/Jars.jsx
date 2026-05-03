@@ -273,7 +273,7 @@ export default function Jars({ jars, habits, history, onAddJar, onEditJar, onDel
                   <Crown size={14} className="text-casino-accent" />
                   <p className="text-xs font-semibold text-casino-accent tracking-tight">Hall of Fame</p>
                 </div>
-                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide jar-hall-of-fame-shelf">
+                <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar jar-hall-of-fame-shelf">
                   {completedJars.map((jar, idx) => (
                     <CompletedJarCard
                       key={jar.id}

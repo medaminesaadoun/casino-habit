@@ -61,7 +61,7 @@ export default function RewardBank({ rewards, onClaim, onDeleteAll, onRequestCon
       </div>
 
       {/* Tier filter pills */}
-      <div className="flex gap-2 mb-4 overflow-x-auto scrollbar-hide">
+      <div className="flex gap-2 mb-4 overflow-x-auto custom-scrollbar">
         {FILTER_OPTIONS.map((label) => {
           const tierNum = label === 'All' ? 0 : label === 'Jackpot' ? 4 : parseInt(label.replace('Tier ', ''));
           const color = tierNum === 0 ? 'var(--color-casino-accent)' : TIER_COLORS[tierNum];
