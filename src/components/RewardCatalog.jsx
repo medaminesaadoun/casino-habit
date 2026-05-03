@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { X, Plus, Trash2 } from 'lucide-react';
 
 const TIER_NAMES = { tier1: 'T1 — 5-15 min', tier2: 'T2 — 20-45 min', tier3: 'T3 — 45-90 min', jackpot: 'Jackpot — 2h-4h+' };
-const TIER_COLORS = { tier1: '#e63946', tier2: '#4cc9f0', tier3: '#f72585', jackpot: '#ffd60a' };
+const TIER_COLORS = { tier1: '#ef4444', tier2: '#3b82f6', tier3: '#a855f7', jackpot: '#e8b931' };
 const TIER_DEFAULTS = {
   tier1: { grace: 0, duration: 10 },
   tier2: { grace: 0, duration: 30 },

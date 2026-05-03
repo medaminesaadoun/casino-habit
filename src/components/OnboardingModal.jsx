@@ -25,10 +25,10 @@ function Step1HabitToJar() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="glass shape-card p-4 w-56 relative"
-        style={{ borderLeft: '3px solid #e63946' }}
+        style={{ borderLeft: '3px solid #ef4444' }}
       >
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#e63946', boxShadow: '0 0 8px #e6394680' }} />
+          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#ef4444', boxShadow: '0 0 8px #ef444480' }} />
           <span className="text-sm font-semibold text-white">Morning Workout</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -36,7 +36,7 @@ function Step1HabitToJar() {
             animate={phase >= 1 ? { scale: [1, 0.9, 1], backgroundColor: '#22c55e' } : {}}
             transition={{ duration: 0.3 }}
             className="btn-pill w-full py-2 text-xs font-bold text-white"
-            style={{ background: phase >= 1 ? '#22c55e' : 'linear-gradient(135deg, #e63946, #e63946cc)' }}
+            style={{ background: phase >= 1 ? '#22c55e' : 'linear-gradient(135deg, #ef4444, #ef4444cc)' }}
           >
             {phase >= 1 ? <><Check size={14} className="inline mr-1" />Done!</> : 'Complete Habit'}
           </motion.button>
@@ -147,7 +147,7 @@ function Step2TierUpgrade() {
             transition={{ type: 'spring', stiffness: 300, damping: 15 }}
             className="px-6 py-3 rounded-2xl font-bold text-white text-lg"
             style={{
-              background: 'linear-gradient(135deg, #e63946, #b91c1c)',
+              background: 'linear-gradient(135deg, #ef4444, #dc2626)',
               boxShadow: '0 4px 20px rgba(239,68,68,0.4), 0 0 0 1px rgba(239,68,68,0.3)',
             }}
           >
@@ -192,9 +192,9 @@ function Step3SpinWin() {
           style={{ transformOrigin: '70px 70px' }}
         >
           {/* Simplified 5-segment wheel */}
-          <path d="M70,70 L70,10 A60,60 0 0,1 127.43,42.43 Z" fill="#e63946" opacity="0.7" />
-          <path d="M70,70 L127.43,42.43 A60,60 0 0,1 127.43,97.57 Z" fill="#4cc9f0" opacity="0.7" />
-          <path d="M70,70 L127.43,97.57 A60,60 0 0,1 70,130 Z" fill="#f72585" opacity="0.7" />
+          <path d="M70,70 L70,10 A60,60 0 0,1 127.43,42.43 Z" fill="#ef4444" opacity="0.7" />
+          <path d="M70,70 L127.43,42.43 A60,60 0 0,1 127.43,97.57 Z" fill="#3b82f6" opacity="0.7" />
+          <path d="M70,70 L127.43,97.57 A60,60 0 0,1 70,130 Z" fill="#a855f7" opacity="0.7" />
           <path d="M70,70 L70,130 A60,60 0 0,1 12.57,97.57 Z" fill="#eab308" opacity="0.7" />
           <path d="M70,70 L12.57,97.57 A60,60 0 0,1 12.57,42.43 Z" fill="#e8b931" opacity="0.7" />
           <path d="M70,70 L12.57,42.43 A60,60 0 0,1 70,10 Z" fill="#22c55e" opacity="0.7" />

@@ -929,8 +929,11 @@ function App() {
   };
 
   const [newJarName, setNewJarName] = useState('');
-  const [newJarColor, setNewJarColor] = useState('#e63946');
-  const [newHabitColor, setNewHabitColor] = useState('#e63946');
+  const [newJarColor, setNewJarColor] = useState('#ef4444');
+  const [newHabitName, setNewHabitName] = useState('');
+  const [newHabitDesc, setNewHabitDesc] = useState('');
+  const [newHabitColor, setNewHabitColor] = useState('#ef4444');
+  const [newHabitJarId, setNewHabitJarId] = useState('');
   const [newHabitTags, setNewHabitTags] = useState([]);
   const [editingHabitTags, setEditingHabitTags] = useState([]);
 
@@ -1197,9 +1200,9 @@ function App() {
                           Wheel → <span className="font-semibold" style={{
                             color: item.result === 'Jackpot' ? '#d4a574' :
                               item.result === 'Bonus' ? '#eab308' :
-                              item.result === 'Tier 3' ? '#f72585' :
-                              item.result === 'Tier 2' ? '#4cc9f0' :
-                              '#e63946'
+                              item.result === 'Tier 3' ? '#a855f7' :
+                              item.result === 'Tier 2' ? '#3b82f6' :
+                              '#ef4444'
                           }}>{item.result}</span>
                         </span>
                       )}
@@ -1348,7 +1351,7 @@ function App() {
                     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
                     .slice(0, 10);
                   if (spinHistory.length === 0) return <p className="text-casino-text-tertiary text-center py-4 text-sm">No spins yet. Give it a go!</p>;
-                  const tierColor = (r) => r === 'Jackpot' ? '#ffd60a' : r === 'Bonus' ? '#eab308' : r === 'Tier 3' ? '#f72585' : r === 'Tier 2' ? '#4cc9f0' : '#e63946';
+                  const tierColor = (r) => r === 'Jackpot' ? '#e8b931' : r === 'Bonus' ? '#eab308' : r === 'Tier 3' ? '#a855f7' : r === 'Tier 2' ? '#3b82f6' : '#ef4444';
                   const tierHeight = (r) => r === 'Jackpot' ? 48 : r === 'Bonus' ? 40 : r === 'Tier 3' ? 32 : r === 'Tier 2' ? 24 : 16;
                   const tierInitial = (r) => r === 'Jackpot' ? 'J' : r === 'Bonus' ? 'B' : r === 'Tier 3' ? '3' : r === 'Tier 2' ? '2' : '1';
                   return (
@@ -1487,9 +1490,9 @@ function App() {
                           {item.isMegaSpin ? 'Mega ' : ''}Wheel → <span className="font-semibold" style={{
                             color: item.result === 'Jackpot' ? '#d4a574' :
                               item.result === 'Bonus' ? '#eab308' :
-                              item.result === 'Tier 3' ? '#f72585' :
-                              item.result === 'Tier 2' ? '#4cc9f0' :
-                              '#e63946'
+                              item.result === 'Tier 3' ? '#a855f7' :
+                              item.result === 'Tier 2' ? '#3b82f6' :
+                              '#ef4444'
                           }}>{item.result}</span>
                         </span>
                       )}
@@ -1554,7 +1557,7 @@ function App() {
                 <div>
                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Color</label>
                   <div className="flex gap-2 flex-wrap">
-                    {['#e63946', '#4cc9f0', '#22c55e', '#eab308', '#f72585', '#f97316'].map((c) => (
+                    {['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316'].map((c) => (
                       <button key={c} onClick={() => setNewJarColor(c)}
                         className={`w-8 h-8 rounded-full border-2 transition-all ${newJarColor === c ? 'border-white scale-110' : 'border-transparent opacity-60'}`}
                         style={{ backgroundColor: c }} />
@@ -1584,7 +1587,7 @@ function App() {
                 <div>
                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Color</label>
                   <div className="flex gap-2 flex-wrap">
-                    {['#e63946', '#4cc9f0', '#22c55e', '#eab308', '#f72585', '#f97316'].map((c) => (
+                    {['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316'].map((c) => (
                       <button key={c} onClick={() => setEditingJar({ ...editingJar, color: c })}
                         className={`w-8 h-8 rounded-full border-2 transition-all ${editingJar.color === c ? 'border-white scale-110' : 'border-transparent opacity-60'}`}
                         style={{ backgroundColor: c }} />
@@ -1649,7 +1652,7 @@ function App() {
                 <div>
                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Color</label>
                   <div className="flex gap-2 flex-wrap">
-                    {['#e63946', '#4cc9f0', '#22c55e', '#eab308', '#f72585', '#f97316'].map((c) => (
+                    {['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316'].map((c) => (
                       <button key={c} onClick={() => setNewHabitColor(c)}
                         className={`w-8 h-8 rounded-full border-2 transition-all ${newHabitColor === c ? 'border-white scale-110' : 'border-transparent opacity-60'}`}
                         style={{ backgroundColor: c }} />
@@ -1712,7 +1715,7 @@ function App() {
                 <div>
                   <label className="block text-xs font-medium text-casino-text-tertiary mb-1.5 uppercase tracking-wider">Color</label>
                   <div className="flex gap-2 flex-wrap">
-                    {['#e63946', '#4cc9f0', '#22c55e', '#eab308', '#f72585', '#f97316'].map((c) => (
+                    {['#ef4444', '#3b82f6', '#22c55e', '#eab308', '#a855f7', '#f97316'].map((c) => (
                       <button key={c} onClick={() => setEditingHabit({ ...editingHabit, color: c })}
                         className={`w-8 h-8 rounded-full border-2 transition-all ${editingHabit.color === c ? 'border-white scale-110' : 'border-transparent opacity-60'}`}
                         style={{ backgroundColor: c }} />

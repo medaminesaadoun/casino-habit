@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, Gift, X, Zap, Clock } from 'lucide-react';
 
-const TIER_COLORS = { 1: '#e63946', 2: '#4cc9f0', 3: '#f72585', 4: '#ffd60a' };
+const TIER_COLORS = { 1: '#ef4444', 2: '#3b82f6', 3: '#a855f7', 4: '#e8b931' };
 const TIER_LABELS = { 1: 'Tier 1', 2: 'Tier 2', 3: 'Tier 3', 4: 'Jackpot' };
 
 const BURST_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315];

@@ -70,7 +70,7 @@ function DemoCashIn() {
         </div>
       </div>
       <ArrowRightLeft size={14} />
-      <span className="px-2 py-0.5 rounded-lg text-xs font-bold" style={{ background: 'linear-gradient(135deg, #e63946, #b91c1c)' }}>
+      <span className="px-2 py-0.5 rounded-lg text-xs font-bold" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
         T2
       </span>
     </motion.button>

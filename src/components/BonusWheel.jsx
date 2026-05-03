@@ -6,9 +6,9 @@ import JackpotConfetti from './JackpotConfetti';
 
 const BONUS_SEGMENTS = [
   { label: '75%', color: '#22c55e', start: 0, end: 120, weight: 33.3 },
-  { label: '50%', color: '#4cc9f0', start: 120, end: 210, weight: 25 },
-  { label: '25%', color: '#f72585', start: 210, end: 270, weight: 16.7 },
-  { label: 'FREE', color: '#ffd60a', start: 270, end: 315, weight: 12.5 },
+  { label: '50%', color: '#3b82f6', start: 120, end: 210, weight: 25 },
+  { label: '25%', color: '#a855f7', start: 210, end: 270, weight: 16.7 },
+  { label: 'FREE', color: '#e8b931', start: 270, end: 315, weight: 12.5 },
   { label: 'EXTRA', color: '#eab308', start: 315, end: 360, weight: 12.5 },
 ];
 
