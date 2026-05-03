@@ -28,9 +28,97 @@ import ConfirmModal from './components/ConfirmModal';
 import ToastContainer from './components/ToastContainer';
 import SessionSummaryModal from './components/SessionSummaryModal';
 import SettingsModal from './components/SettingsModal';
+import TodoList from './components/TodoList';
 
 const CLIP_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'gold'];
 const CLIP_WEIGHTS = [20, 20, 20, 20, 15, 4.9, 0.1];
+
+const DEMO_JAR_ID = 'demo-jar-1';
+const DEMO_HABIT_1_ID = 'demo-habit-1';
+const DEMO_HABIT_2_ID = 'demo-habit-2';
+
+const DEMO_DATA = {
+  jars: [
+    {
+      id: DEMO_JAR_ID,
+      name: 'Fitness',
+      color: '#ef4444',
+      totalClips: 450,
+      cashedClips: Array.from({ length: 450 }, (_, i) => {
+        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+        return colors[i % colors.length];
+      }),
+      milestones: [
+        { target: 1000, reward: 'Small Reward' },
+        { target: 5000, reward: 'Medium Reward' },
+        { target: 10000, reward: 'Big Reward' },
+      ],
+      createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
+    },
+  ],
+  habits: [
+    {
+      id: DEMO_HABIT_1_ID,
+      name: 'Morning Jog',
+      description: 'Run at least 2km',
+      color: '#ef4444',
+      jarId: DEMO_JAR_ID,
+      streak: 0,
+      completedDates: [],
+      tags: ['health'],
+      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+    },
+    {
+      id: DEMO_HABIT_2_ID,
+      name: 'Read 30 mins',
+      description: 'Read a book or article',
+      color: '#3b82f6',
+      jarId: DEMO_JAR_ID,
+      streak: 5,
+      completedDates: [
+        new Date().toISOString().slice(0, 10),
+        new Date(Date.now() - 86400000).toISOString().slice(0, 10),
+        new Date(Date.now() - 86400000 * 2).toISOString().slice(0, 10),
+        new Date(Date.now() - 86400000 * 3).toISOString().slice(0, 10),
+        new Date(Date.now() - 86400000 * 4).toISOString().slice(0, 10),
+      ],
+      tags: ['learning'],
+      createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
+    },
+  ],
+  inventory: {
+    clips: ['red', 'red', 'red', 'blue', 'blue', 'green'],
+    activeTier: 2,
+    cashedColors: [],
+    spinTokens: 1,
+    rewardBank: [],
+    activeRewards: [],
+    rainmakerRemaining: 0,
+    lifetimeClips: { red: 3, blue: 2, green: 1 },
+  },
+  history: [
+    {
+      id: 'demo-hist-1',
+      type: 'habit',
+      habitName: 'Read 30 mins',
+      habitId: DEMO_HABIT_2_ID,
+      timestamp: new Date().toISOString(),
+    },
+    {
+      id: 'demo-hist-2',
+      type: 'habit',
+      habitName: 'Read 30 mins',
+      habitId: DEMO_HABIT_2_ID,
+      timestamp: new Date(Date.now() - 86400000).toISOString(),
+    },
+    {
+      id: 'demo-hist-3',
+      type: 'spin',
+      result: 'Tier 2',
+      timestamp: new Date(Date.now() - 86400000 * 2).toISOString(),
+    },
+  ],
+};
 
 function getRandomClip() {
   const rand = Math.random() * 100;
@@ -77,6 +165,7 @@ function App() {
     lifetimeClips: {},
   });
   const [history, setHistory] = useState([]);
+  const [todos, setTodos] = useState([]);
   const [rewardCatalog, setRewardCatalog] = useState({
     tier1: [
       { id: 'simple-t1-1', name: 'Quick pause', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 5 },
@@ -137,11 +226,44 @@ function App() {
   const [sessionSummary, setSessionSummary] = useState({ isOpen: false, habit: null, clip: null, tokenWon: false });
   const [showSettings, setShowSettings] = useState(false);
   const inventoryRef = useRef(inventory);
+  const isDemoModeRef = useRef(false);
 
   // Keep inventoryRef in sync for stale-closure-safe access
   useEffect(() => {
     inventoryRef.current = inventory;
   }, [inventory]);
+
+  // Demo mode: inject demo data when tour starts, wipe on end
+  useEffect(() => {
+    if (onboardingPhase === 'tour') {
+      isDemoModeRef.current = true;
+      setJars(DEMO_DATA.jars);
+      setHabits(DEMO_DATA.habits);
+      setInventory(DEMO_DATA.inventory);
+      setHistory(DEMO_DATA.history);
+      setMobileView('wheel');
+    } else if (onboardingPhase === 'complete' && isDemoModeRef.current) {
+      isDemoModeRef.current = false;
+      setJars([]);
+      setHabits([]);
+      setInventory({
+        clips: [],
+        activeTier: 1,
+        cashedColors: [],
+        spinTokens: 0,
+        rewardBank: [],
+        activeRewards: [],
+        rainmakerRemaining: 0,
+        lifetimeClips: {},
+      });
+      setHistory([]);
+      // Clear any demo localStorage to be safe
+      localStorage.removeItem('ch_jars');
+      localStorage.removeItem('ch_habits');
+      localStorage.removeItem('ch_inventory');
+      localStorage.removeItem('ch_history');
+    }
+  }, [onboardingPhase]);
 
   // Undo countdown timer
   useEffect(() => {
@@ -216,6 +338,7 @@ function App() {
     setJars([]);
     setHabits([]);
     setHistory([]);
+    setTodos([]);
     setRewardCatalog(defaults);
     addToast('All data reset', 'warning');
     closeConfirm();
@@ -274,6 +397,7 @@ function App() {
         const savedHabits = localStorage.getItem('ch_habits');
         const savedInv = localStorage.getItem('ch_inventory');
         const savedHist = localStorage.getItem('ch_history');
+        const savedTodos = localStorage.getItem('ch_todos');
         const savedCatalog = localStorage.getItem('ch_catalog');
         if (savedJars) {
           loadedJars = JSON.parse(savedJars).map(normalizeJar);
@@ -284,6 +408,7 @@ function App() {
         else setInventory({ clips: [], activeTier: 1, cashedColors: [], spinTokens: 0, rewardBank: [], activeRewards: [], rainmakerRemaining: 0 });
         if (savedHist) setHistory(JSON.parse(savedHist));
         else setHistory([]);
+        if (savedTodos) setTodos(JSON.parse(savedTodos));
         if (savedCatalog) setRewardCatalog(JSON.parse(savedCatalog));
         else setRewardCatalog({
     tier1: [
@@ -339,14 +464,15 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!useApi && !loading) {
+    if (!useApi && !loading && !isDemoModeRef.current) {
       localStorage.setItem('ch_jars', JSON.stringify(jars));
       localStorage.setItem('ch_habits', JSON.stringify(habits));
       localStorage.setItem('ch_inventory', JSON.stringify(inventory));
       localStorage.setItem('ch_history', JSON.stringify(history));
+      localStorage.setItem('ch_todos', JSON.stringify(todos));
       localStorage.setItem('ch_catalog', JSON.stringify(rewardCatalog));
     }
-  }, [jars, habits, inventory, history, rewardCatalog, useApi, loading]);
+  }, [jars, habits, inventory, history, todos, rewardCatalog, useApi, loading]);
 
   const handleCompleteHabit = async (habit) => {
     setUndoState(null);
@@ -952,11 +1078,17 @@ function App() {
     playComplete();
     const now = new Date().toISOString();
     const clip = getRandomClip();
-    setInventory((prev) => {
-      const updated = { ...prev, clips: [...prev.clips, clip] };
-      if (useApi) api.updateInventory(updated).catch(() => setUseApi(false));
-      return updated;
-    });
+    setInventory((prev) => ({
+      ...prev,
+      clips: [...prev.clips, clip],
+      lifetimeClips: { ...(prev.lifetimeClips || {}), [clip]: ((prev.lifetimeClips || {})[clip] || 0) + 1 },
+    }));
+    const updatedInv = {
+      ...inventory,
+      clips: [...inventory.clips, clip],
+      lifetimeClips: { ...(inventory.lifetimeClips || {}), [clip]: ((inventory.lifetimeClips || {})[clip] || 0) + 1 },
+    };
+    if (useApi) api.updateInventory(updatedInv).catch(() => setUseApi(false));
     setLastClip(clip);
     setClipToast({ color: clip, visible: true, id: Date.now() });
     setTimeout(() => setClipToast(null), 2500);
@@ -972,9 +1104,83 @@ function App() {
     setHistory((prev) => [...prev, entry]);
     if (useApi) api.addHistory(entry).catch(() => setUseApi(false));
 
+    // Also add as a pre-completed one-off todo
+    const todoEntry = {
+      id: `todo-${Date.now()}`,
+      name,
+      type: 'oneoff',
+      jarId: jarId || null,
+      completedDates: [now],
+      createdAt: now,
+    };
+    setTodos((prev) => [...prev, todoEntry]);
+
     setShowQuickTask(false);
     setPendingTokenHabit(null);
     setShowTokenWheel(true);
+  };
+
+  const handleCreateTodo = (name, type, jarId) => {
+    const newTodo = {
+      id: `todo-${Date.now()}`,
+      name,
+      type,
+      jarId: jarId || null,
+      completedDates: [],
+      createdAt: new Date().toISOString(),
+    };
+    setTodos((prev) => [...prev, newTodo]);
+    addToast('Task added', 'success');
+  };
+
+  const handleCompleteTodo = (todo) => {
+    playComplete();
+    const now = new Date().toISOString();
+    const updated = {
+      ...todo,
+      completedDates: [...(todo.completedDates || []), now],
+    };
+    setTodos((prev) => prev.map((t) => (t.id === todo.id ? updated : t)));
+
+    const clip = getRandomClip();
+    const updatedInv = {
+      ...inventory,
+      clips: [...inventory.clips, clip],
+      spinTokens: (inventory.spinTokens || 0) + 1,
+      lifetimeClips: { ...(inventory.lifetimeClips || {}), [clip]: ((inventory.lifetimeClips || {})[clip] || 0) + 1 },
+    };
+    setInventory(updatedInv);
+    if (useApi) api.updateInventory(updatedInv).catch(() => setUseApi(false));
+    setLastClip(clip);
+    setClipToast({ color: clip, visible: true, id: Date.now() });
+    setTimeout(() => setClipToast(null), 2500);
+    setTimeout(() => playClipDrop(), 300);
+
+    const entry = {
+      id: `hist-${Date.now()}`,
+      type: 'quick-task',
+      habitName: todo.name,
+      jarId: todo.jarId,
+      timestamp: now,
+    };
+    setHistory((prev) => [...prev, entry]);
+    if (useApi) api.addHistory(entry).catch(() => setUseApi(false));
+    setPendingTokenHabit(null);
+    setShowTokenWheel(true);
+    addToast('Task completed!', 'success');
+  };
+
+  const handleDeleteTodo = (id) => {
+    openConfirm({
+      title: 'Delete Task?',
+      message: 'This task will be permanently removed.',
+      danger: true,
+      onConfirm: () => {
+        setTodos((prev) => prev.filter((t) => t.id !== id));
+        addToast('Task deleted', 'success');
+        closeConfirm();
+      },
+    });
   };
 
   const [newJarName, setNewJarName] = useState('');
@@ -1194,6 +1400,16 @@ function App() {
               onAdd={() => setShowCreateHabit(true)}
               onQuickTask={() => setShowQuickTask(true)}
             />
+            <div className="mt-4">
+              <TodoList
+                todos={todos}
+                jars={jars}
+                onComplete={handleCompleteTodo}
+                onDelete={handleDeleteTodo}
+                onCreate={handleCreateTodo}
+                defaultJarId={jars[0]?.id}
+              />
+            </div>
             <div className="mt-4" data-tour="cash-in-area">
               <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} onRequestConfirm={openConfirm} />
               {isCashingEligible(inventory.clips, inventory.activeTier) ? (
@@ -1342,6 +1558,14 @@ function App() {
                 onDelete={handleDeleteHabit}
                 onAdd={() => setShowCreateHabit(true)}
                 onQuickTask={() => setShowQuickTask(true)}
+              />
+              <TodoList
+                todos={todos}
+                jars={jars}
+                onComplete={handleCompleteTodo}
+                onDelete={handleDeleteTodo}
+                onCreate={handleCreateTodo}
+                defaultJarId={jars[0]?.id}
               />
               <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} />
               <div data-tour="cash-in-area">

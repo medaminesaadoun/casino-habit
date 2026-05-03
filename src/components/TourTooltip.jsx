@@ -184,10 +184,15 @@ function TourTooltipContent({ step, total, title, description, hasDemo, waitForC
             ))}
           </div>
         </div>
-        <button onClick={onSkip} className="text-casino-text-tertiary hover:text-white transition-colors" aria-label="Skip tour">
-          <X size={14} />
-        </button>
-      </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-md bg-casino-warning/15 text-casino-warning border border-casino-warning/20">
+            Demo
+          </span>
+          <button onClick={onSkip} className="text-casino-text-tertiary hover:text-white transition-colors" aria-label="Skip tour">
+              <X size={14} />
+            </button>
+          </div>
+        </div>
 
       {/* Content */}
       <h3 className="text-sm font-bold text-white mb-1.5">{title}</h3>
