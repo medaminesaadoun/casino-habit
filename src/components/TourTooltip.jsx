@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, X, ArrowRightLeft, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, ArrowRightLeft, MousePointerClick } from 'lucide-react';
 import { SingleClip } from './ClipInventory';
 
 const CLIP_COLORS = {
@@ -16,22 +16,34 @@ const STEPS = [
     position: 'bottom',
   },
   {
+    selector: 'jars-tab',
+    title: 'Your Jars',
+    desc: 'Every habit links to a jar. Completing habits drops clips into it. Fill a jar to complete it!',
+    position: 'top',
+    switchToView: 'jars',
+  },
+  {
     selector: 'add-habit',
     title: 'Create Habits',
     desc: 'Add habits you want to track. Complete them to earn clips and spin tokens.',
     position: 'bottom',
+    waitForClick: true,
+    clickHint: 'Click the Add Habit button to continue',
+    switchToView: 'habits',
   },
   {
     selector: 'habit-list',
     title: 'Complete & Earn',
     desc: 'Tap the checkmark when you finish a habit. Each completion drops a random colored clip.',
     position: 'top',
+    switchToView: 'habits',
   },
   {
     selector: 'wheel-area',
     title: 'Spin for Rewards',
     desc: 'Use tokens to spin the wheel. Land on tiers, bonus, or jackpot to win time-based rewards.',
     position: 'top',
+    switchToView: 'wheel',
   },
   {
     selector: 'cash-in-area',
@@ -39,12 +51,14 @@ const STEPS = [
     desc: 'Collect 2+ matching clips to cash in. This boosts your wheel tier for better odds.',
     position: 'bottom',
     demo: 'cashin',
+    switchToView: 'habits',
   },
   {
     selector: 'reward-bank',
     title: 'Claim & Enjoy',
     desc: 'Won rewards go to your bank. Claim them to start the timer, then complete your habit before it expires.',
     position: 'top',
+    switchToView: 'rewards',
   },
 ];
 
@@ -79,7 +93,7 @@ function DemoCashIn() {
 
 /* ===== SPOTLIGHT OVERLAY ===== */
 
-function SpotlightOverlay({ bounds, onClick }) {
+function SpotlightOverlay({ bounds, waitForClick, onClick }) {
   if (!bounds) return null;
   const pad = 10;
   const x = bounds.x - pad;
@@ -104,6 +118,7 @@ function SpotlightOverlay({ bounds, onClick }) {
           left: x, top: y, width: w, height: h,
           borderRadius: 12,
           boxShadow: '0 0 0 2px rgba(232,185,49,0.5), 0 0 20px rgba(232,185,49,0.15), inset 0 0 20px rgba(232,185,49,0.05)',
+          animation: waitForClick ? 'pulse-border 1.5s ease-in-out infinite' : 'none',
         }}
       />
     </div>
@@ -112,7 +127,7 @@ function SpotlightOverlay({ bounds, onClick }) {
 
 /* ===== TOOLTIP ===== */
 
-function TourTooltipContent({ step, total, title, description, hasDemo, position, onNext, onBack, onSkip, isFirst, isLast }) {
+function TourTooltipContent({ step, total, title, description, hasDemo, waitForClick, clickHint, position, onNext, onBack, onSkip, isFirst, isLast }) {
   const tooltipRef = useRef(null);
   const [style, setStyle] = useState({ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' });
 
@@ -181,6 +196,14 @@ function TourTooltipContent({ step, total, title, description, hasDemo, position
       {/* Demo element */}
       {hasDemo && <DemoCashIn />}
 
+      {/* Click hint for wait-for-click steps */}
+      {waitForClick && (
+        <div className="flex items-center gap-2 mt-3 px-3 py-2 rounded-xl bg-casino-accent/10 border border-casino-accent/20">
+          <MousePointerClick size={14} className="text-casino-accent shrink-0 animate-bounce" />
+          <span className="text-xs text-casino-accent font-semibold">{clickHint}</span>
+        </div>
+      )}
+
       {/* Navigation */}
       <div className="flex items-center gap-2 mt-4">
         <button
@@ -193,7 +216,8 @@ function TourTooltipContent({ step, total, title, description, hasDemo, position
         </button>
         <button
           onClick={onNext}
-          className="btn-pill btn-gold flex-1 py-2 text-xs font-bold flex items-center justify-center gap-1"
+          disabled={waitForClick}
+          className={`btn-pill btn-gold flex-1 py-2 text-xs font-bold flex items-center justify-center gap-1 ${waitForClick ? 'opacity-40 cursor-not-allowed' : ''}`}
         >
           {isLast ? 'Finish' : <>Next <ChevronRight size={14} /></>}
         </button>
@@ -204,12 +228,19 @@ function TourTooltipContent({ step, total, title, description, hasDemo, position
 
 /* ===== MAIN COMPONENT ===== */
 
-export default function TourTooltip({ onComplete, onSkip }) {
+export default function TourTooltip({ onComplete, onSkip, onSwitchView }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [bounds, setBounds] = useState(null);
   const rafRef = useRef(null);
 
   const step = STEPS[currentStep];
+
+  // Switch to correct view when step changes
+  useEffect(() => {
+    if (step.switchToView && onSwitchView) {
+      onSwitchView(step.switchToView);
+    }
+  }, [currentStep, step.switchToView, onSwitchView]);
 
   const updateBounds = useCallback(() => {
     const els = document.querySelectorAll(`[data-tour="${step.selector}"]`);
@@ -234,15 +265,51 @@ export default function TourTooltip({ onComplete, onSkip }) {
     window.addEventListener('resize', handleResize);
     window.addEventListener('scroll', handleResize, true);
     const interval = setInterval(updateBounds, 500);
+
+    // Delayed re-check after view switch so DOM has time to render
+    let delayedCheck;
+    if (step.switchToView) {
+      delayedCheck = setTimeout(() => {
+        updateBounds();
+      }, 500);
+    }
+
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('scroll', handleResize, true);
       clearInterval(interval);
       cancelAnimationFrame(rafRef.current);
+      if (delayedCheck) clearTimeout(delayedCheck);
     };
-  }, [updateBounds]);
+  }, [updateBounds, step.switchToView]);
+
+  // Attach click listener to highlighted element when waitForClick is true
+  useEffect(() => {
+    if (!step.waitForClick || !bounds) return;
+
+    const els = document.querySelectorAll(`[data-tour="${step.selector}"]`);
+    const el = Array.from(els).find((e) => {
+      const r = e.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    });
+    if (!el) return;
+
+    const handleClick = () => {
+      if (currentStep < STEPS.length - 1) {
+        setCurrentStep((s) => s + 1);
+        setBounds(null);
+      } else {
+        localStorage.setItem('ch_onboarded', 'complete');
+        onComplete();
+      }
+    };
+
+    el.addEventListener('click', handleClick);
+    return () => el.removeEventListener('click', handleClick);
+  }, [step.waitForClick, step.selector, bounds, currentStep, onComplete]);
 
   const handleNext = () => {
+    if (step.waitForClick) return; // blocked
     if (currentStep < STEPS.length - 1) {
       setCurrentStep((s) => s + 1);
       setBounds(null);
@@ -265,8 +332,14 @@ export default function TourTooltip({ onComplete, onSkip }) {
   };
 
   const handleOverlayClick = () => {
-    // Clicking outside advances to next step
-    handleNext();
+    if (step.waitForClick) return; // clicking outside does nothing on wait-for-click steps
+    if (currentStep < STEPS.length - 1) {
+      setCurrentStep((s) => s + 1);
+      setBounds(null);
+    } else {
+      localStorage.setItem('ch_onboarded', 'complete');
+      onComplete();
+    }
   };
 
   return (
@@ -276,15 +349,17 @@ export default function TourTooltip({ onComplete, onSkip }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-40"
+        className="fixed inset-0 z-40 pointer-events-none"
       >
-        <SpotlightOverlay bounds={bounds} onClick={handleOverlayClick} />
+        <SpotlightOverlay bounds={bounds} waitForClick={step.waitForClick} onClick={handleOverlayClick} />
         <TourTooltipContent
           step={{ index: currentStep, bounds }}
           total={STEPS.length}
           title={step.title}
           description={step.desc}
           hasDemo={step.demo === 'cashin'}
+          waitForClick={step.waitForClick}
+          clickHint={step.clickHint}
           position={step.position}
           onNext={handleNext}
           onBack={handleBack}

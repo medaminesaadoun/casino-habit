@@ -4,12 +4,12 @@ import { Pencil, Trash2, Gem, Sparkles, Plus, Crown } from 'lucide-react';
 import JarDetail from './JarDetail';
 
 function JarCard({ jar, onEdit, onDelete, onSelect, index }) {
-  const maxTarget = jar.milestones[jar.milestones.length - 1]?.target || 10000;
+  const maxTarget = jar.milestones?.[jar.milestones.length - 1]?.target || jar.target || 10000;
   const fillPercent = Math.min((jar.totalClips / maxTarget) * 100, 100);
   const [sparkles, setSparkles] = useState([]);
 
   useEffect(() => {
-    const achieved = jar.milestones
+    const achieved = (jar.milestones || [])
       .map((m, idx) => ({ ...m, idx }))
       .filter((m) => jar.totalClips >= m.target && jar.totalClips - m.target < m.target * 0.5);
     if (achieved.length > 0) {
@@ -20,7 +20,7 @@ function JarCard({ jar, onEdit, onDelete, onSelect, index }) {
     }
   }, []);
 
-  const nextMilestone = jar.milestones.find((m) => jar.totalClips < m.target);
+  const nextMilestone = (jar.milestones || []).find((m) => jar.totalClips < m.target);
 
   return (
     <motion.div
@@ -76,7 +76,7 @@ function JarCard({ jar, onEdit, onDelete, onSelect, index }) {
                 style={{ backgroundColor: jar.color }}
               />
               <div className="jar-count">{jar.totalClips.toLocaleString()}</div>
-              {jar.milestones.map((m, idx) => {
+              {(jar.milestones || []).map((m, idx) => {
                 const tickPercent = Math.min((m.target / maxTarget) * 100, 100);
                 const achieved = jar.totalClips >= m.target;
                 return (
@@ -119,7 +119,7 @@ function JarCard({ jar, onEdit, onDelete, onSelect, index }) {
           </div>
 
           <div className="space-y-1">
-            {jar.milestones.map((m, idx) => {
+            {(jar.milestones || []).map((m, idx) => {
               const achieved = jar.totalClips >= m.target;
               return (
                 <motion.div
@@ -165,7 +165,7 @@ function JarCard({ jar, onEdit, onDelete, onSelect, index }) {
 }
 
 function CompletedJarCard({ jar, onSelect, index }) {
-  const maxTarget = jar.milestones[jar.milestones.length - 1]?.target || 10000;
+  const maxTarget = jar.milestones?.[jar.milestones.length - 1]?.target || jar.target || 10000;
   const fillPercent = Math.min((jar.totalClips / maxTarget) * 100, 100);
 
   return (
@@ -213,12 +213,12 @@ export default function Jars({ jars, habits, history, onAddJar, onEditJar, onDel
   const [selectedJarId, setSelectedJarId] = useState(null);
 
   const activeJars = jars.filter((j) => {
-    const finalTarget = j.milestones[j.milestones.length - 1]?.target || 10000;
+    const finalTarget = j.milestones?.[j.milestones.length - 1]?.target || j.target || 10000;
     return j.totalClips < finalTarget;
   });
 
   const completedJars = jars.filter((j) => {
-    const finalTarget = j.milestones[j.milestones.length - 1]?.target || 10000;
+    const finalTarget = j.milestones?.[j.milestones.length - 1]?.target || j.target || 10000;
     return j.totalClips >= finalTarget;
   });
 

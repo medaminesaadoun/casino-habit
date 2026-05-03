@@ -24,6 +24,7 @@ export default function TopNav({ active, onChange, unseenRewards }) {
             className={`relative flex items-center gap-2 px-5 py-2.5 rounded-lg flex-1 justify-center z-10 transition-colors font-heading ${
               isActive ? 'text-casino-accent' : 'text-casino-text-tertiary hover:text-casino-text-secondary'
             }`}
+            {...(item.id === 'jars' ? { 'data-tour': 'jars-tab' } : {})}
           >
             {isActive && (
               <motion.span

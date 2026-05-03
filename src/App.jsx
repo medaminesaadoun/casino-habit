@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Diamond, Plus, Trash2, Sparkles, Paperclip, History, ArrowRightLeft, Gem, Crown, Volume2, VolumeX, CloudRain, Trophy, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import { playComplete, playClipDrop, playCashIn, playRewardWon, playClick, toggleMute, getMuteState } from './sounds';
@@ -223,6 +223,10 @@ function App() {
     setOnboardingPhase('modal');
   };
 
+  const handleSwitchView = useCallback((view) => {
+    setMobileView(view);
+  }, []);
+
   useEffect(() => {
     if (showConfetti) {
       const t = setTimeout(() => setShowConfetti(false), 3000);
@@ -230,8 +234,23 @@ function App() {
     }
   }, [showConfetti]);
 
+  function normalizeJar(j) {
+    return {
+      ...j,
+      cashedClips: j.cashedClips || [],
+      milestones: j.milestones || [
+        { target: j.target || 1000, reward: 'Small Reward' },
+        { target: (j.target || 1000) * 5, reward: 'Medium Reward' },
+        { target: (j.target || 1000) * 10, reward: 'Big Reward' },
+      ],
+      color: j.color || '#e8b931',
+    };
+  }
+
   useEffect(() => {
     async function loadData() {
+      let loadedJars = [];
+      let apiSuccess = false;
       try {
         const [jarsData, habitsData, invData, histData, catalogData] = await Promise.all([
           api.getJars(),
@@ -240,12 +259,14 @@ function App() {
           api.getHistory(),
           api.getRewardCatalog(),
         ]);
-        setJars(jarsData.map((j) => ({ ...j, cashedClips: j.cashedClips || [] })));
+        loadedJars = jarsData.map(normalizeJar);
+        setJars(loadedJars);
         setHabits(habitsData);
         setInventory(invData);
         setHistory(histData);
         setRewardCatalog(catalogData);
         setUseApi(true);
+        apiSuccess = true;
       } catch (err) {
         console.warn('API unavailable, using localStorage fallback', err);
         setUseApi(false);
@@ -254,7 +275,10 @@ function App() {
         const savedInv = localStorage.getItem('ch_inventory');
         const savedHist = localStorage.getItem('ch_history');
         const savedCatalog = localStorage.getItem('ch_catalog');
-        if (savedJars) setJars(JSON.parse(savedJars).map((j) => ({ ...j, cashedClips: j.cashedClips || [] })));
+        if (savedJars) {
+          loadedJars = JSON.parse(savedJars).map(normalizeJar);
+          setJars(loadedJars);
+        }
         if (savedHabits) setHabits(JSON.parse(savedHabits));
         if (savedInv) setInventory(JSON.parse(savedInv));
         else setInventory({ clips: [], activeTier: 1, cashedColors: [], spinTokens: 0, rewardBank: [], activeRewards: [], rainmakerRemaining: 0 });
@@ -284,6 +308,31 @@ function App() {
     ],
   });
       }
+
+      // Auto-create a default jar if user has none
+      if (loadedJars.length === 0) {
+        const defaultJar = {
+          id: `jar-${Date.now()}`,
+          name: 'General',
+          color: '#e8b931',
+          totalClips: 0,
+          cashedClips: [],
+          milestones: [
+            { target: 1000, reward: 'Small Reward' },
+            { target: 5000, reward: 'Medium Reward' },
+            { target: 10000, reward: 'Big Reward' },
+          ],
+          createdAt: new Date().toISOString(),
+        };
+        loadedJars = [defaultJar];
+        setJars(loadedJars);
+        // Always save to localStorage as fallback, even in API mode
+        localStorage.setItem('ch_jars', JSON.stringify(loadedJars));
+        if (apiSuccess) {
+          try { await api.createJar(defaultJar); } catch (e) { console.warn('Failed to save default jar to API', e); }
+        }
+      }
+
       setLoading(false);
     }
     loadData();
@@ -1808,6 +1857,7 @@ function App() {
         <TourTooltip
           onComplete={() => setOnboardingPhase('complete')}
           onSkip={() => setOnboardingPhase('complete')}
+          onSwitchView={handleSwitchView}
         />
       )}
       {undoState && <UndoToast habitName={undoState.habit.name} secondsLeft={undoSeconds} onUndo={handleUndo} />}

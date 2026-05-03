@@ -25,6 +25,7 @@ export default function BottomNav({ active, onChange, unseenRewards }) {
               className={`relative flex flex-col items-center gap-0.5 px-4 py-2 rounded-xl transition-colors ${
                 isActive ? 'text-casino-accent' : 'text-casino-text-tertiary'
               }`}
+              {...(item.id === 'jars' ? { 'data-tour': 'jars-tab' } : {})}
             >
               {isActive && (
                 <motion.span
