@@ -128,8 +128,18 @@ export default function RewardBank({ rewards, onClaim, onDeleteAll, onRequestCon
                   )}
                   <span className="text-3xl mb-2">{reward.icon}</span>
                   <span className="text-sm font-semibold text-white leading-tight mb-1">{reward.name}</span>
-                  <div className="flex items-center gap-1 text-[11px] text-casino-text-tertiary mb-3 tabular-nums font-medium">
-                    <Clock size={10} />{daysOld === 0 ? 'Today' : daysOld === 1 ? '1d ago' : `${daysOld}d ago`}
+                  <div className="flex flex-col items-center gap-0.5 text-[11px] text-casino-text-tertiary mb-3 tabular-nums font-medium">
+                    <div className="flex items-center gap-1">
+                      <Clock size={10} />{daysOld === 0 ? 'Today' : daysOld === 1 ? '1d ago' : `${daysOld}d ago`}
+                    </div>
+                    {reward.durationMinutes > 0 && (
+                      <span className="text-[10px]">
+                        {reward.durationMinutes >= 60
+                          ? `${reward.durationMinutes / 60}h`
+                          : `${reward.durationMinutes}m`}
+                        {reward.gracePeriodMinutes > 0 && ` · grace ${reward.gracePeriodMinutes}m`}
+                      </span>
+                    )}
                   </div>
                   <button onClick={() => onClaim(reward)} className="btn-pill btn-gold w-full py-2 text-xs">
                     Claim

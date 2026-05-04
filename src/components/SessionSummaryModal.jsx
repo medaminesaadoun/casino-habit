@@ -20,7 +20,7 @@ export default function SessionSummaryModal({
   isOpen,
   habit,
   clip,
-  tokenWon,
+  tokenCount,
   onDismiss,
 }) {
   useEffect(() => {
@@ -89,7 +89,7 @@ export default function SessionSummaryModal({
         </div>
 
         {/* Token result */}
-        {tokenWon ? (
+        {tokenCount > 0 ? (
           <motion.div
             initial={{ scale: 0.5 }}
             animate={{ scale: 1 }}
@@ -97,7 +97,7 @@ export default function SessionSummaryModal({
             className="text-2xl font-bold mb-4"
             style={{ color: 'var(--color-casino-success)' }}
           >
-            +1 Token
+            +{tokenCount} Token{tokenCount > 1 ? 's' : ''}
           </motion.div>
         ) : (
           <div className="text-sm text-casino-text-secondary mb-4">

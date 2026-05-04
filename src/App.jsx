@@ -222,7 +222,7 @@ function App() {
   const [isMuted, setIsMuted] = useState(() => getMuteState());
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null, danger: false });
   const [toasts, setToasts] = useState([]);
-  const [sessionSummary, setSessionSummary] = useState({ isOpen: false, habit: null, clip: null, tokenWon: false });
+  const [sessionSummary, setSessionSummary] = useState({ isOpen: false, habit: null, clip: null, tokenCount: 0 });
   const [showSettings, setShowSettings] = useState(false);
   const inventoryRef = useRef(inventory);
   const isDemoModeRef = useRef(false);
@@ -547,10 +547,10 @@ function App() {
 
   const handleTokenWheelComplete = (won) => {
     setShowTokenWheel(false);
+    const rainmakerActive = (inventory.rainmakerRemaining || 0) > 0;
+    const tokenGain = rainmakerActive ? 2 : 1;
     if (won) {
       setInventory((prev) => {
-        const rainmakerActive = (prev.rainmakerRemaining || 0) > 0;
-        const tokenGain = rainmakerActive ? 2 : 1;
         const updated = {
           ...prev,
           spinTokens: (prev.spinTokens || 0) + tokenGain,
@@ -576,7 +576,7 @@ function App() {
       isOpen: true,
       habit: pendingTokenHabit,
       clip: lastClip,
-      tokenWon: won,
+      tokenCount: won ? tokenGain : 0,
     });
 
     if (pendingTokenHabit) {
@@ -623,6 +623,8 @@ function App() {
       spinTokens: inventory.spinTokens,
       rewardBank: inventory.rewardBank,
       activeRewards: inventory.activeRewards,
+      lifetimeClips: inventory.lifetimeClips,
+      rainmakerRemaining: inventory.rainmakerRemaining,
     };
     setInventory(newInventory);
 
@@ -1257,7 +1259,6 @@ function App() {
                   <MainWheel
                     activeTier={inventory.activeTier}
                     spinTokens={inventory.spinTokens || 0}
-                    canMegaSpin={(inventory.spinTokens || 0) >= 5}
                     isFreeJackpotSpin={freeJackpotSpin}
                     onConsumeToken={handleConsumeToken}
                     onConsumeMegaToken={handleConsumeMegaToken}
@@ -1510,7 +1511,6 @@ function App() {
                   <MainWheel
                     activeTier={inventory.activeTier}
                     spinTokens={inventory.spinTokens || 0}
-                    canMegaSpin={(inventory.spinTokens || 0) >= 5}
                     isFreeJackpotSpin={freeJackpotSpin}
                     onConsumeToken={handleConsumeToken}
                     onConsumeMegaToken={handleConsumeMegaToken}
@@ -1734,7 +1734,7 @@ function App() {
 
       {/* Modals */}
       <AnimatePresence>
-        {showTokenWheel && <TokenWheel onComplete={handleTokenWheelComplete} clipColor={lastClip} />}
+        {showTokenWheel && <TokenWheel onComplete={handleTokenWheelComplete} clipColor={lastClip} rainmakerRemaining={inventory.rainmakerRemaining} />}
         {showCashing && (
           <CashingSystem
             clips={inventory.clips}
@@ -2027,7 +2027,7 @@ function App() {
         isOpen={sessionSummary.isOpen}
         habit={sessionSummary.habit}
         clip={sessionSummary.clip}
-        tokenWon={sessionSummary.tokenWon}
+        tokenCount={sessionSummary.tokenCount}
         onDismiss={() => setSessionSummary(prev => ({ ...prev, isOpen: false }))}
       />
       <SettingsModal

@@ -96,7 +96,6 @@ function lightenColor(hex, amount = 40) {
 export default function MainWheel({
   activeTier,
   spinTokens,
-  canMegaSpin,
   isFreeJackpotSpin,
   onConsumeToken,
   onConsumeMegaToken,
@@ -107,14 +106,15 @@ export default function MainWheel({
   const [result, setResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [megaMode, setMegaMode] = useState(false);
-  const [hubPulse, setHubPulse] = useState(false);
   const [ringRotation, setRingRotation] = useState(0);
   const controls = useAnimation();
   const rotationRef = useRef(0);
+  const megaReady = spinTokens >= 5;
+  const megaProgress = Math.min(spinTokens, 5) / 5;
 
   useEffect(() => {
-    if (megaMode && !canMegaSpin) setMegaMode(false);
-  }, [canMegaSpin, megaMode]);
+    if (!isSpinning && megaMode && !megaReady) setMegaMode(false);
+  }, [megaReady, megaMode, isSpinning]);
 
   const segments = megaMode ? MEGA_SEGMENTS : NORMAL_SEGMENTS;
   const isLocked = isFreeJackpotSpin ? false : spinTokens < (megaMode ? 5 : 1);
@@ -145,7 +145,6 @@ export default function MainWheel({
       setResult({ landed: 'Jackpot', effective: 'Jackpot', color: '#e8b931' });
       setShowResult(true);
       setIsSpinning(false);
-      setHubPulse(false);
       playSpinLand('Jackpot');
       onSpinComplete({ landed: 'Jackpot', effective: 'Jackpot', isBonus: false }, { isMegaSpin: false, isFreeJackpot: true });
       return;
@@ -187,7 +186,6 @@ export default function MainWheel({
     setResult({ landed: landed.label, effective: effectiveResult, color: landed.color });
     setShowResult(true);
     setIsSpinning(false);
-    setHubPulse(false);
     playSpinLand(effectiveResult);
     onSpinComplete(
       { landed: landed.label, effective: effectiveResult, isBonus: effectiveResult === 'Bonus' },
@@ -257,9 +255,6 @@ export default function MainWheel({
             onUpdate={(latest) => {
               if (typeof latest.rotate === 'number') {
                 playTickIfPassed(latest.rotate);
-                // Track rotation delta for hub pulse intensity
-                const delta = Math.abs(latest.rotate - (rotationRef.current - 360));
-                if (delta > 5) setHubPulse(true);
               }
             }}
             style={{ transformOrigin: '170px 170px' }}
@@ -396,7 +391,7 @@ export default function MainWheel({
             >
               {isSpinning ? (
                 <motion.div
-                  animate={hubPulse ? { rotate: 360, scale: [1, 1.3, 1] } : { rotate: 360 }}
+                  animate={isSpinning ? { rotate: 360, scale: [1, 1.3, 1] } : { rotate: 360 }}
                   transition={{ rotate: { duration: megaMode ? 1.2 : 2, repeat: Infinity, ease: 'linear' }, scale: { duration: 0.3, type: 'spring' } }}
                 >
                   <Sparkles size={24} className="text-casino-accent" />
@@ -413,6 +408,27 @@ export default function MainWheel({
         </div>
       </div>
 
+      {/* Mega spin unlocked banner */}
+      {megaReady && !megaMode && (
+        <motion.div
+          initial={{ opacity: 0, y: -8, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          className="mb-4 px-4 py-2.5 rounded-2xl text-center mega-banner-pulse"
+          style={{
+            background: 'linear-gradient(135deg, rgba(232,185,49,0.15) 0%, rgba(232,185,49,0.05) 100%)',
+            border: '1px solid rgba(232,185,49,0.3)',
+            boxShadow: '0 0 20px rgba(232,185,49,0.15), inset 0 0 20px rgba(232,185,49,0.05)',
+          }}
+        >
+          <span className="text-xs font-bold text-casino-accent tracking-wider flex items-center justify-center gap-2">
+            <Sparkles size={14} />
+            ✦ MEGA SPIN UNLOCKED ✦
+            <Sparkles size={14} />
+          </span>
+          <p className="text-[10px] text-casino-text-tertiary mt-1">Higher odds — switch to Mega mode below</p>
+        </motion.div>
+      )}
+
       {/* Mode toggle */}
       <div className="flex items-center gap-2 mb-4">
         <button
@@ -428,18 +444,24 @@ export default function MainWheel({
           Normal · 1 token · <span style={{ color: TIER_COLORS[activeTier] || TIER_COLORS[1] }}>T{activeTier}</span>
         </button>
         <button
-          onClick={() => canMegaSpin && setMegaMode(true)}
-          disabled={isSpinning || !canMegaSpin}
+          onClick={() => megaReady && setMegaMode(true)}
           className={`text-xs px-4 py-2 rounded-full font-semibold transition-all ${
             megaMode
               ? 'bg-casino-accent text-black shadow-lg'
-              : canMegaSpin
-              ? 'text-casino-text-tertiary hover:text-casino-text-secondary glass'
-              : 'text-casino-text-tertiary/30 glass cursor-not-allowed'
+              : megaReady
+              ? 'text-casino-accent glass mega-btn-ready'
+              : 'mega-btn-progress glass'
           }`}
-          style={megaMode ? { boxShadow: '0 0 16px color-mix(in srgb, var(--color-casino-accent) 40%, transparent)' } : {}}
+          style={megaMode
+            ? { boxShadow: '0 0 16px color-mix(in srgb, var(--color-casino-accent) 40%, transparent)' }
+            : !megaReady
+            ? {
+                boxShadow: `0 0 ${8 + megaProgress * 16}px color-mix(in srgb, var(--color-casino-accent) ${megaProgress * 25}%, transparent)`,
+                background: `linear-gradient(90deg, rgba(232,185,49,${0.04 + megaProgress * 0.08}) 0%, rgba(232,185,49,${0.04 + megaProgress * 0.08}) ${megaProgress * 100}%, transparent ${megaProgress * 100}%)`,
+              }
+            : {}}
         >
-          Mega · 5 tokens
+          {megaReady ? 'MEGA SPIN' : 'Mega'}
         </button>
       </div>
 

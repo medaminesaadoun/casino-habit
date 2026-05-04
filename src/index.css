@@ -410,6 +410,32 @@ body {
               0 4px 12px rgba(0,0,0,0.3);
 }
 
+/* ===== MEGA BUTTON PROGRESSIVE GLOW ===== */
+@keyframes mega-btn-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.mega-btn-ready {
+  position: relative;
+  overflow: hidden;
+  color: var(--color-casino-accent) !important;
+  border: 1px solid color-mix(in srgb, var(--color-casino-accent) 40%, transparent);
+  background: linear-gradient(90deg,
+    transparent,
+    color-mix(in srgb, var(--color-casino-accent) 8%, transparent) 50%,
+    transparent
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: mega-btn-shimmer 2s ease-in-out infinite;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--color-casino-accent) 25%, transparent),
+              0 0 40px color-mix(in srgb, var(--color-casino-accent) 10%, transparent);
+}
+.mega-btn-progress {
+  border: 1px solid color-mix(in srgb, var(--color-casino-accent) 12%, transparent);
+  color: var(--color-casino-accent) !important;
+  transition: all 0.3s ease;
+}
+
 /* ===== SNAP SCROLL ===== */
 .snap-x { scroll-snap-type: x mandatory; }
 .snap-start { scroll-snap-align: start; }
@@ -839,4 +865,17 @@ body { touch-action: manipulation; }
   50% {
     box-shadow: 0 0 0 4px rgba(232,185,49,0.7), 0 0 30px rgba(232,185,49,0.25), inset 0 0 30px rgba(232,185,49,0.1);
   }
+}
+
+/* ===== MEGA SPIN BANNER PULSE ===== */
+@keyframes mega-banner-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+.mega-banner-pulse {
+  animation: mega-banner-pulse 2s ease-in-out infinite;
 }

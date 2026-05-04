@@ -37,7 +37,7 @@ function getTextRotation(midAngle) {
   return a;
 }
 
-export default function TokenWheel({ onComplete, clipColor }) {
+export default function TokenWheel({ onComplete, clipColor, rainmakerRemaining }) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
@@ -291,7 +291,7 @@ export default function TokenWheel({ onComplete, clipColor }) {
                     <Trophy size={22} />
                     <span className="text-xl font-heading">Token Won!</span>
                   </motion.div>
-                  <p className="text-xs text-casino-text-tertiary">You earned a Main Wheel spin</p>
+                  <p className="text-xs text-casino-text-tertiary">{(rainmakerRemaining || 0) > 0 ? '+2 Tokens (Rainmaker)' : '+1 Token earned'}</p>
                 </>
               ) : (
                 <>
