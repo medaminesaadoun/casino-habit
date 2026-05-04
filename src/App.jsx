@@ -28,7 +28,7 @@ import ConfirmModal from './components/ConfirmModal';
 import ToastContainer from './components/ToastContainer';
 import SessionSummaryModal from './components/SessionSummaryModal';
 import SettingsModal from './components/SettingsModal';
-import TodoList from './components/TodoList';
+import DoneToday from './components/DoneToday';
 
 const CLIP_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'gold'];
 const CLIP_WEIGHTS = [20, 20, 20, 20, 15, 4.9, 0.1];
@@ -165,7 +165,6 @@ function App() {
     lifetimeClips: {},
   });
   const [history, setHistory] = useState([]);
-  const [todos, setTodos] = useState([]);
   const [rewardCatalog, setRewardCatalog] = useState({
     tier1: [
       { id: 'simple-t1-1', name: 'Quick pause', icon: '⏱️', enabled: true, custom: true, gracePeriodMinutes: 0, durationMinutes: 5 },
@@ -338,7 +337,6 @@ function App() {
     setJars([]);
     setHabits([]);
     setHistory([]);
-    setTodos([]);
     setRewardCatalog(defaults);
     addToast('All data reset', 'warning');
     closeConfirm();
@@ -397,7 +395,6 @@ function App() {
         const savedHabits = localStorage.getItem('ch_habits');
         const savedInv = localStorage.getItem('ch_inventory');
         const savedHist = localStorage.getItem('ch_history');
-        const savedTodos = localStorage.getItem('ch_todos');
         const savedCatalog = localStorage.getItem('ch_catalog');
         if (savedJars) {
           loadedJars = JSON.parse(savedJars).map(normalizeJar);
@@ -408,7 +405,6 @@ function App() {
         else setInventory({ clips: [], activeTier: 1, cashedColors: [], spinTokens: 0, rewardBank: [], activeRewards: [], rainmakerRemaining: 0 });
         if (savedHist) setHistory(JSON.parse(savedHist));
         else setHistory([]);
-        if (savedTodos) setTodos(JSON.parse(savedTodos));
         if (savedCatalog) setRewardCatalog(JSON.parse(savedCatalog));
         else setRewardCatalog({
     tier1: [
@@ -469,10 +465,9 @@ function App() {
       localStorage.setItem('ch_habits', JSON.stringify(habits));
       localStorage.setItem('ch_inventory', JSON.stringify(inventory));
       localStorage.setItem('ch_history', JSON.stringify(history));
-      localStorage.setItem('ch_todos', JSON.stringify(todos));
       localStorage.setItem('ch_catalog', JSON.stringify(rewardCatalog));
     }
-  }, [jars, habits, inventory, history, todos, rewardCatalog, useApi, loading]);
+  }, [jars, habits, inventory, history, rewardCatalog, useApi, loading]);
 
   const handleCompleteHabit = async (habit) => {
     setUndoState(null);
@@ -1104,83 +1099,9 @@ function App() {
     setHistory((prev) => [...prev, entry]);
     if (useApi) api.addHistory(entry).catch(() => setUseApi(false));
 
-    // Also add as a pre-completed one-off todo
-    const todoEntry = {
-      id: `todo-${Date.now()}`,
-      name,
-      type: 'oneoff',
-      jarId: jarId || null,
-      completedDates: [now],
-      createdAt: now,
-    };
-    setTodos((prev) => [...prev, todoEntry]);
-
     setShowQuickTask(false);
     setPendingTokenHabit(null);
     setShowTokenWheel(true);
-  };
-
-  const handleCreateTodo = (name, type, jarId) => {
-    const newTodo = {
-      id: `todo-${Date.now()}`,
-      name,
-      type,
-      jarId: jarId || null,
-      completedDates: [],
-      createdAt: new Date().toISOString(),
-    };
-    setTodos((prev) => [...prev, newTodo]);
-    addToast('Task added', 'success');
-  };
-
-  const handleCompleteTodo = (todo) => {
-    playComplete();
-    const now = new Date().toISOString();
-    const updated = {
-      ...todo,
-      completedDates: [...(todo.completedDates || []), now],
-    };
-    setTodos((prev) => prev.map((t) => (t.id === todo.id ? updated : t)));
-
-    const clip = getRandomClip();
-    const updatedInv = {
-      ...inventory,
-      clips: [...inventory.clips, clip],
-      spinTokens: (inventory.spinTokens || 0) + 1,
-      lifetimeClips: { ...(inventory.lifetimeClips || {}), [clip]: ((inventory.lifetimeClips || {})[clip] || 0) + 1 },
-    };
-    setInventory(updatedInv);
-    if (useApi) api.updateInventory(updatedInv).catch(() => setUseApi(false));
-    setLastClip(clip);
-    setClipToast({ color: clip, visible: true, id: Date.now() });
-    setTimeout(() => setClipToast(null), 2500);
-    setTimeout(() => playClipDrop(), 300);
-
-    const entry = {
-      id: `hist-${Date.now()}`,
-      type: 'quick-task',
-      habitName: todo.name,
-      jarId: todo.jarId,
-      timestamp: now,
-    };
-    setHistory((prev) => [...prev, entry]);
-    if (useApi) api.addHistory(entry).catch(() => setUseApi(false));
-    setPendingTokenHabit(null);
-    setShowTokenWheel(true);
-    addToast('Task completed!', 'success');
-  };
-
-  const handleDeleteTodo = (id) => {
-    openConfirm({
-      title: 'Delete Task?',
-      message: 'This task will be permanently removed.',
-      danger: true,
-      onConfirm: () => {
-        setTodos((prev) => prev.filter((t) => t.id !== id));
-        addToast('Task deleted', 'success');
-        closeConfirm();
-      },
-    });
   };
 
   const [newJarName, setNewJarName] = useState('');
@@ -1240,7 +1161,7 @@ function App() {
   return (
     <div className="min-h-screen pb-24 md:pb-0 relative overflow-hidden" style={{ backgroundColor: 'var(--color-casino-bg)' }}>
 
-      <div className="max-w-4xl mx-auto px-4 md:px-6 pt-6 md:pt-8 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 md:px-6 pt-6 md:pt-8 relative z-10">
 
         {/* Header */}
         <header className="flex items-center justify-between mb-10">
@@ -1401,14 +1322,7 @@ function App() {
               onQuickTask={() => setShowQuickTask(true)}
             />
             <div className="mt-4">
-              <TodoList
-                todos={todos}
-                jars={jars}
-                onComplete={handleCompleteTodo}
-                onDelete={handleDeleteTodo}
-                onCreate={handleCreateTodo}
-                defaultJarId={jars[0]?.id}
-              />
+                  <DoneToday habits={habits} jars={jars} history={history} />
             </div>
             <div className="mt-4" data-tour="cash-in-area">
               <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} onRequestConfirm={openConfirm} />
@@ -1519,69 +1433,70 @@ function App() {
         <div className="hidden lg:block">
           {/* Habits Tab */}
           {mobileView === 'habits' && (
-            <div className="space-y-6 stagger-reveal">
-              {/* Daily Stats */}
-              {(() => {
-                const today = new Date().toISOString().slice(0, 10);
-                const completedToday = habits.filter((h) =>
-                  h.completedDates.some((d) => d.startsWith(today))
-                ).length;
-                const earnedToday = history.filter(
-                  (h) => h.type === 'habit' && h.timestamp.startsWith(today)
-                ).length;
-                const tokens = inventory.spinTokens || 0;
-                return (
-                  <div className="glass p-3 flex items-center justify-around text-center">
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span className="text-lg font-bold text-casino-accent tabular-nums">&#10003;{completedToday}</span>
-                      <span className="text-[10px] text-casino-text-tertiary">Completed</span>
-                    </div>
-                    <div className="w-px h-8 bg-white/10" />
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span className="text-lg font-bold text-casino-accent tabular-nums">&#9830;{earnedToday}</span>
-                      <span className="text-[10px] text-casino-text-tertiary">Clips</span>
-                    </div>
-                    <div className="w-px h-8 bg-white/10" />
-                    <div className="flex flex-col items-center gap-0.5">
-                      <span className="text-lg font-bold text-casino-accent tabular-nums">{tokens}</span>
-                      <span className="text-[10px] text-casino-text-tertiary">Tokens</span>
-                    </div>
+            <div className="stagger-reveal">
+              <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+                {/* Left column: Habits */}
+                <div className="lg:col-span-2 space-y-6">
+                  <HabitList
+                    habits={habits}
+                    jars={jars}
+                    tags={allTags}
+                    onComplete={handleCompleteHabit}
+                    onEdit={handleEditHabit}
+                    onDelete={handleDeleteHabit}
+                    onAdd={() => setShowCreateHabit(true)}
+                    onQuickTask={() => setShowQuickTask(true)}
+                  />
+                </div>
+                {/* Right column: Stats + Tasks + Clips */}
+                <div className="space-y-6">
+                  {/* Daily Stats */}
+                  {(() => {
+                    const today = new Date().toISOString().slice(0, 10);
+                    const completedToday = habits.filter((h) =>
+                      h.completedDates.some((d) => d.startsWith(today))
+                    ).length;
+                    const earnedToday = history.filter(
+                      (h) => h.type === 'habit' && h.timestamp.startsWith(today)
+                    ).length;
+                    const tokens = inventory.spinTokens || 0;
+                    return (
+                      <div className="glass p-3 flex items-center justify-around text-center">
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span className="text-lg font-bold text-casino-accent tabular-nums">&#10003;{completedToday}</span>
+                          <span className="text-[10px] text-casino-text-tertiary">Completed</span>
+                        </div>
+                        <div className="w-px h-8 bg-white/10" />
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span className="text-lg font-bold text-casino-accent tabular-nums">&#9830;{earnedToday}</span>
+                          <span className="text-[10px] text-casino-text-tertiary">Clips</span>
+                        </div>
+                        <div className="w-px h-8 bg-white/10" />
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span className="text-lg font-bold text-casino-accent tabular-nums">{tokens}</span>
+                          <span className="text-[10px] text-casino-text-tertiary">Tokens</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+              <DoneToday habits={habits} jars={jars} history={history} />
+                  <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} />
+                  <div data-tour="cash-in-area">
+                    {isCashingEligible(inventory.clips, inventory.activeTier) ? (
+                      <button
+                        onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
+                        className="btn-pill btn-gold w-full"
+                      >
+                        <ArrowRightLeft size={16} />
+                        Cash In Clips
+                      </button>
+                    ) : (
+                      <div className="glass py-3 px-4 text-center text-casino-text-tertiary text-xs">
+                        Collect 2+ matching clips to cash in
+                      </div>
+                    )}
                   </div>
-                );
-              })()}
-              <HabitList
-                habits={habits}
-                jars={jars}
-                tags={allTags}
-                onComplete={handleCompleteHabit}
-                onEdit={handleEditHabit}
-                onDelete={handleDeleteHabit}
-                onAdd={() => setShowCreateHabit(true)}
-                onQuickTask={() => setShowQuickTask(true)}
-              />
-              <TodoList
-                todos={todos}
-                jars={jars}
-                onComplete={handleCompleteTodo}
-                onDelete={handleDeleteTodo}
-                onCreate={handleCreateTodo}
-                defaultJarId={jars[0]?.id}
-              />
-              <ClipInventory clips={inventory.clips} activeTier={inventory.activeTier} lifetimeClips={inventory.lifetimeClips} onDeleteAll={handleDeleteAllClips} />
-              <div data-tour="cash-in-area">
-                {isCashingEligible(inventory.clips, inventory.activeTier) ? (
-                  <button
-                    onClick={() => { setCashingDefaultJarId(null); setShowCashing(true); }}
-                    className="btn-pill btn-gold w-full"
-                  >
-                    <ArrowRightLeft size={16} />
-                    Cash In Clips
-                  </button>
-                ) : (
-                  <div className="glass py-3 px-4 text-center text-casino-text-tertiary text-xs">
-                    Collect 2+ matching clips to cash in
-                  </div>
-                )}
+                </div>
               </div>
             </div>
           )}
